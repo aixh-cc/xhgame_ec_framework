@@ -1,5 +1,5 @@
 {
-  "name": "@aixh-cc/ec_framework",
+  "name": "@aixh-cc/xhgame_ec_framework",
   "version": "1.0.0",
   "description": "cocos的ec框架",
   "main": "bin/index.js",
@@ -59,7 +59,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aixh-cc/ec-framework.git",
+    "url": "https://github.com/aixh-cc/xhgame_ec_framework.git",
     "directory": "packages/core"
   }
 }
