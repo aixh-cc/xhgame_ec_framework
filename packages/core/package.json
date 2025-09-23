@@ -1,0 +1,65 @@
+{
+  "name": "@aixh-cc/ec_framework",
+  "version": "1.0.0",
+  "description": "cocos的ec框架",
+  "main": "bin/index.js",
+  "types": "bin/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./bin/index.d.ts",
+      "import": "./bin/index.js",
+      "development": {
+        "types": "./src/index.ts",
+        "import": "./src/index.ts"
+      }
+    }
+  },
+  "files": [
+    "bin/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "typescript",
+    "cocos"
+  ],
+  "scripts": {
+    "clean": "rimraf bin dist tsconfig.tsbuildinfo",
+    "build:ts": "tsc",
+    "prebuild": "npm run clean",
+    "build": "npm run build:ts",
+    "build:watch": "tsc --watch",
+    "rebuild": "npm run clean && npm run build",
+    "build:npm": "npm run build && node build-rollup.cjs",
+    "publish:npm": "npm run build:npm && cd dist && npm publish",
+    "publish:patch": "npm version patch && npm run build:npm && cd dist && npm publish",
+    "publish:minor": "npm version minor && npm run build:npm && cd dist && npm publish",
+    "publish:major": "npm version major && npm run build:npm && cd dist && npm publish",
+    "preversion": "npm run rebuild"
+  },
+  "author": "aixh-cc",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.28.3",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.27.1",
+    "@babel/plugin-transform-optional-chaining": "^7.27.1",
+    "@babel/preset-env": "^7.28.3",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/node": "^20.19.0",
+    "rollup": "^4.42.0",
+    "rollup-plugin-dts": "^6.2.1",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aixh-cc/ec-framework.git",
+    "directory": "packages/core"
+  }
+}
