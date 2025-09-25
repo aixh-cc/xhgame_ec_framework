@@ -1,46 +1,27 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2020",
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": false,
-    "lib": ["ES2020", "DOM"],
-    "outDir": "./bin",
-    "rootDir": "./src",
-    "strict": true,
-    "composite": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "removeComments": false,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "exactOptionalPropertyTypes": false,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": false,
-    "noUncheckedIndexedAccess": false,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "importHelpers": false,
-    "downlevelIteration": true,
-    "isolatedModules": false,
-    "allowJs": true,
-    "resolveJsonModule": true
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "bin",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+    "compilerOptions": {
+        "target": "es6",    // 
+        "module": "commonjs",    // 
+        "experimentalDecorators": true, // 启用ES装饰器。
+        "strict": true,
+        "strictNullChecks": false,
+        "moduleResolution": "Node",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "stripInternal": true,
+        "types": [
+            "@cocos/creator-types/engine",
+            "@cocos/creator-types/editor"
+        ]
+    },
+    "include": [
+        "./src/**/*"
+        // "libs"
+    ],
+    // 排除
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build"
+    ]
 }
