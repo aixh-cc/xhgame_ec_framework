@@ -1,0 +1,13 @@
+{
+  "name": "@aixh-cc/xhgame",
+  "scripts": {
+    "test": "bun ./tests/run.test.mjs"
+  },
+  "dependencies": {
+
+  },
+  "devDependencies": {
+    "poku": "^3.0.1",
+    "typescript": "^5.7.3"
+  }
+}
