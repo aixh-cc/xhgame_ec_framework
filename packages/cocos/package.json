@@ -1,0 +1,55 @@
+{
+  "name": "@aixh-cc/xhgame_cocos",
+  "version": "1.0.0",
+  "description": "cocos的开发组件",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.cjs"
+    },
+    "./min": {
+      "require": "./dist/index.min.cjs",
+      "import": "./dist/index.min.mjs"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "typescript",
+    "cocos"
+  ],
+  "scripts": {
+    "clean": "rimraf bin dist tsconfig.tsbuildinfo",
+    "build": "npm run clean && rollup -c rollup.config.mjs"
+  },
+  "author": "aixh-cc",
+  "license": "MIT",
+  "devDependencies": {
+    "@cocos/creator-types": "^3.8.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/lodash": "^4.17.13",
+    "@types/node": "^22.10.2",
+    "rollup": "^4.28.1",
+    "rollup-plugin-dts": "^6.1.1",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aixh-cc/xhgame_cocos.git",
+    "directory": "packages/core"
+  }
+}
