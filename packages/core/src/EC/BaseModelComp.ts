@@ -7,10 +7,10 @@ import { Entity } from "./Entity";
 export abstract class BaseModelComp extends Comp implements ISubject {
     compName: string;
     abstract reset(): void
-    onAttach(entity: Entity) {
+    onAttach() {
 
     }
-    abstract onDetach(entity: Entity): void
+    abstract onDetach(): void
     /**
      * 被观察着的视图列表
      * 设计模式14:观察者模式

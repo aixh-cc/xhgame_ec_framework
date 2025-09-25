@@ -29,7 +29,7 @@ export abstract class Comp {
     }
 
     static removeComp(comp: Comp) {
-        comp.onDetach(comp.entity!);
+        comp.onDetach();
         comp.entity = null
         comp.reset();
         // 获取组件实例的构造函数
@@ -51,18 +51,18 @@ export abstract class Comp {
     /** 
      * 监听挂载到实体
      */
-    abstract onAttach(entity: Entity): void
+    abstract onAttach(): void
     attach(entity: Entity): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.entity = entity
             setTimeout(() => {
-                this.onAttach && this.onAttach(entity)
+                this.onAttach && this.onAttach()
                 resolve(true)
             }, 0)
         })
     }
     /** 监听从实体卸载 */
-    abstract onDetach(entity: Entity): void
+    abstract onDetach(): void
     /** 重置 */
     abstract reset(): void
     /** 准备 */
