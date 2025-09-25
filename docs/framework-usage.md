@@ -73,10 +73,10 @@ export interface IUnitTableItem {
 
 ### 2.2 注册数据表
 
-在`assets/script/common/MyTableMap.ts`中定义映射：
+在`assets/script/common/MyTableConfig.ts`中定义映射：
 
 ```typescript
-export class MyTableMap implements ITableMap {
+export class MyTableConfig implements ITableConfig {
     [TableType.skill]: SkillTable<ISkillTableItem>
     [TableType.unit]: UnitTable<IUnitTableItem>
     [TableType.battle]: BattleTable<IBattleTableItem>

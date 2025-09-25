@@ -1,7 +1,7 @@
 
 export interface ITable {
     name: string
-    data?: any
+    init: (data: any) => this
     getList: () => any[]
     getInfo: (id: string | number) => any | undefined
 }
@@ -9,10 +9,6 @@ export interface ITable {
 export abstract class BaseTable<T> implements ITable {
     abstract name: string;
     private _data: any = null;
-    /** 游戏配置数据 */
-    public get data(): any {
-        return this._data;
-    }
     init(data: any): this {
         this._data = Object.freeze(data);
         return this;
@@ -26,12 +22,41 @@ export abstract class BaseTable<T> implements ITable {
     }
 }
 
-// 定义工厂类型映射
-export interface ITableMap {
+/**
+ * 
+ * table的配置
+ * ITableConfig
+ * 
+ * 例子：
+ *  [TableType.skill]!: SkillTable<ISkillTableItem>
+ *  [TableType.unit]!: UnitTable<IUnitTableItem>
+ * 
+ *  当然前提是你准备了以下的定义
+ *  enum TableType {
+ *      skill = "skill",
+ *      unit = "unit",
+ *  }
+ *  class SkillTable<T> extends BaseTable<T> {
+ *      name = TableType.skill;
+ *  }
+ *  interface ISkillTableItem {
+ *      id: number,
+ *      name: string,
+ *  }
+ *  class UnitTable<T> extends BaseTable<T> {
+ *      name = TableType.unit;
+ *  }
+ *  interface IUnitTableItem {
+ *      id: number,
+ *      name: string,
+ *  }
+
+ */
+export interface ITableConfig {
 
 }
 
-export class TableManager<T extends ITableMap> {
+export class TableManager<T extends ITableConfig> {
     private _tables = new Map<keyof T, ITable>();
     /** 注册 */
     register(

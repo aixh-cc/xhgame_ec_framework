@@ -1,5 +1,5 @@
 import { assert, describe, test } from "poku";
-import { BaseTable, ITableMap, TableManager } from "../../../packages/core/src/Table/TableManager";
+import { BaseTable, ITableConfig, TableManager } from "../../../packages/core/src/Table/TableManager";
 
 
 enum TableType {
@@ -20,7 +20,7 @@ interface IUnitTableItem {
     id: number,
     name: string,
 }
-class TestTableMap implements ITableMap {
+class TestTableConfig implements ITableConfig {
     [TableType.skill]!: SkillTable<ISkillTableItem>
     [TableType.unit]!: UnitTable<IUnitTableItem>
 }
@@ -38,7 +38,7 @@ let json_data = {
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试table功能', async () => {
-            let tableManager = new TableManager<TestTableMap>()
+            let tableManager = new TableManager<TestTableConfig>()
             tableManager.register(new SkillTable())
             tableManager.register(new UnitTable())
             testCheck('获取getTables正常', tableManager.getTables().length, 2)

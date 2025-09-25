@@ -15,13 +15,13 @@ outline: deep
 
 
 ```ts
-import { ITableMap } from "db://xhgame-plugin-framework/core/config/TableManager";
+import { ITableConfig } from "db://xhgame-plugin-framework/core/config/TableManager";
 import { TableType } from "./ClientEnum";
 import { ISkillTableItem, SkillTable } from "./tables/SkillTable";
 import { IUnitTableItem, UnitTable } from "./tables/UnitTable";
 import { BattleTable, IBattleTableItem } from "./tables/BattleTable";
 
-export class MyTableMap implements ITableMap {
+export class MyTableConfig implements ITableConfig {
     [TableType.skill]: SkillTable<ISkillTableItem>
     [TableType.unit]: UnitTable<IUnitTableItem>
     [TableType.battle]: BattleTable<IBattleTableItem>
@@ -55,7 +55,7 @@ this.setTableManager(this.getTables())
 ```ts
 
     getTables() {
-        let tableManager = new TableManager<MyTableMap>()
+        let tableManager = new TableManager<MyTableConfig>()
         tableManager.register(new SkillTable())
         tableManager.register(new UnitTable())
         tableManager.register(new BattleTable())
