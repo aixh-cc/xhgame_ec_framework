@@ -1,5 +1,6 @@
 import { assert, describe, test } from "poku";
-import { BaseTable, ITableConfig, TableManager } from "../../../packages/core/src/Table/TableManager";
+import { TableManager } from "../../../packages/core/src/Table/TableManager";
+import { BaseTable, ITableConfig } from "../../../packages/core/src/Table/Table";
 
 
 enum TableType {
