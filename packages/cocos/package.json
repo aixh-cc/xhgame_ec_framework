@@ -1,6 +1,6 @@
 {
   "name": "@aixh-cc/xhgame_cocos",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "cocos的开发组件",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
