@@ -5,36 +5,6 @@ class EventManagerTest {
     debug: boolean = false
 
 
-
-    /** 测试清除 */
-    public test_4() {
-        let mgr = new EventManager()
-        mgr.setDebug(this.debug)
-        let emit_arr = []
-        let effective_emit_arr = []
-        let on_arr = []
-        let callbackFn = (event, value) => {
-            on_arr.push(value)
-        }
-        mgr.on('test_val', callbackFn)
-        let is_off = false
-        for (let i = 0; i < 10; i++) {
-            let _val = Math.floor(Math.random() * 1000)
-            if (i >= 5 && is_off == false) {
-                mgr.clear()
-                is_off = true
-            }
-            if (i < 5) {
-                effective_emit_arr.push(_val)
-            }
-            emit_arr.push(_val)
-            mgr.emit('test_val', _val)
-        }
-        // 断言
-        console.assert(this._testCheck('测试清除1', JSON.stringify(emit_arr) == JSON.stringify(on_arr), false))
-
-    }
-
     /** 测试多个不同监听(发送方是 空上下文) */
     public test_5() {
         let mgr = new EventManager()

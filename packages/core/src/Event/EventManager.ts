@@ -22,17 +22,12 @@ export class EventManager {
     /** _debug模式下可以看到更多的打印数据 */
     private _is_debug: boolean = false
 
-    private static _instance: EventManager = new this()
-    static getInstance() {
-        return this._instance
-    }
-
     /** 设置_debug */
     setDebug(val: boolean) {
         this._is_debug = val
     }
-
     private _tag: string = ''
+    private _nextEventItemId: number = 0
     // 索引到一维
     private _eventIndex_EventItemArray: IEventItem[] = []
     private _eventIndex_EventIdArray: number[] = []
@@ -44,8 +39,6 @@ export class EventManager {
         this._tag = tag
         return this
     }
-
-    private _nextEventItemId: number = 0
 
     createEventItem(name: string, event: (event: IEventItem, obj: any) => void, context: any) {
         let eventItemId = ++this._nextEventItemId
