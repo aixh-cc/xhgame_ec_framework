@@ -25,7 +25,7 @@ const test_00 = () => {
 }
 const test_01 = () => {
     return new Promise((resolve, reject) => {
-        test('测试监听', async () => {
+        test('测试取消监听', async () => {
             let eventManager = new EventManager()
 
             // eventManager.setDebug(this.debug)
@@ -57,10 +57,83 @@ const test_01 = () => {
         })
     })
 }
+const test_02 = () => {
+    return new Promise((resolve, reject) => {
+        test('测试多个相同监听', async () => {
+            let eventManager = new EventManager()
+            let emit_arr = []
+            let effective_emit_arr = []
+            let on_arr: any[] = []
+            let callbackFn = (event: any, value: any) => {
+                on_arr.push(value)
+            }
+            eventManager.on('test_val', callbackFn)
+            eventManager.on('test_val', callbackFn)
+            eventManager.on('test_val', callbackFn)
+            let is_off = false
+            let all_count = 10000;
+            let real_count = 500;
+            for (let i = 0; i < all_count; i++) {
+                let _val = Math.floor(Math.random() * 1000)
+                if (i >= real_count && is_off == false) {
+                    is_off = true
+                    eventManager.off('test_val', callbackFn)
+                }
+                if (i < real_count) {
+                    effective_emit_arr.push(_val)
+                }
+                emit_arr.push(_val)
+                eventManager.emit('test_val', _val)
+            }
+            // 断言
+            testCheck('测试多个相同监听1', emit_arr[real_count - 1], on_arr[on_arr.length - 1])
+            testCheck('测试多个相同监听2', emit_arr.length, all_count)
+            testCheck('测试多个相同监听3', on_arr.length, real_count)
+            resolve(true)
+        })
+    })
+}
+const test_03 = () => {
+    return new Promise((resolve, reject) => {
+        test('测试清除', async () => {
+            let eventManager = new EventManager()
 
+            let emit_arr = []
+            let effective_emit_arr = []
+            let on_arr: any[] = []
+            let callbackFn = (event: any, value: any) => {
+                on_arr.push(value)
+            }
+            eventManager.on('test_val', callbackFn)
+            let is_off = false
+            let all_count = 10000;
+            let real_count = 500;
+            for (let i = 0; i < all_count; i++) {
+                let _val = Math.floor(Math.random() * 1000)
+                if (i >= real_count && is_off == false) {
+                    eventManager.clearByTag()
+                    is_off = true
+                }
+                if (i < real_count) {
+                    effective_emit_arr.push(_val)
+                }
+                emit_arr.push(_val)
+                eventManager.emit('test_val', _val)
+            }
+            // 断言
+            testCheck('测试清除1', JSON.stringify(emit_arr) == JSON.stringify(on_arr), false)
+            testCheck('测试清除2', emit_arr.length, all_count)
+            testCheck('测试清除3', on_arr.length, real_count)
+
+            resolve(true)
+        })
+    })
+}
 let functions = [
     test_00,
     test_01,
+    test_02,
+    test_03,
 ]
 
 function testCheck(test_name: string, val: any, need: any) {
