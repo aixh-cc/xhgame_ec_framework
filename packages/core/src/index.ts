@@ -1,6 +1,10 @@
+// Time
 export * from './Time/TimeSystem';
-export * from './Table/TableManager';
+// EC
 export * from './EC/BaseModelComp';
 export * from './EC/Comp';
 export * from './EC/Entity';
 export * from './EC/System';
+// Manager
+export * from './Table/TableManager';
+export * from './Event/EventManager';
