@@ -23,6 +23,7 @@ export interface IItem {
 }
 
 export interface IItemProduceDrive {
+    name: string
     preloadItemsResource(): Promise<boolean>
     createItem(itemNo: string, itemId: number): IItem
     removeItem(item: IItem): void

@@ -1,35 +1,11 @@
 import { assert, describe, test } from "poku";
 import { FactoryManager } from "../../../packages/core/src/Factory/FactoryManager";
-import { IItem, IItemProduceDrive } from "../../../packages/core/src/Factory/Item";
-import { BaseFactory, FactoryConfig } from "../../../packages/core/src/Factory/Factory";
-
-enum FactoryType {
-    unitItem = "unitItem",
-    effectItem = 'effectItem',
-}
-interface IUnitItem {
-    owner_is_player: boolean
-}
-interface IEffectItem {
-    showTime: number
-}
-
-class UnitItemFactory<T extends IItemProduceDrive, TT extends IItem & IUnitItem> extends BaseFactory<T, TT> {
-    name = FactoryType.unitItem;
-}
-class EffectItemFactory<T extends IItemProduceDrive, TT extends IItem & IEffectItem> extends BaseFactory<T, TT> {
-    name = FactoryType.effectItem;
-}
-
-class MyTestFactoryConfig extends FactoryConfig {
-    [FactoryType.unitItem]: typeof UnitItemFactory<IItemProduceDrive, IItem & IUnitItem> = UnitItemFactory;
-    [FactoryType.effectItem]: typeof EffectItemFactory<IItemProduceDrive, IItem & IEffectItem> = EffectItemFactory;
-}
+import { FactoryType, MyTestDriveConfig, MyTestFactoryConfig } from "./TestFacotryData";
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {
-        test('测试Factory', async () => {
-            let factoryManager = new FactoryManager<MyTestFactoryConfig, any>(new MyTestFactoryConfig())
+        test('测试FactoryManager', async () => {
+            let factoryManager = new FactoryManager<MyTestFactoryConfig, MyTestDriveConfig, any>(new MyTestFactoryConfig(), new MyTestDriveConfig())
             factoryManager.autoRegister()
             assert.equal(factoryManager.getFactorys().size, 2, '自动注册正常')
             let effectItemFactory = factoryManager.getFactory(FactoryType.effectItem)
@@ -42,7 +18,7 @@ let functions = [
     test_01
 ]
 
-describe('Factory功能', async () => {
+describe('FactoryManager功能', async () => {
     while (functions.length > 0) {
         let func = functions.shift()
         if (func) {
