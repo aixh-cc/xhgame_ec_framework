@@ -78,9 +78,11 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
  * 
  *  工厂配置
  *  例子:
- *  [FactoryType.unitItem]: UnitItemFactory<IItemProduceDrive, IItem & IUnitItem> = new UnitItemFactory();
- *  [FactoryType.effectItem]: EffectItemFactory<IItemProduceDrive, IItem & IEffectItem> = new EffectItemFactory();
+ *  class MyTestFactoryConfig extends FactoryConfig {
+ *      [FactoryType.unitItem]: typeof UnitItemFactory<IItemProduceDrive, IItem & IUnitItem> = UnitItemFactory;
+ *      [FactoryType.effectItem]: typeof EffectItemFactory<IItemProduceDrive, IItem & IEffectItem> = EffectItemFactory;
+ *  }
  */
-export interface IFactoryConfig {
-
+export class FactoryConfig {
+    [key: string]: new (...args: any[]) => any;
 }
