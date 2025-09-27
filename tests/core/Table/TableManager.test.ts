@@ -22,8 +22,8 @@ interface IUnitTableItem {
     name: string,
 }
 class TestTableConfig implements ITableConfig {
-    [TableType.skill]!: SkillTable<ISkillTableItem>
-    [TableType.unit]!: UnitTable<IUnitTableItem>
+    [TableType.skill]: typeof SkillTable = SkillTable;
+    [TableType.unit]: typeof UnitTable = UnitTable;
 }
 let json_data = {
     "1": {

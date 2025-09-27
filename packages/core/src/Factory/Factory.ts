@@ -56,6 +56,7 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         if (itemsPool) {
             itemsPool.push(item) // 放回灵魂池
         }
+        item.baseAttrReset() // 基础属性(主要为基类使用)
         item.reset() // 抹除灵魂记忆
     }
     preloadItemsResource() {
@@ -72,6 +73,14 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         }
     }
 }
+
+/**
+ * 
+ *  工厂配置
+ *  例子:
+ *  [FactoryType.unitItem]: UnitItemFactory<IItemProduceDrive, IItem & IUnitItem> = new UnitItemFactory();
+ *  [FactoryType.effectItem]: EffectItemFactory<IItemProduceDrive, IItem & IEffectItem> = new EffectItemFactory();
+ */
 export interface IFactoryConfig {
 
 }
