@@ -1,7 +1,18 @@
-import { ITable, ITableConfig } from "./Table";
+import { ITable, TableConfig } from "./Table";
 
-export class TableManager<T extends ITableConfig> {
+export class TableManager<T extends TableConfig> {
     private _tables = new Map<keyof T, ITable>();
+    private _config: T
+    constructor(config: T) {
+        this._config = config
+    }
+    autoRegister() {
+        // 遍历所有属性
+        Object.keys(this._config).forEach(key => {
+            const registerClass = this._config[key as keyof T] as any
+            this.register(new registerClass())
+        });
+    }
     /** 注册 */
     register(
         table: ITable
@@ -11,8 +22,8 @@ export class TableManager<T extends ITableConfig> {
     }
     getTable<K extends keyof T>(
         key: K
-    ): T[K] | undefined {
-        return this._tables.get(key) as T[K];
+    ): InstanceType<T[K]> | undefined {
+        return this._tables.get(key) as InstanceType<T[K]>;
     }
     getTables(): (keyof T)[] {
         return Array.from(this._tables.keys());

@@ -76,7 +76,7 @@ export interface IUnitTableItem {
 在`assets/script/common/MyTableConfig.ts`中定义映射：
 
 ```typescript
-export class MyTableConfig implements ITableConfig {
+export class MyTableConfig implements TableConfig {
     [TableType.skill]: SkillTable<ISkillTableItem>
     [TableType.unit]: UnitTable<IUnitTableItem>
     [TableType.battle]: BattleTable<IBattleTableItem>

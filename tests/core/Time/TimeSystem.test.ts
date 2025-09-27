@@ -6,14 +6,14 @@ const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试时间功能', async () => {
             TestUtil.getInstance().setTimePassDt(10)
-            testCheck('游戏时间流逝0秒正常', TimeSystem.getInstance().getPassTime(), 0)
+            assert.equal(TimeSystem.getInstance().getPassTime(), 0, '游戏时间流逝0秒正常')
             TimeSystem.getInstance().timePlay()
             await TimeSystem.getInstance().waitTimeSystemXms(200)
-            testCheck('游戏时间流逝0.2秒正常', TimeSystem.getInstance().getPassTime(), 200)
+            assert.equal(TimeSystem.getInstance().getPassTime(), 200, '游戏时间流逝0.2秒正常')
 
             let uuid_01 = ''
             uuid_01 = TimeSystem.getInstance().scheduleOnce(() => {
-                testCheck('等待0.15秒(1),uuid_01=' + uuid_01, TimeSystem.getInstance().getPassTime(), 350)
+                assert.equal(TimeSystem.getInstance().getPassTime(), 350, '等待0.15秒(1),uuid_01=' + uuid_01)
             }, 150)
             console.log('loop before time:' + TimeSystem.getInstance().getPassTime())
             let loop_count = 0;
@@ -21,12 +21,12 @@ const test_00 = () => {
                 loop_count++
                 console.log('loop in time:' + TimeSystem.getInstance().getPassTime())
                 if (loop_count == 1) {
-                    testCheck('第一次是执行在1200', TimeSystem.getInstance().getPassTime(), 1200)
+                    assert.equal(TimeSystem.getInstance().getPassTime(), 1200, '第一次是执行在1200')
                 }
             }, 1000)
             let uuid_02 = ''
             uuid_02 = TimeSystem.getInstance().scheduleOnce(() => {
-                testCheck('等待0.15秒(2),uuid_02=' + uuid_02, TimeSystem.getInstance().getPassTime(), 350)
+                assert.equal(TimeSystem.getInstance().getPassTime(), 350, '等待0.15秒(2),uuid_02=' + uuid_02)
             }, 150)
             TimeSystem.getInstance().scheduleOnce(() => {
                 TimeSystem.getInstance().unschedule(loop_uuid)
@@ -38,15 +38,6 @@ const test_00 = () => {
 }
 
 let functions = [test_00]
-
-function testCheck(test_name: string, val: any, need: any) {
-    let is_success = val == need
-    assert(is_success, test_name);
-    if (is_success == false) {
-        console.error('测试【' + test_name + '】失败', '需要:', need, '实际:', val)
-    }
-    return is_success
-}
 
 describe('时间功能TimeSystem', async () => {
     while (functions.length > 0) {

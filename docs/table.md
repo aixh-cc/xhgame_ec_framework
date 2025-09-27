@@ -15,13 +15,13 @@ outline: deep
 
 
 ```ts
-import { ITableConfig } from "db://xhgame-plugin-framework/core/config/TableManager";
+import { TableConfig } from "db://xhgame-plugin-framework/core/config/TableManager";
 import { TableType } from "./ClientEnum";
 import { ISkillTableItem, SkillTable } from "./tables/SkillTable";
 import { IUnitTableItem, UnitTable } from "./tables/UnitTable";
 import { BattleTable, IBattleTableItem } from "./tables/BattleTable";
 
-export class MyTableConfig implements ITableConfig {
+export class MyTableConfig implements TableConfig {
     [TableType.skill]: SkillTable<ISkillTableItem>
     [TableType.unit]: UnitTable<IUnitTableItem>
     [TableType.battle]: BattleTable<IBattleTableItem>

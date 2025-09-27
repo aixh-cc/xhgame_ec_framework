@@ -10,8 +10,8 @@ export class FactoryManager<T extends FactoryConfig, TT> {
     autoRegister() {
         // 遍历所有属性
         Object.keys(this._config).forEach(key => {
-            const factoryClass = this._config[key as keyof T] as any
-            this.register(new factoryClass())
+            const registerClass = this._config[key as keyof T] as any
+            this.register(new registerClass())
         });
     }
     /** 注册 */

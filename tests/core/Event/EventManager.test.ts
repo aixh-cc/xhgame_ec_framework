@@ -18,7 +18,7 @@ const test_00 = () => {
                 eventManager.emit('test_val', _val)
             }
             // 断言
-            testCheck('发送与接受', JSON.stringify(emit_arr), JSON.stringify(on_arr))
+            assert.equal(JSON.stringify(emit_arr), JSON.stringify(on_arr), '发送与接受')
             resolve(true)
         })
     })
@@ -50,8 +50,8 @@ const test_01 = () => {
                 eventManager.emit('test_val', _val)
             }
             // 断言
-            testCheck('测试取消监听1', JSON.stringify(emit_arr) == JSON.stringify(on_arr), false)
-            testCheck('测试取消监听2', JSON.stringify(effective_emit_arr), JSON.stringify(on_arr))
+            assert.equal(JSON.stringify(emit_arr) == JSON.stringify(on_arr), false, '测试取消监听1')
+            assert.equal(JSON.stringify(effective_emit_arr), JSON.stringify(on_arr), '测试取消监听2')
 
             resolve(true)
         })
@@ -86,9 +86,9 @@ const test_02 = () => {
                 eventManager.emit('test_val', _val)
             }
             // 断言
-            testCheck('测试多个相同监听1', emit_arr[real_count - 1], on_arr[on_arr.length - 1])
-            testCheck('测试多个相同监听2', emit_arr.length, all_count)
-            testCheck('测试多个相同监听3', on_arr.length, real_count)
+            assert.equal(emit_arr[real_count - 1], on_arr[on_arr.length - 1], '测试多个相同监听1')
+            assert.equal(emit_arr.length, all_count, '测试多个相同监听2')
+            assert.equal(on_arr.length, real_count, '测试多个相同监听3')
             resolve(true)
         })
     })
@@ -121,9 +121,9 @@ const test_03 = () => {
                 eventManager.emit('test_val', _val)
             }
             // 断言
-            testCheck('测试清除1', JSON.stringify(emit_arr) == JSON.stringify(on_arr), false)
-            testCheck('测试清除2', emit_arr.length, all_count)
-            testCheck('测试清除3', on_arr.length, real_count)
+            assert.equal(JSON.stringify(emit_arr) == JSON.stringify(on_arr), false, '测试清除1')
+            assert.equal(emit_arr.length, all_count, '测试清除2')
+            assert.equal(on_arr.length, real_count, '测试清除3')
 
             resolve(true)
         })
@@ -159,9 +159,9 @@ const test_04 = () => {
                 eventManager.emit('test_val', _val)
             }
             // 断言
-            testCheck('测试多个不同监听(发送方是 空上下文)1', on_arr.length, 0)
-            testCheck('测试多个不同监听(发送方是 空上下文)2', effective_emit_arr.length, real_count)
-            testCheck('测试多个不同监听(发送方是 空上下文)3', emit_arr.length, all_count)
+            assert.equal(on_arr.length, 0, '测试多个不同监听(发送方是 空上下文)1')
+            assert.equal(effective_emit_arr.length, real_count, '测试多个不同监听(发送方是 空上下文)2')
+            assert.equal(emit_arr.length, all_count, '测试多个不同监听(发送方是 空上下文)3')
 
             resolve(true)
         })
@@ -203,8 +203,8 @@ const test_05 = () => {
             }
             // 断言
 
-            testCheck('测试多个不同监听(发送方是 有上下文)1', JSON.stringify(obj2_on_arr), JSON.stringify(emit_arr))
-            testCheck('测试多个不同监听(发送方是 有上下文)2', JSON.stringify(obj1_on_arr), JSON.stringify(effective_emit_arr))
+            assert.equal(JSON.stringify(obj2_on_arr), JSON.stringify(emit_arr), '测试多个不同监听(发送方是 有上下文)1')
+            assert.equal(JSON.stringify(obj1_on_arr), JSON.stringify(effective_emit_arr), '测试多个不同监听(发送方是 有上下文)2')
 
             resolve(true)
         })
@@ -250,9 +250,9 @@ const test_06 = () => {
                 eventManager.emit('test_val3', _val, obj2)
             }
             // 断言
-            testCheck('测试设置tag1', JSON.stringify(obj1_on_arr), JSON.stringify(emit_arr))
-            testCheck('测试删除tag2', JSON.stringify(obj2_on_arr), JSON.stringify(effective_emit_arr))
-            testCheck('测试删除tag3', JSON.stringify(obj3_on_arr), JSON.stringify(effective_emit_arr))
+            assert.equal(JSON.stringify(obj1_on_arr), JSON.stringify(emit_arr), '测试设置tag1')
+            assert.equal(JSON.stringify(obj2_on_arr), JSON.stringify(effective_emit_arr), '测试删除tag2')
+            assert.equal(JSON.stringify(obj3_on_arr), JSON.stringify(effective_emit_arr), '测试删除tag3')
 
             resolve(true)
         })
@@ -267,15 +267,6 @@ let functions = [
     test_05,
     test_06,
 ]
-
-function testCheck(test_name: string, val: any, need: any) {
-    let is_success = val === need
-    assert(is_success, test_name);
-    if (is_success == false) {
-        console.error('测试【' + test_name + '】失败', "需要:\n", need, "实际:\n", val)
-    }
-    return is_success
-}
 
 describe('Event功能', async () => {
     while (functions.length > 0) {

@@ -1,6 +1,6 @@
 import { assert, describe, test } from "poku";
 import { TableManager } from "../../../packages/core/src/Table/TableManager";
-import { BaseTable, ITableConfig } from "../../../packages/core/src/Table/Table";
+import { BaseTable, TableConfig } from "../../../packages/core/src/Table/Table";
 
 
 enum TableType {
@@ -21,7 +21,7 @@ interface IUnitTableItem {
     id: number,
     name: string,
 }
-class TestTableConfig implements ITableConfig {
+class TestTableConfig extends TableConfig {
     [TableType.skill]: typeof SkillTable = SkillTable;
     [TableType.unit]: typeof UnitTable = UnitTable;
 }
@@ -39,21 +39,20 @@ let json_data = {
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试table功能', async () => {
-            let tableManager = new TableManager<TestTableConfig>()
-            tableManager.register(new SkillTable())
-            tableManager.register(new UnitTable())
-            testCheck('获取getTables正常', tableManager.getTables().length, 2)
+            let tableManager = new TableManager<TestTableConfig>(new TestTableConfig())
+            tableManager.autoRegister()
+            assert.equal(tableManager.getTables().length, 2, '获取getTables正常')
             let skillTable = tableManager.getTable(TableType.skill);
-            testCheck('获取getTable正常', skillTable != null, true)
+            assert.equal(skillTable != null, true, '获取getTable正常')
             //
             if (skillTable) {
                 let itemv1 = skillTable.getInfo(1)
-                testCheck('未初始化前getInfo为undefined', itemv1, undefined)
+                assert.equal(itemv1, undefined, '未初始化前getInfo为undefined')
                 skillTable.init(json_data)
                 let itemv2 = skillTable.getInfo(2)
-                testCheck('初始化后getInfo获取正常', JSON.stringify(itemv2), '{"id":2,"name":"name2"}')
+                assert.equal(JSON.stringify(itemv2), '{"id":2,"name":"name2"}', '初始化后getInfo获取正常')
                 let skilllist = skillTable.getList()
-                testCheck('getList获取正常', JSON.stringify(skilllist), '[{"id":1,"name":"name1"},{"id":2,"name":"name2"}]')
+                assert.equal(JSON.stringify(skilllist), '[{"id":1,"name":"name1"},{"id":2,"name":"name2"}]', 'getList获取正常')
             }
             resolve(true)
         })
@@ -61,15 +60,6 @@ const test_00 = () => {
 }
 
 let functions = [test_00]
-
-function testCheck(test_name: string, val: any, need: any) {
-    let is_success = val == need
-    assert(is_success, test_name);
-    if (is_success == false) {
-        console.error('测试【' + test_name + '】失败', '需要:', need, '实际:', val)
-    }
-    return is_success
-}
 
 describe('table功能', async () => {
     while (functions.length > 0) {
