@@ -116,8 +116,8 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
  *  工厂配置
  *  例子:
  *  class MyTestFactoryConfig extends FactoryConfig {
- *      [FactoryType.unitItem]: typeof UnitItemFactory<IItemProduceDrive, IItem & IUnitItem> = UnitItemFactory;
- *      [FactoryType.effectItem]: typeof EffectItemFactory<IItemProduceDrive, IItem & IEffectItem> = EffectItemFactory;
+ *      [FactoryType.unitItem]: typeof UnitItemFactory<IItemProduceDrive, IUnitItem> = UnitItemFactory;
+ *      [FactoryType.effectItem]: typeof EffectItemFactory<IItemProduceDrive, IEffectItem> = EffectItemFactory;
  *  }
  */
 export class FactoryConfig {

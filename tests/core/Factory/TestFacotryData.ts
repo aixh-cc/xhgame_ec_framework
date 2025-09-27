@@ -5,10 +5,10 @@ export enum FactoryType {
     unitItem = "unitItem",
     effectItem = 'effectItem',
 }
-export interface IUnitItem {
+export interface IUnitItem extends IItem {
     owner_is_player: boolean
 }
-export interface IEffectItem {
+export interface IEffectItem extends IItem {
     effectTime: number
 }
 
@@ -44,7 +44,7 @@ export class TestUnitItem extends BaseTestItem implements IUnitItem {
         this.owner_is_player = false
     }
     clone() {
-
+        this.itemId
     }
     toScene(): void {
 
@@ -109,15 +109,15 @@ export class TestUnitItemProduceDrive implements IItemProduceDrive {
     }
 }
 
-export class UnitItemFactory<T extends IItemProduceDrive, TT extends IItem & IUnitItem> extends BaseFactory<T, TT> {
+export class UnitItemFactory<T extends IItemProduceDrive, TT extends IUnitItem> extends BaseFactory<T, TT> {
     name = FactoryType.unitItem;
 }
-export class EffectItemFactory<T extends IItemProduceDrive, TT extends IItem & IEffectItem> extends BaseFactory<T, TT> {
+export class EffectItemFactory<T extends IItemProduceDrive, TT extends IEffectItem> extends BaseFactory<T, TT> {
     name = FactoryType.effectItem;
 }
 export class MyTestFactoryConfig extends FactoryConfig {
-    [FactoryType.unitItem]: typeof UnitItemFactory<TestEffectItemProduceDrive, IItem & IUnitItem> = UnitItemFactory;
-    [FactoryType.effectItem]: typeof EffectItemFactory<TestEffectItemProduceDrive, IItem & IEffectItem> = EffectItemFactory;
+    [FactoryType.unitItem]: typeof UnitItemFactory<TestEffectItemProduceDrive, IUnitItem> = UnitItemFactory;
+    [FactoryType.effectItem]: typeof EffectItemFactory<TestEffectItemProduceDrive, IEffectItem> = EffectItemFactory;
 }
 
 export class MyTestDriveConfig extends DriveConfig {
