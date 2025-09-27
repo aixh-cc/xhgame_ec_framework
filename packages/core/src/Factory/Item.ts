@@ -24,7 +24,12 @@ export interface IItem {
 
 export interface IItemProduceDrive {
     name: string
-    preloadItemsResource(): Promise<boolean>
+    /** 预加载item的资源 */
+    preloadItemsResource(itemNos?: string[]): Promise<boolean>
+    /** 释放item的资源 */
+    releaseItemsResource(itemNos?: string[]): Promise<boolean>
+    /** 创建item */
     createItem(itemNo: string, itemId: number): IItem
+    /** 移除item */
     removeItem(item: IItem): void
 }
