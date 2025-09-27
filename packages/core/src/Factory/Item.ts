@@ -20,6 +20,8 @@ export interface IItem {
     toPool(): void
     /** 基类中的基础属性重置 */
     baseAttrReset(): void
+    /** 获取Item的ViewVm */
+    getViewVm<T>(): T
 }
 
 export interface IItemProduceDrive {

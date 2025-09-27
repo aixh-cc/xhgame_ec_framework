@@ -25,6 +25,13 @@ export abstract class BaseTestItem implements IItem {
     baseAttrReset() {
         this.positions = [0, 0, 0]
     }
+    mock_vm: any = null
+    getViewVm<T>(): T {
+        if (this.mock_vm == null) {
+            this.mock_vm = {}
+        }
+        return this.mock_vm
+    }
     abstract reset(): void
     abstract clone(): void
     abstract toScene(): void
