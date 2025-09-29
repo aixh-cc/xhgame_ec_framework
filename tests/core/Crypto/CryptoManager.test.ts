@@ -1,6 +1,7 @@
 import { assert, describe, test } from "poku";
 import { CryptoManager } from "../../../packages/core/src/Crypto/CryptoManager";
 import { CryptoAES, CryptoEmpty } from "../../../packages/core/src/Crypto/Crypto";
+import CryptoJS from "crypto-js";
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {
@@ -16,7 +17,7 @@ const test_01 = () => {
 const test_02 = () => {
     return new Promise((resolve, reject) => {
         test('测试CryptoManager的CryptoAES', async () => {
-            let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES())
+            let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES(CryptoJS))
             assert.equal(cryptoManager.md5('aixh-cc'), '6f39f4a117d4f352cf33cd6827343815', 'CryptoAES的md5正常')
             let xxx_content = cryptoManager.encrypt('aixh-cc')
             assert.equal(cryptoManager.decrypt(xxx_content), 'aixh-cc', 'CryptoAES的加密解密正常')

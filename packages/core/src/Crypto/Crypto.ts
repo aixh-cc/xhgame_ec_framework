@@ -1,5 +1,3 @@
-import CryptoJS from "crypto-js";
-
 export interface ICrypto {
     /**
      * md5
@@ -38,12 +36,18 @@ export class CryptoEmpty implements ICrypto {
     }
 }
 export class CryptoAES implements ICrypto {
+
+    cryptoJS: any
+    constructor(cryptoJS: any) {
+        this.cryptoJS = cryptoJS
+    }
+
     /**
      * MD5加密
      * @param msg 加密信息
      */
     md5(msg: string): string {
-        return CryptoJS.MD5(msg).toString();
+        return this.cryptoJS.MD5(msg).toString();
     }
 
     /**
@@ -59,18 +63,18 @@ export class CryptoAES implements ICrypto {
         }
 
         // 生成随机初始化向量 (16字节)
-        const iv = CryptoJS.lib.WordArray.random(16);
+        const iv = this.cryptoJS.lib.WordArray.random(16);
 
         // 使用AES-256-CBC模式加密
-        const encrypted = CryptoJS.AES.encrypt(msg, CryptoJS.enc.Utf8.parse(key), {
+        const encrypted = this.cryptoJS.AES.encrypt(msg, this.cryptoJS.enc.Utf8.parse(key), {
             iv: iv,
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
+            mode: this.cryptoJS.mode.CBC,
+            padding: this.cryptoJS.pad.Pkcs7
         });
 
         // 组合IV和加密数据，然后进行Base64编码
         const combined = iv.concat(encrypted.ciphertext);
-        return combined.toString(CryptoJS.enc.Base64);
+        return combined.toString(this.cryptoJS.enc.Base64);
     }
 
     /**
@@ -86,7 +90,7 @@ export class CryptoAES implements ICrypto {
         }
 
         // Base64解码
-        const data = CryptoJS.enc.Base64.parse(str);
+        const data = this.cryptoJS.enc.Base64.parse(str);
 
         // 提取IV（前16字节）和加密数据
         const iv = data.clone();
@@ -98,17 +102,17 @@ export class CryptoAES implements ICrypto {
         encrypted.words = encrypted.words.slice(4); // 跳过前4个words (16字节)
 
         // 解密数据
-        const decrypted = CryptoJS.AES.decrypt(
-            CryptoJS.lib.CipherParams.create({
+        const decrypted = this.cryptoJS.AES.decrypt(
+            this.cryptoJS.lib.CipherParams.create({
                 ciphertext: encrypted
             }),
-            CryptoJS.enc.Utf8.parse(key), {
+            this.cryptoJS.enc.Utf8.parse(key), {
             iv: iv,
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
+            mode: this.cryptoJS.mode.CBC,
+            padding: this.cryptoJS.pad.Pkcs7
         });
 
         // 返回UTF-8格式的解密结果
-        return decrypted.toString(CryptoJS.enc.Utf8);
+        return decrypted.toString(this.cryptoJS.enc.Utf8);
     }
 }
