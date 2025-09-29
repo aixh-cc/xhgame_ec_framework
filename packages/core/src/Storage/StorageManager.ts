@@ -8,6 +8,7 @@ export class StorageManager {
     constructor(prefix: string = 'xh', localStorage: any, crypto: any = null) {
         this._prefix = prefix
         this._localStorage = localStorage
+        this._crypto = crypto
     }
     /**
      * 存储本地数据
@@ -86,7 +87,7 @@ export class StorageManager {
         }
         key = `${this.prefix}_${key}`;
         let str: string | null = this._localStorage.getItem(key);
-        if (this._crypto && str && str.indexOf('{"ct"') > -1) {
+        if (this._crypto && str) {
             str = this._crypto.decrypt(str);
         }
         if (null === str) {

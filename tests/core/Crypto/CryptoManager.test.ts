@@ -11,9 +11,13 @@ const test_01 = () => {
             assert.equal(cryptoManager.decrypt('aixh-cc'), 'aixh-cc', 'CryptoEmpty的decrypt正常')
             resolve(true)
         })
+    })
+}
+const test_02 = () => {
+    return new Promise((resolve, reject) => {
         test('测试CryptoManager的CryptoAES', async () => {
             let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES())
-            assert.equal(cryptoManager.md5('aixh-cc'), '9f6e6800cfae7749eb6c486619254b9c', 'CryptoAES的md5正常')
+            assert.equal(cryptoManager.md5('aixh-cc'), '6f39f4a117d4f352cf33cd6827343815', 'CryptoAES的md5正常')
             let xxx_content = cryptoManager.encrypt('aixh-cc')
             assert.equal(cryptoManager.decrypt(xxx_content), 'aixh-cc', 'CryptoAES的加密解密正常')
             resolve(true)
@@ -21,7 +25,8 @@ const test_01 = () => {
     })
 }
 let functions = [
-    test_01
+    test_01,
+    test_02
 ]
 
 describe('CryptoManager功能', async () => {

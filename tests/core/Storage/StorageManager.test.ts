@@ -1,5 +1,8 @@
 import { assert, describe, test } from "poku";
 import { StorageManager } from "../../../packages/core/src/Storage/StorageManager";
+import { CryptoManager } from "../../../packages/core/src/Crypto/CryptoManager";
+import { CryptoAES } from "../../../packages/core/src/Crypto/Crypto";
+
 const getLocalStorage = () => {
     const LocalStorage = require('node-localstorage').LocalStorage;
     let localStorage = new LocalStorage('./scratch', { quota: 10 * 1024 * 1024 }); // 设置为 10MB
@@ -32,8 +35,36 @@ const test_01 = () => {
         })
     })
 }
+const test_02 = () => {
+    return new Promise((resolve, reject) => {
+        test('测试StorageManager的加密存储', async () => {
+            let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES())
+            let factoryManager = new StorageManager('xh', getLocalStorage(), cryptoManager)
+            factoryManager.origin_set('tt', 'tt001')
+            assert.equal(factoryManager.origin_get('tt'), 'tt001', 'origin_set和origin_get正常')
+            //
+            factoryManager.set('object_json', { name: '张三', age: 12 })
+            assert.equal(factoryManager.getJson('object_json').name, '张三', 'getJson正常')
+            factoryManager.set('test_boolen', true)
+            assert.equal(factoryManager.getBoolean('test_boolen'), true, 'getBoolean正常')
+            //
+            factoryManager.set('test_number', 123444)
+            assert.equal(factoryManager.getNumber('test_number'), 123444, 'getNumber正常')
+            // 
+            factoryManager.remove('test_number')
+            assert.equal(factoryManager.getNumber('test_number'), 0, 'remove正常')
+            //
+            factoryManager.clear()
+            assert.equal(factoryManager.get('test_boolen'), null, 'clear1正常')
+            assert.equal(factoryManager.get('tt'), null, 'clear2正常')
+
+            resolve(true)
+        })
+    })
+}
 let functions = [
-    test_01
+    test_01,
+    test_02
 ]
 
 describe('StorageManager功能', async () => {
