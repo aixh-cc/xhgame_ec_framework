@@ -11,7 +11,9 @@ export * from './Table/Table';
 export * from './Table/TableManager';
 // event
 export * from './Event/EventManager';
-// 
+// Factory
 export * from './Factory/Factory';
 export * from './Factory/FactoryManager';
 export * from './Factory/Item';
+// Storage
+export * from './Storage/StorageManager';
