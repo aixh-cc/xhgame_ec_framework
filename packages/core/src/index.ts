@@ -17,3 +17,6 @@ export * from './Factory/FactoryManager';
 export * from './Factory/Item';
 // Storage
 export * from './Storage/StorageManager';
+// Crypto
+export * from './Crypto/Crypto';
+export * from './Crypto/CryptoManager';
