@@ -6,8 +6,8 @@ export interface ISocket {
     onSocketOpen(callback: Function): void
     onSocketClose(callback: Function): void
     closeSocket(): void
-    openResolve: Function
-    connectSocketWithRetryCallback: Function
+    // openResolve: Function
+    // connectSocketWithRetryCallback: Function
 }
 export interface ISocketOptions {
     url: string
