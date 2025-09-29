@@ -20,3 +20,10 @@ export * from './Storage/StorageManager';
 // Crypto
 export * from './Crypto/Crypto';
 export * from './Crypto/CryptoManager';
+// Net
+export * from './Net/Http';
+export * from './Net/Socket';
+export * from './Net/FetchHttp';
+export * from './Net/XMLHttp';
+export * from './Net/Websocket';
+export * from './Net/NetManager';
