@@ -3,12 +3,9 @@
   "scripts": {
     "test": "bun ./tests/run.test.mjs"
   },
-  "dependencies": {
-
-  },
   "devDependencies": {
+    "node-localstorage": "^3.0.5",
     "poku": "^3.0.1",
-    "typescript": "^5.7.3",
-    "node-localstorage": "^3.0.5"
+    "typescript": "^5.7.3"
   }
 }
