@@ -21,16 +21,15 @@ const test_02 = () => {
             websocket.onSocketOpen(() => {
                 console.log('连接成功')
             })
-            let res = await netManager.socket.connectSocketWithRetry({ url: 'wss://shoushenv2.mysxjt.com/websocket/ws?type=admin&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIxMjcuMC4wLjEiLCJhdWQiOiIxMjcuMC4wLjEiLCJpYXQiOjE3NTkxMTM5OTUsIm5iZiI6MTc1OTExMzk5NSwiZXhwIjoxNzYxNzA1OTk1LCJqdGkiOnsiaWQiOjEsInR5cGUiOiJhZG1pbiJ9fQ.6sMeeNlBha9DS-PKbdNIyaAODDVVHrBJR9VIyBx_M0k' })
+            let res = await netManager.socket.connectSocket({ url: 'wss://shoushenv2.mysxjt.com/websocket/ws?type=admin&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIxMjcuMC4wLjEiLCJhdWQiOiIxMjcuMC4wLjEiLCJpYXQiOjE3NTkxMTM5OTUsIm5iZiI6MTc1OTExMzk5NSwiZXhwIjoxNzYxNzA1OTk1LCJqdGkiOnsiaWQiOjEsInR5cGUiOiJhZG1pbiJ9fQ.6sMeeNlBha9DS-PKbdNIyaAODDVVHrBJR9VIyBx_M0k' })
             assert.equal(res, true, '连接成功')
             websocket.sendSocketMessage('ping', {})
             websocket.onSocketMessage('ping', (data: any) => {
                 assert.equal(data.now > 0, true, '获取到now')
-            })
-            setTimeout(() => {
+                // 关闭
                 websocket.closeSocket()
-            }, 1000)
-            resolve(true)
+                resolve(true)
+            })
         })
     })
 }

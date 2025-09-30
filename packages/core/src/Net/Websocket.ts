@@ -12,43 +12,47 @@ export class Websocket implements ISocket {
     private _isCloseByClient: boolean = false
 
     connectSocket(options: ISocketOptions) {
-        this._options = options
-        this._socket = new WebSocket(options.url);
-        this.socket_close_try_max_num = options.socket_close_try_max_num
-        this.socket_close_try_cur_num = options.socket_close_try_cur_num
-        this._socket.addEventListener("open", (event) => {
-            console.log('连接成功。开始监听消息')
-            this.socket_close_try_cur_num = 0
-            this._onSocketOpenCallback && this._onSocketOpenCallback(event)
-        });
-        this._socket.onclose = (event) => {
-            console.warn('连接关闭')
-            this.socket_close_try_cur_num++
-            if (this.socket_close_try_cur_num <= this.socket_close_try_max_num) {
-                console.log('连接断开了,开始尝试重新连接,' + this.socket_close_try_cur_num + '/' + this.socket_close_try_max_num)
-                this.connectSocket(this._options)
-            } else {
-                if (this._isCloseByClient) {
-                    console.log('客户端主动关闭')
+        return new Promise<boolean>((resolve, reject) => {
+            this._options = options
+            this._socket = new WebSocket(options.url);
+            this.socket_close_try_max_num = options.socket_close_try_max_num
+            this.socket_close_try_cur_num = options.socket_close_try_cur_num
+            this._socket.addEventListener("open", (event) => {
+                console.log('连接成功。开始监听消息')
+                resolve(true)
+                this.socket_close_try_cur_num = 0
+                this._onSocketOpenCallback && this._onSocketOpenCallback(event)
+            });
+            this._socket.onclose = (event) => {
+                console.warn('连接关闭')
+                this.socket_close_try_cur_num++
+                if (this.socket_close_try_cur_num <= this.socket_close_try_max_num) {
+                    console.log('连接断开了,开始尝试重新连接,' + this.socket_close_try_cur_num + '/' + this.socket_close_try_max_num)
+                    this.connectSocket(this._options)
                 } else {
-                    console.log('服务端异常,不请求连接')
+                    if (this._isCloseByClient) {
+                        console.log('客户端主动关闭')
+                    } else {
+                        console.log('服务端异常,不请求连接')
+                    }
                 }
-            }
-            this._onSocketCloseCallback && this._onSocketCloseCallback(event)
-        };
-        this._socket.addEventListener("error", (event) => {
-            console.error('socket连接错误', event)
-            this._onSocketErrorCallback && this._onSocketErrorCallback(event)
-        });
-        this._socket.addEventListener("message", (event: MessageEvent) => {
-            if (event.type == 'message') {
-                let wsData = JSON.parse(event.data)
-                let onListenCallback = this.listenMsgMap.get(wsData.type)
-                if (onListenCallback) {
-                    onListenCallback && onListenCallback(wsData.data)
+                this._onSocketCloseCallback && this._onSocketCloseCallback(event)
+            };
+            this._socket.addEventListener("error", (event) => {
+                resolve(false)
+                console.error('socket连接错误', event)
+                this._onSocketErrorCallback && this._onSocketErrorCallback(event)
+            });
+            this._socket.addEventListener("message", (event: MessageEvent) => {
+                if (event.type == 'message') {
+                    let wsData = JSON.parse(event.data)
+                    let onListenCallback = this.listenMsgMap.get(wsData.type)
+                    if (onListenCallback) {
+                        onListenCallback && onListenCallback(wsData.data)
+                    }
                 }
-            }
-        });
+            });
+        })
     }
     onSocketMessage(key: string, callback: Function): void {
         this.listenMsgMap.set(key, callback)

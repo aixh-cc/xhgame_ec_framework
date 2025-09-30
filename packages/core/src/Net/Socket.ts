@@ -1,13 +1,11 @@
 export interface ISocket {
-    connectSocket(options: ISocketOptions): void
+    connectSocket(options: ISocketOptions): Promise<boolean>
     onSocketMessage(key: string, callback: Function): void
     sendSocketMessage(key: string, msgData: any): void
     onSocketError(callback: Function): void
     onSocketOpen(callback: Function): void
     onSocketClose(callback: Function): void
     closeSocket(): void
-    // openResolve: Function
-    // connectSocketWithRetryCallback: Function
 }
 export interface ISocketOptions {
     url: string
