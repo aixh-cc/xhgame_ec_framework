@@ -32,3 +32,6 @@ export * from './Ui/UiDrive';
 export * from './Ui/UiManager';
 // Game
 export * from './Game/Game';
+// Audio
+export * from './Audio/AudioDrive';
+export * from './Audio/AudioManager';
