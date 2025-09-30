@@ -16,7 +16,7 @@
     },
     "include": [
         "./src/**/*"
-        // "libs"
+, "../../tests/core/Ui/TestUiDrive.ts"        // "libs"
     ],
     // 排除
     "exclude": [

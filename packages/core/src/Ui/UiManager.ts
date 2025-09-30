@@ -1,27 +1,27 @@
 import { BaseModelComp } from "../EC/BaseModelComp"
 import { IUiDrive } from "./UiDrive"
 
-export class UiManager<T extends IUiDrive> {
+export class UiManager<T extends IUiDrive, NT> {
 
     private _uiDrive: T
 
     constructor(uiDrive: T) {
         this._uiDrive = uiDrive
     }
-    get gui_root() {
-        return this._uiDrive.getGuiRoot()
+    get gui_root(): NT {
+        return this._uiDrive.getGuiRoot() as NT
     }
-    getGuiRoot() {
-        return this._uiDrive.getGuiRoot()
+    getGuiRoot(): NT {
+        return this._uiDrive.getGuiRoot() as NT
     }
-    get world_root() {
-        return this._uiDrive.getWorldRoot()
+    get world_root(): NT {
+        return this._uiDrive.getWorldRoot() as NT
     }
-    getWorldRoot() {
-        return this._uiDrive.getWorldRoot()
+    getWorldRoot(): NT {
+        return this._uiDrive.getWorldRoot() as NT
     }
-    getUI(uiid: string) {
-        return this._uiDrive.getUI(uiid)
+    getUI(uiid: string): NT {
+        return this._uiDrive.getUI(uiid) as NT
     }
 
     toast(msg: string) {

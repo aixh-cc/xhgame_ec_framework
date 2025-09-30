@@ -1,13 +1,11 @@
 import { assert, describe, test } from "poku";
 import { UiManager } from "../../../packages/core/src/Ui/UiManager";
-import { TestUiDrive } from "../../../packages/core/src/Ui/TestUiDrive";
-import { TestViewComp } from "./TestUiData";
+import { TestNode, TestViewComp, TestUiDrive } from "./TestUiData";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试UiManager功能', async () => {
-            let uiManager = new UiManager<TestUiDrive>(new TestUiDrive())
-            console.log(uiManager)
+            let uiManager = new UiManager<TestUiDrive, TestNode>(new TestUiDrive())
             assert.equal(uiManager.getGuiRoot().name, 'gui_root', 'getGuiRoot正常')
             assert.equal(uiManager.getWorldRoot().name, 'world_root', 'getWorldRoot正常')
             uiManager.openUIAsync('test_view', new TestViewComp()).then(() => {
