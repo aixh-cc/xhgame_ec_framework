@@ -1,11 +1,12 @@
 import { FactoryConfig, IFactory } from "./Factory";
 
 export class FactoryManager<T extends FactoryConfig, TT> {
-    actions: TT // 快速入口
+    private _actions: TT // 快速入口
     private _factorys = new Map<keyof T, IFactory>();
     private _config: T
-    constructor(config: T) {
+    constructor(config: T, actions: TT) {
         this._config = config
+        this._actions = actions
     }
     autoRegister() {
         // 遍历所有属性
@@ -13,6 +14,9 @@ export class FactoryManager<T extends FactoryConfig, TT> {
             const _factory = this._config[key as keyof T] as any
             _factory && this.register(_factory)
         });
+    }
+    getActions() {
+        return this._actions
     }
     /** 注册 */
     register(

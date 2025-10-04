@@ -128,3 +128,14 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
 export class FactoryConfig {
     [key: string]: BaseFactory<IItemProduceDrive, IItem>
 }
+
+export interface IFactoryAction {
+    // ui
+    createUiItem(itemNo: string): IItem
+    removeUiItem(item: IItem): void
+    getUiItemFactory(): IFactory
+    // effect
+    createEffectItem(itemNo: string): IItem
+    removeEffectItem(item: IItem): void
+    getEffectItemFactory(): IFactory
+}
