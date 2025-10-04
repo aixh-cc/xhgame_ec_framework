@@ -7,14 +7,14 @@ enum TableType {
     skill = "skill",
     unit = "unit",
 }
-class SkillTable<T> extends BaseTable<T> {
+class SkillTable extends BaseTable<ISkillTableItem> {
     name = TableType.skill;
 }
 interface ISkillTableItem {
     id: number,
     name: string,
 }
-class UnitTable<T> extends BaseTable<T> {
+class UnitTable extends BaseTable<IUnitTableItem> {
     name = TableType.unit;
 }
 interface IUnitTableItem {
@@ -22,8 +22,8 @@ interface IUnitTableItem {
     name: string,
 }
 class TestTableConfig extends TableConfig {
-    [TableType.skill]: typeof SkillTable = SkillTable;
-    [TableType.unit]: typeof UnitTable = UnitTable;
+    [TableType.skill]: SkillTable = new SkillTable();
+    [TableType.unit]: UnitTable = new UnitTable();
 }
 let json_data = {
     "1": {

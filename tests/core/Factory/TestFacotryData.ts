@@ -1,4 +1,4 @@
-import { BaseFactory, DriveConfig, FactoryConfig } from "../../../packages/core/src/Factory/Factory";
+import { BaseFactory, FactoryConfig } from "../../../packages/core/src/Factory/Factory";
 import { IItem, IItemProduceDrive } from "../../../packages/core/src/Factory/Item";
 
 export enum FactoryType {
@@ -82,7 +82,7 @@ export class TestEffectItemProduceDrive implements IItemProduceDrive {
             resolve(true)
         })
     }
-    createItem() {
+    createItem(itemNo: string, itemId: number) {
         return new TestEffectItem()
     }
     removeItem(item: TestEffectItem): void {
@@ -101,7 +101,7 @@ export class TestUnitItemProduceDrive implements IItemProduceDrive {
             resolve(true)
         })
     }
-    createItem() {
+    createItem(itemNo: string, itemId: number) {
         return new TestUnitItem()
     }
     removeItem(item: TestUnitItem): void {
@@ -116,11 +116,6 @@ export class EffectItemFactory<T extends IItemProduceDrive, TT extends IEffectIt
     name = FactoryType.effectItem;
 }
 export class MyTestFactoryConfig extends FactoryConfig {
-    [FactoryType.unitItem]: typeof UnitItemFactory<TestEffectItemProduceDrive, IUnitItem> = UnitItemFactory;
-    [FactoryType.effectItem]: typeof EffectItemFactory<TestEffectItemProduceDrive, IEffectItem> = EffectItemFactory;
-}
-
-export class MyTestDriveConfig extends DriveConfig {
-    [FactoryType.unitItem]: typeof TestUnitItemProduceDrive = TestUnitItemProduceDrive;
-    [FactoryType.effectItem]: typeof TestEffectItemProduceDrive = TestEffectItemProduceDrive;
+    [FactoryType.unitItem]: UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem> = (new UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem>()).setItemProduceDrive(new TestUnitItemProduceDrive());
+    [FactoryType.effectItem]: EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem> = (new EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem>()).setItemProduceDrive(new TestEffectItemProduceDrive());
 }

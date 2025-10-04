@@ -21,5 +21,5 @@ export abstract class BaseTable<T> implements ITable {
     }
 }
 export class TableConfig {
-    [key: string]: new (...args: any[]) => any;
+    [key: string]: BaseTable<any>
 }

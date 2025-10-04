@@ -3,7 +3,7 @@ import { IItem, IItemProduceDrive } from "./Item";
 export interface IFactory {
     name: string
     /** 初始化时设置的item生产驱动 */
-    setItemProduceDrive(itemProduceDrive: IItemProduceDrive): void
+    setItemProduceDrive(itemProduceDrive: IItemProduceDrive): IFactory
     /** 获取当前item */
     getItemProduceDrive(): IItemProduceDrive
     /** 生产item */
@@ -31,8 +31,9 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
     private _itemPoolsMap: Map<string, TT[]> = new Map();
     /** 生产驱动 */
     private _itemProduceDrive: T
-    setItemProduceDrive(itemProduceDrive: T): void {
+    setItemProduceDrive(itemProduceDrive: T) {
         this._itemProduceDrive = itemProduceDrive
+        return this
     }
     getItemProduceDrive(): T {
         return this._itemProduceDrive
@@ -115,14 +116,15 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
  * 
  *  工厂配置
  *  例子:
+ * 
  *  class MyTestFactoryConfig extends FactoryConfig {
- *      [FactoryType.unitItem]: typeof UnitItemFactory<IItemProduceDrive, IUnitItem> = UnitItemFactory;
- *      [FactoryType.effectItem]: typeof EffectItemFactory<IItemProduceDrive, IEffectItem> = EffectItemFactory;
+ * 
+ *      [FactoryType.unitItem]: UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem> = (new UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem>()).setItemProduceDrive(new TestUnitItemProduceDrive());
+ *   
+ *      [FactoryType.effectItem]: EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem> = (new EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem>()).setItemProduceDrive(new TestEffectItemProduceDrive());
+ *  
  *  }
  */
 export class FactoryConfig {
-    [key: string]: new (...args: any[]) => any;
-}
-export class DriveConfig {
-    [key: string]: new (...args: any[]) => any;
+    [key: string]: BaseFactory<IItemProduceDrive, IItem>
 }

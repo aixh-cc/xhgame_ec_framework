@@ -1,11 +1,11 @@
 import { assert, describe, test } from "poku";
 import { FactoryManager } from "../../../packages/core/src/Factory/FactoryManager";
-import { FactoryType, MyTestDriveConfig, MyTestFactoryConfig } from "./TestFacotryData";
+import { FactoryType, MyTestFactoryConfig } from "./TestFacotryData";
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {
         test('测试FactoryManager', async () => {
-            let factoryManager = new FactoryManager<MyTestFactoryConfig, MyTestDriveConfig, any>(new MyTestFactoryConfig(), new MyTestDriveConfig())
+            let factoryManager = new FactoryManager<MyTestFactoryConfig, any>(new MyTestFactoryConfig())
             factoryManager.autoRegister()
             assert.equal(factoryManager.getFactorys().size, 2, '自动注册正常')
             let effectItemFactory = factoryManager.getFactory(FactoryType.effectItem)

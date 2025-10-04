@@ -9,8 +9,8 @@ export class TableManager<T extends TableConfig> {
     autoRegister() {
         // 遍历所有属性
         Object.keys(this._config).forEach(key => {
-            const registerClass = this._config[key as keyof T] as any
-            this.register(new registerClass())
+            const _table = this._config[key as keyof T] as any
+            this.register(_table)
         });
     }
     /** 注册 */
@@ -22,8 +22,8 @@ export class TableManager<T extends TableConfig> {
     }
     getTable<K extends keyof T>(
         key: K
-    ): InstanceType<T[K]> | undefined {
-        return this._tables.get(key) as InstanceType<T[K]>;
+    ): T[K] | undefined {
+        return this._tables.get(key) as T[K];
     }
     getTables(): (keyof T)[] {
         return Array.from(this._tables.keys());
