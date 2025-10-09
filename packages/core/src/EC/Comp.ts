@@ -14,7 +14,7 @@ export abstract class Comp {
      * @param compClass 
      * @returns 
      */
-    public static createComp<T extends Comp>(compClass: new () => T, entity: Entity): T {
+    public static createComp<T extends Comp>(compClass: new () => T): T {
         // 获取对应组件类的池子
         let pool = this.compsPool.get(compClass);
         // 如果池子不存在，为组件类创建一个新的空池子
@@ -24,7 +24,6 @@ export abstract class Comp {
         }
         // 如果池子中有实例，则取出并返回；否则创建一个新实例并返回
         let comp = pool.length > 0 ? pool.pop() as T : new compClass();
-        // comp.entity = entity
         return comp
     }
 

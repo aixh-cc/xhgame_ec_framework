@@ -1,6 +1,4 @@
 import { Comp } from "./Comp";
-import { Entity } from "./Entity";
-
 /**
  * 组件
  */

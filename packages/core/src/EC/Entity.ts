@@ -59,7 +59,7 @@ export class Entity {
             console.error('已存在组件,不会触发挂载事件compName=' + component.compName)
             return component;
         } else {
-            const component = Comp.createComp(componentClass, this);
+            const component = Comp.createComp(componentClass);
             this._components_class.push(componentClass)
             this._components_names.push(component.compName)
             this._components.push(component)
