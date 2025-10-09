@@ -56,7 +56,7 @@ export class Entity {
         let hasIndex = this._components_class.indexOf(componentClass)
         if (hasIndex > -1) {
             const component = this.components[hasIndex] as T;
-            console.error('已存在组件,不会触发挂载事件compName=' + component.compName)
+            console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
             return component;
         } else {
             const component = Comp.createComp(componentClass);
