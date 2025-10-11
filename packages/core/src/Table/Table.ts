@@ -20,6 +20,6 @@ export abstract class BaseTable<T> implements ITable {
         return this._data[id] || undefined;
     }
 }
-export class TableConfig {
-    [key: string]: BaseTable<any>
+export interface ITableConfig {
+
 }

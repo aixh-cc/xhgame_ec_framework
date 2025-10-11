@@ -1,6 +1,6 @@
-import { ITable, TableConfig } from "./Table";
+import { ITable, ITableConfig } from "./Table";
 
-export class TableManager<T extends TableConfig> {
+export class TableManager<T extends ITableConfig> {
     private _tables = new Map<keyof T, ITable>();
     private _config: T
     constructor(config: T) {

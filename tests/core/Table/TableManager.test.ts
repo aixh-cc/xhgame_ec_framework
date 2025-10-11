@@ -1,6 +1,6 @@
 import { assert, describe, test } from "poku";
 import { TableManager } from "../../../packages/core/src/Table/TableManager";
-import { BaseTable, TableConfig } from "../../../packages/core/src/Table/Table";
+import { BaseTable, ITableConfig } from "../../../packages/core/src/Table/Table";
 
 
 enum TableType {
@@ -21,7 +21,7 @@ interface IUnitTableItem {
     id: number,
     name: string,
 }
-class TestTableConfig extends TableConfig {
+class TestTableConfig implements ITableConfig {
     [TableType.skill]: SkillTable = new SkillTable();
     [TableType.unit]: UnitTable = new UnitTable();
 }

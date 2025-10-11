@@ -117,7 +117,7 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
  *  工厂配置
  *  例子:
  * 
- *  class MyTestFactoryConfig extends FactoryConfig {
+ *  class MyTestFactoryConfig implements IFactoryConfig {
  * 
  *      [FactoryType.unitItem]: UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem> = (new UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem>()).setItemProduceDrive(new TestUnitItemProduceDrive());
  *   
@@ -125,8 +125,8 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
  *  
  *  }
  */
-export class FactoryConfig {
-    [key: string]: BaseFactory<IItemProduceDrive, IItem>
+export interface IFactoryConfig {
+
 }
 
 export interface IFactoryAction {

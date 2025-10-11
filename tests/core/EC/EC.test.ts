@@ -41,7 +41,7 @@ const test_01 = () => {
 
             mygameEntiy.detachComponentByName(testSenceComp.compName)
             assert.equal(mygameEntiy.components.length, 1, 'detachComponentByName正常')
-
+            Entity.removeEntity(mygameEntiy)
             resolve(true)
         })
     })
@@ -55,34 +55,37 @@ const test_02 = () => {
             assert.equal(JSON.stringify(arr), '[121,232,343,454]', 'initComp正常1')
             await mygameEntiy.attachComponent(TestViewComp).setup({ arr: arr, add_value: 10 }).done()
             assert.equal(JSON.stringify(arr), '[131,242,353,464,565,676,787,898]', 'initComp正常2')
+            Entity.removeEntity(mygameEntiy)
             resolve(true)
         })
     })
 }
-let mygameEntiy_003 = Entity.createEntity<GameEntity>(GameEntity)
-let arr_003: number[] = []
-const test_03 = () => {
-    return new Promise((resolve, reject) => {
-        test('挂载组件WaitGroup准备', async () => {
-            let wg: IWaitGroup = { groupResolve: resolve, groupCount: 2, hasDoneCount: 0 }
-            mygameEntiy_003.attachComponent(TestSenceComp).setup({ arr: arr_003, add_value: 10 }).done(wg)
-            mygameEntiy_003.attachComponent(TestViewComp).setup({ arr: arr_003, add_value: 10 }).done(wg)
-        })
+
+
+const testWaitGroup = (mygameEntiy_003: GameEntity, arr_003: number[]) => {
+    return new Promise(async (resolve, reject) => {
+        let wg: IWaitGroup = { groupResolve: resolve, groupCount: 2, hasDoneCount: 0 }
+        mygameEntiy_003.attachComponent(TestSenceComp).setup({ arr: arr_003, add_value: 10 }).done(wg)
+        mygameEntiy_003.attachComponent(TestViewComp).setup({ arr: arr_003, add_value: 10 }).done(wg)
     })
 }
-const test_04 = () => {
+
+const test_03 = () => {
     return new Promise((resolve, reject) => {
-        test('挂载组件WaitGroup完成', async () => {
+        test('挂载组件WaitGroup', async () => {
+            let mygameEntiy_003 = Entity.createEntity<GameEntity>(GameEntity)
+            let arr_003: number[] = []
+            await testWaitGroup(mygameEntiy_003, arr_003)
             assert.equal(JSON.stringify(arr_003), '[131,242,353,464,565,676,787,898]', 'WaitGroup正常')
         })
     })
 }
+
 let functions = [
     test_00,
     test_01,
     test_02,
-    test_03,
-    test_04
+    test_03
 ]
 
 describe('Entity功能', async () => {

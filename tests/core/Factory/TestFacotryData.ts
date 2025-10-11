@@ -1,4 +1,4 @@
-import { BaseFactory, FactoryConfig, IFactory, IFactoryAction } from "../../../packages/core/src/Factory/Factory";
+import { BaseFactory, IFactoryConfig, IFactory, IFactoryAction } from "../../../packages/core/src/Factory/Factory";
 import { IItem, IItemProduceDrive } from "../../../packages/core/src/Factory/Item";
 
 export enum FactoryType {
@@ -156,7 +156,7 @@ export class UnitItemFactory<T extends IItemProduceDrive, TT extends IUnitItem> 
 export class EffectItemFactory<T extends IItemProduceDrive, TT extends IEffectItem> extends BaseFactory<T, TT> {
     name = FactoryType.effectItem;
 }
-export class MyTestFactoryConfig extends FactoryConfig {
+export class MyTestFactoryConfig implements IFactoryConfig {
     [FactoryType.uiItem]: UiItemFactory<TestUiItemProduceDrive, TestUiItem> = (new UiItemFactory<TestUiItemProduceDrive, TestUiItem>()).setItemProduceDrive(new TestUiItemProduceDrive());
     [FactoryType.unitItem]: UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem> = (new UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem>()).setItemProduceDrive(new TestUnitItemProduceDrive());
     [FactoryType.effectItem]: EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem> = (new EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem>()).setItemProduceDrive(new TestEffectItemProduceDrive());

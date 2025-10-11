@@ -1,6 +1,6 @@
-import { FactoryConfig, IFactory } from "./Factory";
+import { IFactoryConfig, IFactory } from "./Factory";
 
-export class FactoryManager<T extends FactoryConfig, TT> {
+export class FactoryManager<T extends IFactoryConfig, TT> {
     private _actions: TT // 快速入口
     private _factorys = new Map<keyof T, IFactory>();
     private _config: T

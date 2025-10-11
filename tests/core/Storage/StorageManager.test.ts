@@ -2,6 +2,7 @@ import { assert, describe, test } from "poku";
 import { StorageManager } from "../../../packages/core/src/Storage/StorageManager";
 import { CryptoManager } from "../../../packages/core/src/Crypto/CryptoManager";
 import { CryptoAES } from "../../../packages/core/src/Crypto/Crypto";
+import CryptoJS from "crypto-js";
 
 const getLocalStorage = () => {
     const LocalStorage = require('node-localstorage').LocalStorage;
@@ -38,7 +39,7 @@ const test_01 = () => {
 const test_02 = () => {
     return new Promise((resolve, reject) => {
         test('测试StorageManager的加密存储', async () => {
-            let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES())
+            let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES(CryptoJS))
             let factoryManager = new StorageManager('xh', getLocalStorage(), cryptoManager)
             factoryManager.origin_set('tt', 'tt001')
             assert.equal(factoryManager.origin_get('tt'), 'tt001', 'origin_set和origin_get正常')
