@@ -1,0 +1,42 @@
+import { IAudioDrive } from "./Audio/AudioDrive"
+import { AudioManager } from "./Audio/AudioManager"
+import { ICrypto } from "./Crypto/Crypto"
+import { CryptoManager } from "./Crypto/CryptoManager"
+import { EventManager } from "./Event/EventManager"
+import { FactoryConfig } from "./Factory/Factory"
+import { FactoryManager } from "./Factory/FactoryManager"
+import { IHttp } from "./Net/Http"
+import { NetManager } from "./Net/NetManager"
+import { ISocket } from "./Net/Socket"
+import { StorageManager } from "./Storage/StorageManager"
+import { TableConfig } from "./Table/Table"
+import { TableManager } from "./Table/TableManager"
+import { INode, IUiDrive } from "./Ui/UiDrive"
+import { UiManager } from "./Ui/UiManager"
+
+export interface IManagers {
+    // table
+    setTableManager(tableManager: TableManager<TableConfig>): void
+    getTableManager(): TableManager<TableConfig>
+    // event
+    setEventManager(eventManager: EventManager): void
+    getEventManager(): EventManager
+    // factory
+    setFactoryManager(factoryManager: FactoryManager<FactoryConfig, any>): void
+    getFactoryManager(): FactoryManager<FactoryConfig, any>
+    // storage
+    setStorageManager(storageManager: StorageManager): void
+    getStorageManager(): StorageManager
+    // crypto
+    setCryptoManager(cryptoManager: CryptoManager<ICrypto>): void
+    getCryptoManager(): CryptoManager<ICrypto>
+    // net
+    setNetManager(netManager: NetManager<IHttp, ISocket>): void
+    getNetManager(): NetManager<IHttp, ISocket>
+    // ui
+    setGuiManager(guiManager: UiManager<IUiDrive, INode>): void
+    getGuiManager(): UiManager<IUiDrive, INode>
+    // audio
+    setAudioManager(audioManager: AudioManager<IAudioDrive>): void
+    getAudioManager(): AudioManager<IAudioDrive>
+}

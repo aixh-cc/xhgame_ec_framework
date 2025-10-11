@@ -1,7 +1,7 @@
 import { BaseModelComp } from "../EC/BaseModelComp"
-import { IUiDrive } from "./UiDrive"
+import { INode, IUiDrive } from "./UiDrive"
 
-export class UiManager<T extends IUiDrive, NT> {
+export class UiManager<T extends IUiDrive, NT extends INode> {
 
     private _uiDrive: T
 
@@ -26,25 +26,14 @@ export class UiManager<T extends IUiDrive, NT> {
 
     toast(msg: string) {
         this._uiDrive.toast(msg)
-        // let item = xhgame.factory.actions.createTextUiItem('toast')
-        // item.content = msg
-        // item.playTime = 1
-        // item.toScene()
     }
 
-    // private loading_ui_item: IUiItem = null
     loading() {
         this._uiDrive.loading()
-        // if (this.loading_ui_item) {
-        //     this.loading_ui_item.toPool()
-        // }
-        // this.loading_ui_item = xhgame.factory.actions.createUiItem('loading_tips_item')
-        // this.loading_ui_item.toScene()
     }
+
     loaded() {
         this._uiDrive.loaded()
-        // this.loading_ui_item.toPool()
-        // this.loading_ui_item = null
     }
 
     private _openingUiids: string[] = []

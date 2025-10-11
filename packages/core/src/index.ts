@@ -35,3 +35,5 @@ export * from './Game/Game';
 // Audio
 export * from './Audio/AudioDrive';
 export * from './Audio/AudioManager';
+// Managers
+export { IManagers } from './Managers';
