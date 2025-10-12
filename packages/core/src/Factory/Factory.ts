@@ -63,11 +63,11 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         item.alive = true
         return item
     }
-    recycleItem(item: TT) {
+    recycleItem(item: IItem) {
         this._itemProduceDrive.removeItem(item) // 销毁肉身
         let itemsPool = this._itemPoolsMap.get(item.itemNo)
         if (itemsPool) {
-            itemsPool.push(item) // 放回灵魂池
+            itemsPool.push(item as TT) // 放回灵魂池
         }
         item.baseAttrReset() // 基础属性(主要为基类使用)
         item.reset() // 抹除灵魂记忆
@@ -128,14 +128,3 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
 export interface IFactoryConfig {
 
 }
-
-// export interface IFactoryAction {
-//     // ui
-//     createUiItem(itemNo: string): IItem
-//     removeUiItem(item: IItem): void
-//     getUiItemFactory(): IFactory
-//     // effect
-//     createEffectItem(itemNo: string): IItem
-//     removeEffectItem(item: IItem): void
-//     getEffectItemFactory(): IFactory
-// }

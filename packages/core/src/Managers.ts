@@ -20,8 +20,8 @@ export interface IManagers {
     setEventManager(eventManager: EventManager): void
     getEventManager(): EventManager
     // factory
-    setFactoryManager(factoryManager: FactoryManager<any, any>): void
-    getFactoryManager(): FactoryManager<any, any>
+    setFactoryManager(factoryManager: FactoryManager<any>): void
+    getFactoryManager(): FactoryManager<any>
     // storage
     setStorageManager(storageManager: StorageManager): void
     getStorageManager(): StorageManager
