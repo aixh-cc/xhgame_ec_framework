@@ -1,7 +1,10 @@
 {
-  "name": "NewProject_6",
+  "name": "xhgame_3d_demo",
   "uuid": "76161922-d749-4845-ba92-88f05cd96539",
   "creator": {
     "version": "3.8.7"
+  },
+  "dependencies": {
+    "@aixh-cc/xhgame_ec_framework": "^1.0"
   }
 }

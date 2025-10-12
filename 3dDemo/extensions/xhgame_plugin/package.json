@@ -1,5 +1,5 @@
 {
-    "name": "vue-element-plus-template",
+    "name": "xhgame_plugin",
     "version": "0.0.0",
     "package_version": 2,
     "type": "module",
@@ -26,14 +26,13 @@
         "vue-tsc": "^2.1.10"
     },
     "contributions": {
-        "menu": [
-            {
-                "path": "i18n:menu.panel/vue-element-plus-template",
-                "label": "i18n:vue-element-plus-template.title",
+        "menu": [{
+                "path": "i18n:menu.panel/xhgame_plugin",
+                "label": "i18n:xhgame_plugin.title",
                 "message": "open"
             },
             {
-                "path": "i18n:menu.panel/vue-element-plus-template",
+                "path": "i18n:menu.panel/xhgame_plugin",
                 "label": "send to panel",
                 "message": "increase"
             }
