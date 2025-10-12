@@ -1,4 +1,4 @@
-import { BaseFactory, IFactoryConfig, IFactory, IFactoryAction } from "../../../packages/core/src/Factory/Factory";
+import { BaseFactory, IFactoryConfig, IFactory } from "../../../packages/core/src/Factory/Factory";
 import { IItem, IItemProduceDrive } from "../../../packages/core/src/Factory/Item";
 
 export enum FactoryType {
@@ -161,23 +161,23 @@ export class MyTestFactoryConfig implements IFactoryConfig {
     [FactoryType.unitItem]: UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem> = (new UnitItemFactory<TestUnitItemProduceDrive, TestUnitItem>()).setItemProduceDrive(new TestUnitItemProduceDrive());
     [FactoryType.effectItem]: EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem> = (new EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem>()).setItemProduceDrive(new TestEffectItemProduceDrive());
 }
-export class MyFactoryAction implements IFactoryAction {
-    createUiItem(itemNo: string): IItem {
-        return new TestUiItem()
-    }
-    removeUiItem(item: IItem): void {
+// export class MyFactoryAction implements IFactoryAction {
+//     createUiItem(itemNo: string): IItem {
+//         return new TestUiItem()
+//     }
+//     removeUiItem(item: IItem): void {
 
-    }
-    getUiItemFactory(): IFactory {
-        return {} as IFactory
-    }
-    createEffectItem(itemNo: string): IItem {
-        return new TestUiItem()
-    }
-    removeEffectItem(item: IItem): void {
+//     }
+//     getUiItemFactory(): IFactory {
+//         return {} as IFactory
+//     }
+//     createEffectItem(itemNo: string): IItem {
+//         return new TestUiItem()
+//     }
+//     removeEffectItem(item: IItem): void {
 
-    }
-    getEffectItemFactory(): IFactory {
-        return {} as IFactory
-    }
-}
+//     }
+//     getEffectItemFactory(): IFactory {
+//         return {} as IFactory
+//     }
+// }

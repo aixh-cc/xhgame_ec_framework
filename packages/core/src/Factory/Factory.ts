@@ -129,13 +129,13 @@ export interface IFactoryConfig {
 
 }
 
-export interface IFactoryAction {
-    // ui
-    createUiItem(itemNo: string): IItem
-    removeUiItem(item: IItem): void
-    getUiItemFactory(): IFactory
-    // effect
-    createEffectItem(itemNo: string): IItem
-    removeEffectItem(item: IItem): void
-    getEffectItemFactory(): IFactory
-}
+// export interface IFactoryAction {
+//     // ui
+//     createUiItem(itemNo: string): IItem
+//     removeUiItem(item: IItem): void
+//     getUiItemFactory(): IFactory
+//     // effect
+//     createEffectItem(itemNo: string): IItem
+//     removeEffectItem(item: IItem): void
+//     getEffectItemFactory(): IFactory
+// }

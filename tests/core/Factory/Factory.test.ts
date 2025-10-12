@@ -1,8 +1,8 @@
 import { assert, describe, test } from "poku";
 import { FactoryManager } from "../../../packages/core/src/Factory/FactoryManager";
-import { FactoryType, MyFactoryAction, MyTestFactoryConfig } from "./TestFacotryData";
+import { FactoryType, MyTestFactoryConfig } from "./TestFacotryData";
 
-let factoryManager = new FactoryManager<MyTestFactoryConfig, MyFactoryAction>(new MyTestFactoryConfig(), new MyFactoryAction())
+let factoryManager = new FactoryManager<MyTestFactoryConfig>(new MyTestFactoryConfig())
 factoryManager.autoRegister()
 
 const test_01 = () => {
