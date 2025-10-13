@@ -104,12 +104,15 @@ class DI {
 }
 
 // 2. 定义Service装饰器
-function autoBindForDI(identifier?: string | symbol) {
+function autoBindForDI(identifier?: string | symbol, isTransient: boolean = false) {
     return function (target: any) {
         // 确保Application容器在装饰器执行时就可用
         const id = identifier || target;
-        // 绑定服务
-        DI.bindSingleton(id, target);
+        if (isTransient) {
+            DI.bindTransient(id, target);
+        } else {
+            DI.bindSingleton(id, target);
+        }
     };
 }
 
