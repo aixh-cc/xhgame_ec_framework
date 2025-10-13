@@ -37,3 +37,5 @@ export * from './Audio/AudioDrive';
 export * from './Audio/AudioManager';
 // Managers
 export { IManagers } from './Managers';
+// DI
+export * from './DI/DI';

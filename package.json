@@ -3,11 +3,15 @@
   "scripts": {
     "test": "bun ./tests/run.test.mjs"
   },
+  "dependencies": {
+    "inversify": "^7.10.2",
+    "reflect-metadata": "^0.2.2"
+  },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "node-localstorage": "^3.0.5",
     "poku": "^3.0.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.9.3"
   }
 }
