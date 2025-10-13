@@ -8,21 +8,7 @@ import { TestGame } from "../../tests/myTestGame/TestGame";
 // import { TestGameManagers } from "../../tests/myTestGame/test/TestGameManagers";
 // import { TestGame } from "../../tests/myTestGame/TestGame";
 
-
-// DI.bind<CocosGameManagers>('GameManagers', CocosGameManagers);
-// DI.bind<TestGameManagers>('GameManagers', new TestGameManagers());
-
-class xhgame<T> {
-    // private static _managers: any = null
-    // static get managers() {
-    //     return DI.make<IManagers>('CocosGameManagers');
-
-    //     return xhgame.getManagers()
-    // }
-    // private static _game: IGame = null
-    static get game() {
-        return this.getGame();
-    }
+class xhgame {
     /**
     * test 时,打开下面的注释 
     * ==== test start ====
@@ -36,13 +22,9 @@ class xhgame<T> {
     // static getGame() {
     //     return this._game as TestGame
     // }
-    /**
-     * ==== test end ====
-     */
-    /**
-     * cocos 时,打开下面的注释 
-     * ==== cocos start ====
-     */
+    // ==== test end ====
+
+    // cocos 时,打开下面的注释  ==== cocos start ====
     static getManagers() {
         return DI.make<IManagers>('IManagers') as TestGameManagers;
         // if (this._managers == null) {
@@ -52,16 +34,11 @@ class xhgame<T> {
     }
     static getGame<T extends IGame>() {
         return DI.make<TestGame>('IGame') as TestGame;
-        // return this._game as CocosGame
     }
-    /**
-     * ==== cocos end ====
-     */
-    // static async initManagers(game: IGame) {
-    //     this._game = game as T
-    //     this.getManagers().init(game.node)
-    // }
-    // 门面
+    // ==== cocos end ====
+    static get game() {
+        return this.getGame();
+    }
     static get gameEntity() {
         return this.getGame().getGameEntity()
     }
@@ -85,7 +62,6 @@ class xhgame<T> {
     static get event() {
         return this.getManagers().getEventManager()
     }
-
     /** 工厂管理 */
     static get factory() {
         return this.getManagers().getFactoryManager()
@@ -102,7 +78,6 @@ class xhgame<T> {
     static get timer() {
         return TimeSystem.getInstance()
     }
-
 }
 
 export { xhgame }

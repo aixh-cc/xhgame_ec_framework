@@ -33,7 +33,6 @@ export class TestGame implements IGame {
     testing: boolean = false
 
     async start() {
-        console.log(DI.isBound('IGame'))
         this.serverNo = 'dev_001'
         this.at_platform = Platform.H5
         const managers = new TestGameManagers()
@@ -48,8 +47,6 @@ export class TestGame implements IGame {
     async init() {
         return new Promise<void>((resolve, reject) => {
             this.setGameEntity(Entity.createEntity<GameEntity>(GameEntity))
-            console.log(xhgame, xhgame.gameEntity, this._gameEntity)
-            console.log(this === DI.make<TestGame>('IGame'))
             const comp = xhgame.gameEntity.attachComponent(LoadResourceViewComp)
             setTimeout(() => {
                 this.tableInit()
