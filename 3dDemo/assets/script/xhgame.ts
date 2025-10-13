@@ -51,7 +51,7 @@ class xhgame<T> {
         // return this._managers as CocosGameManagers
     }
     static getGame<T extends IGame>() {
-        return DI.make<IGame>('IGame') as TestGame;
+        return DI.make<TestGame>('IGame') as TestGame;
         // return this._game as CocosGame
     }
     /**

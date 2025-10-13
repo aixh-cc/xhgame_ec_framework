@@ -1,7 +1,7 @@
 import { TestAudioDrive } from "./drive/TestAudioDrive";
 import { TestUiDrive } from "./drive/TestUiDrive";
 import { MyTableConfig } from "db://assets/script/managers/myTable/MyTableConfig";
-import { CryptoEmpty, CryptoManager, EventManager, FactoryManager, FetchHttp, IManagers, INode, NetManager, StorageManager, Websocket } from "@aixh-cc/xhgame_ec_framework";
+import { CryptoEmpty, CryptoManager, DI, EventManager, FactoryManager, FetchHttp, IManagers, INode, NetManager, StorageManager, Websocket } from "@aixh-cc/xhgame_ec_framework";
 import { MyTestFactoryConfig } from "../MyTestFactoryConfig";
 import { MyFactoryActions } from "db://assets/script/managers/myFactory/MyFactoryActions";
 import { MyAudioManager } from "db://assets/script/managers/MyAudioManager";
@@ -39,6 +39,8 @@ export class TestGameManagers implements IManagers {
         // this.setCryptoManager(new CryptoManager('s', new CryptoEmpty()))
         // this.setAudioManager(new MyAudioManager<TestAudioDrive>(new TestAudioDrive()))
         console.log('构建完成')
+        // let mm = DI.make('mm')
+        // console.log('mm', mm, mm.getDdd())
     }
     guiManager: MyUiManager<TestUiDrive, TestNode>
     setGuiManager(guiManager) {

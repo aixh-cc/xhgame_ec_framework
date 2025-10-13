@@ -27,15 +27,48 @@ class DI {
     }
 
     /**
-     * 绑定服务
+     * 绑定服务（每次创建新实例）
      * @param identifier 服务标识符
      * @param implementation 服务实现
      */
     static bind<T>(identifier: string | symbol | NewableFunction, implementation: any) {
         const container = this.getContainer();
-        container.bind<T>(identifier).to(implementation);
+        // 如果已经绑定，先解绑避免冲突
+        if (container.isBound(identifier)) {
+            container.unbind(identifier);
+        }
+        container.bind<T>(identifier).to(implementation).inTransientScope();;
     }
+    /**
+     * 绑定单例服务（整个应用生命周期内同一实例）
+     */
+    static bindSingleton<T>(
+        identifier: string | symbol | NewableFunction,
+        implementation: any
+    ): void {
+        const container = this.getContainer();
 
+        if (container.isBound(identifier)) {
+            container.unbind(identifier);
+        }
+
+        container.bind<T>(identifier).to(implementation).inSingletonScope();
+    }
+    /**
+     * 绑定服务实例（直接绑定已创建的实例）
+     */
+    static bindInstance<T>(
+        identifier: string | symbol | NewableFunction,
+        instance: T
+    ): void {
+        const container = this.getContainer();
+
+        if (container.isBound(identifier)) {
+            container.unbind(identifier);
+        }
+
+        container.bind<T>(identifier).toConstantValue(instance);
+    }
     /**
      * 获取服务实例
      * @param identifier 服务标识符
@@ -59,6 +92,15 @@ class DI {
     static isBound(identifier: string | symbol | NewableFunction): boolean {
         return this.getContainer().isBound(identifier);
     }
+    /**
+     * 解绑服务
+     */
+    static unbind(identifier: string | symbol | NewableFunction): void {
+        const container = this.getContainer();
+        if (container.isBound(identifier)) {
+            container.unbind(identifier);
+        }
+    }
 }
 
 // 2. 定义Service装饰器
@@ -67,7 +109,7 @@ function autoBindForDI(identifier?: string | symbol) {
         // 确保Application容器在装饰器执行时就可用
         const id = identifier || target;
         // 绑定服务
-        DI.bind(id, target);
+        DI.bindSingleton(id, target);
     };
 }
 

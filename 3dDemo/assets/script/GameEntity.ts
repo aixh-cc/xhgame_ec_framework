@@ -7,6 +7,6 @@ export class GameEntity extends Entity {
     models: Models = null
 
     init(): void {
-        this.models = new Models()
+        // this.models = new Models()
     }
 }

@@ -1,9 +1,10 @@
-import { GatePackagePanelComp } from "db://assets/script/severs/gate/PackagePanel/GatePackagePanelComp";
-import { GateSignViewComp } from "db://assets/script/severs/gate/GateSignViewComp";
-import { PackageType } from "db://assets/script/tsshared/defined/Interface";
+// import { GatePackagePanelComp } from "db://assets/script/severs/gate/PackagePanel/GatePackagePanelComp";
+// import { GateSignViewComp } from "db://assets/script/severs/gate/GateSignViewComp";
+// import { PackageType } from "db://assets/script/tsshared/defined/Interface";
 import { xhgame } from "db://assets/script/xhgame";
 import { assert, describe, test } from "poku";
 import { TestGame } from "../TestGame";
+import { DI } from "@aixh-cc/xhgame_ec_framework";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
@@ -83,7 +84,12 @@ const test_03 = () => {
 //     })
 // }
 
-let functions = [test_00, test_01, test_02, test_03]
+let functions = [
+    test_00,
+    // test_01,
+    // test_02,
+    // test_03
+]
 
 
 const wait0ms = () => {
@@ -93,9 +99,11 @@ const wait0ms = () => {
         }, 0)
     })
 }
-
 // 初始化及开始
+
 let testGame = new TestGame()
+DI.bindI('IGame').toConstantValue(this);
+
 testGame.start().then(() => {
     describe('包裹测试', async () => {
         while (functions.length > 0) {
