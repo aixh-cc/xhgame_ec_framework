@@ -1,7 +1,7 @@
 
 import { IGame, TimeSystem } from "@aixh-cc/xhgame_ec_framework";
-import { CocosGameManagers } from "db://assets/script/cocos/CocosGameManagers";
-import { CocosGame } from "db://assets/script/CocosGame";
+import { CocosGameManagers } from "./CocosGameManagers";
+import { CocosGame } from "./CocosGame";
 // import { TestGameManagers } from "../../tests/myTestGame/test/TestGameManagers";
 // import { TestGame } from "../../tests/myTestGame/TestGame";
 
