@@ -6,6 +6,7 @@ import { MyNetManager } from "./managers/MyNetManager";
 import { MyFactoryManager } from "./managers/MyFactoryManager";
 import { MyTableManager } from "./managers/MyTableManager";
 import { MyEventManager } from "./managers/MyEventManager";
+import { xhgame } from "./xhgame";
 
 export class CocosGameManagers implements IManagers {
     node: Node
@@ -20,7 +21,7 @@ export class CocosGameManagers implements IManagers {
         this.setTableManager(this.getTables())
         this.setFactoryManager(this.getFactorys())
         this.setNetManager(new MyNetManager())
-        this.setGuiManager(new MyUiManager<CocosUiDrive, Node>(this.node.getChildByName('UICanvas').addComponent(CocosUiDrive)))
+        this.setGuiManager(new MyUiManager())
         this.setStorageManager(new StorageManager('xhgame', sys.localStorage))
         // this.setCameraManager(new CameraManager(new UICamera(), new UICamera()))
         this.setCryptoManager(new CryptoManager('s', new CryptoEmpty()))
@@ -28,20 +29,20 @@ export class CocosGameManagers implements IManagers {
         this.setAudioManager(new MyAudioManager<CocosAudioDrive>(this.node.addComponent(CocosAudioDrive)))
     }
     getTables() {
-        let tableManager = new MyTableManager<MyTableConfig>(new MyTableConfig())
+        let tableManager = new MyTableManager()
         tableManager.autoRegister()
         return tableManager
     }
     getFactorys() {
-        let factoryManager = new MyFactoryManager<MyCocosFactoryConfig>(new MyCocosFactoryConfig())
+        let factoryManager = new MyFactoryManager()
         factoryManager.autoRegister()
         return factoryManager
     }
-    guiManager: MyUiManager<CocosUiDrive, Node>
+    guiManager: MyUiManager
     setGuiManager(guiManager) {
         this.guiManager = guiManager
     }
-    getGuiManager(): MyUiManager<CocosUiDrive, Node> {
+    getGuiManager(): MyUiManager {
         return this.guiManager
     }
     cryptoManager: CryptoManager<CryptoEmpty>
@@ -59,19 +60,19 @@ export class CocosGameManagers implements IManagers {
         return this.audioManager
     }
     // table
-    tableManager: MyTableManager<MyTableConfig>
-    setTableManager(tableManager: MyTableManager<MyTableConfig>) {
+    tableManager: MyTableManager
+    setTableManager(tableManager: MyTableManager) {
         this.tableManager = tableManager
     }
-    getTableManager(): MyTableManager<MyTableConfig> {
+    getTableManager(): MyTableManager {
         return this.tableManager
     }
     // factory
-    factoryManager: MyFactoryManager<MyCocosFactoryConfig>
-    setFactoryManager(factoryManager: MyFactoryManager<MyCocosFactoryConfig>) {
+    factoryManager: MyFactoryManager
+    setFactoryManager(factoryManager: MyFactoryManager) {
         this.factoryManager = factoryManager
     }
-    getFactoryManager(): MyFactoryManager<MyCocosFactoryConfig> {
+    getFactoryManager(): MyFactoryManager {
         return this.factoryManager
     }
     // 

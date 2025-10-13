@@ -1,6 +1,12 @@
-import { INode, IUiDrive, UiManager } from "@aixh-cc/xhgame_ec_framework"
+import { DI, INode, IUiDrive, UiManager } from "@aixh-cc/xhgame_ec_framework"
 
-export class MyUiManager<T extends IUiDrive, NT extends INode> extends UiManager<T, NT> {
+export class MyUiManager extends UiManager<IUiDrive, INode> {
+
+    constructor() {
+        let uiDrive = DI.make<IUiDrive>('IUiDrive')
+        super(uiDrive)
+    }
+
     get enums() {
         return UIEnums
     }

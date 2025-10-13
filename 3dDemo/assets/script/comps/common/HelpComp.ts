@@ -4,7 +4,7 @@ import { xhgame } from "../../xhgame"
 import { BaseModelComp } from "@aixh-cc/xhgame_ec_framework"
 import { HelpChatViewComp, IHelpChatView } from "./HelpChatViewComp"
 import { HelpGuideComp, IHelpGuideViewVM } from "./HelpGuideComp"
-import { BattleGameBoxComp } from "../battle/BattleGameBoxComp"
+// import { BattleGameBoxComp } from "../battle/BattleGameBoxComp"
 
 export class HelpSystem extends System {
 
@@ -36,10 +36,9 @@ export class HelpSystem extends System {
                     items: helpItem.chatItems,
                     onComplete: () => {
                         comp.resolveCallback && comp.resolveCallback(true)
-                        const battleGameBoxComp = xhgame.gameEntity.getComponent(BattleGameBoxComp)
-                        battleGameBoxComp.gameBox.resume()
+                        // const battleGameBoxComp = xhgame.gameEntity.getComponent(BattleGameBoxComp)
+                        // battleGameBoxComp.gameBox.resume()
 
-                        xhgame.event.emit()
                         xhgame.gameEntity.detachComponent(HelpChatViewComp)
                         resolve(true)
                     }
@@ -58,8 +57,8 @@ export class HelpSystem extends System {
                     items: helpItem.guideItems,
                     onComplete: () => {
                         comp.resolveCallback && comp.resolveCallback(true)
-                        const battleGameBoxComp = xhgame.gameEntity.getComponent(BattleGameBoxComp)
-                        battleGameBoxComp.gameBox.resume()
+                        // const battleGameBoxComp = xhgame.gameEntity.getComponent(BattleGameBoxComp)
+                        // battleGameBoxComp.gameBox.resume()
                         xhgame.gameEntity.detachComponent(HelpGuideComp)
                     }
                 })
@@ -74,8 +73,8 @@ export class HelpSystem extends System {
             let str = eventName + JSON.stringify(eventObj)
             if (comp.strNames.indexOf(str) > -1) {
                 console.log('comp.resolveCallback = resolve')
-                const battleGameBoxComp = xhgame.gameEntity.getComponent(BattleGameBoxComp)
-                battleGameBoxComp.gameBox.pause()
+                // const battleGameBoxComp = xhgame.gameEntity.getComponent(BattleGameBoxComp)
+                // battleGameBoxComp.gameBox.pause()
                 comp.resolveCallback = resolve
             } else {
                 resolve(true) // 没有直接返回

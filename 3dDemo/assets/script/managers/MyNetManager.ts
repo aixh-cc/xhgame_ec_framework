@@ -1,4 +1,4 @@
-import { NetManager, Websocket } from "@aixh-cc/xhgame_ec_framework"
+import { FetchHttp, NetManager, Websocket } from "@aixh-cc/xhgame_ec_framework"
 import { TsrpcHttp } from "../../../extensions/xhgame_plugin/assets/net/TsrpcHttp"
 
 export class MyNetManager extends NetManager<TsrpcHttp, Websocket> {
@@ -11,7 +11,8 @@ export class MyNetManager extends NetManager<TsrpcHttp, Websocket> {
     }
 }
 
-enum ApiEnums {
+
+export enum ApiEnums {
     GetRoomList = 'atHall/GetRoomList',
     EnterRoom = 'atHall/EnterRoom',
     //

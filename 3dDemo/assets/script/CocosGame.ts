@@ -6,12 +6,13 @@ import { BYTEDANCE, DEBUG, WECHAT } from "cc/env";
 // import { PlayerLoginComp } from "./severs/player/PlayerLoginComp";
 // import { BattleGameBoxComp } from "./severs/battle/BattleGameBoxComp";
 // import { SdkComp } from "./severs/common/SdkComp";
-import { Entity, IGame, IWaitGroup, Platform, TimeSystem } from "@aixh-cc/xhgame_ec_framework";
+import { DI, Entity, IGame, IWaitGroup, Platform, TimeSystem } from "@aixh-cc/xhgame_ec_framework";
 import { Game, Component, assetManager, game, director, profiler, _decorator } from "cc";
 import { LoadResourceView } from "./cocos/view/ui/LoadResourceView";
 import { IConfigTableItem } from "./managers/myTable/tables/ConfigTable";
 import { LoadResourceViewComp } from "./comps/enter/LoadResourceViewComp";
 import { GameEnterComp } from "./comps/enter/GameEnterComp";
+import { CocosGameManagers } from "./CocosGameManagers";
 
 const { ccclass, property } = _decorator;
 @ccclass('CocosGame')
@@ -40,7 +41,10 @@ export class CocosGame extends Component implements IGame {
             this.serverNo = 'dev_001' // 0
             this.at_platform = Platform.H5
         }
-        xhgame.initManagers(this)
+        const managers = new CocosGameManagers()
+        DI.bind('IGame', this)
+        DI.bind('IManagers', managers)
+        managers.init(this.node)
         await this.init()
         await this.play()
         console.log('等待玩家操作')

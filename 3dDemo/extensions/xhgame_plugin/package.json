@@ -10,7 +10,9 @@
     },
     "dependencies": {
         "element-plus": "^2.8.6",
-        "vue": "^3.4.37"
+        "vue": "^3.4.37",
+        "tsrpc-browser": "^3.4.1",
+        "tsrpc-miniapp": "^3.4.1"
     },
     "devDependencies": {
         "@cocos-fe/vite-plugin-cocos-panel": "^1.0.3",
