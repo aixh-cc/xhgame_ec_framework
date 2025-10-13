@@ -59,7 +59,7 @@ test('测试DI', async () => {
     assert.equal(res_sms, 'SmsService: Sending 13500001111: hello', '获取SmsService实例正常')
 
     // 手动绑定
-    DI.bind<UserController>('UserController', UserController);
+    DI.bindTransient<UserController>('UserController', UserController);
     const controller = DI.make<UserController>('UserController');
     assert.equal(DI.isBound('UserController'), true, '手动绑定正常')
     const result = await controller.sendUserSms(11);
@@ -69,7 +69,7 @@ test('测试DI', async () => {
 
     // 手动重新绑
     DI.unbind('SmsService')
-    DI.bind<ISmsService>('SmsService', SmsService);
+    DI.bindTransient<ISmsService>('SmsService', SmsService);
     const smsServiceTwo = DI.make<ISmsService>('SmsService');
     // 是否是同一个实例
     assert.equal(controller.getSmsService() === smsServiceTwo, false, '不是同一个实例正确')
@@ -79,7 +79,7 @@ test('测试DI', async () => {
     DI.bindSingleton<ISmsService>('SmsService', SmsService);
     const smsServiceThree = DI.make<ISmsService>('SmsService');
     // 重新手动绑定(这次的SmsService,因为上面的绑定时是同一实例,所以相同)
-    DI.bind<UserController>('UserController', UserController);
+    DI.bindTransient<UserController>('UserController', UserController);
     const controllerThree = DI.make<UserController>('UserController');
     assert.equal(controllerThree.getSmsService() === smsServiceThree, true, 'DI.bindSingleton同一个实例正确')
 
@@ -88,7 +88,7 @@ test('测试DI', async () => {
     DI.bindInstance<ISmsService>('SmsService', new SmsService());
     const smsServiceFour = DI.make<ISmsService>('SmsService');
     // 重新手动绑定(这次的SmsService,因为上面的绑定时是同一实例,所以相同)
-    DI.bind<UserController>('UserController', UserController);
+    DI.bindTransient<UserController>('UserController', UserController);
     const controllerFour = DI.make<UserController>('UserController');
     assert.equal(controllerFour.getSmsService() === smsServiceFour, true, 'DI.bindInstance同一个实例正确')
 

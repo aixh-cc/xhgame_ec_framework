@@ -21,7 +21,7 @@ export class CocosAudioDrive extends Component implements IAudioDrive {
         var music = new Node("MusicNode");
         music.parent = node;
         this.music = effect.addComponent(AudioMusic);
-        DI.bind('AudioDrive', this)
+        DI.bindInstance('AudioDrive', this)
     }
     protected start(): void {
         // 

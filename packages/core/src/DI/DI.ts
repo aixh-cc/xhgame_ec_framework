@@ -31,7 +31,7 @@ class DI {
      * @param identifier 服务标识符
      * @param implementation 服务实现
      */
-    static bind<T>(identifier: string | symbol | NewableFunction, implementation: any) {
+    static bindTransient<T>(identifier: string | symbol | NewableFunction, implementation: any) {
         const container = this.getContainer();
         // 如果已经绑定，先解绑避免冲突
         if (container.isBound(identifier)) {

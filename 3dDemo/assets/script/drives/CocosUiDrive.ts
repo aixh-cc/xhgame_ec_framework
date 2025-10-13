@@ -115,7 +115,7 @@ export class CocosUiDrive extends Component implements IUiDrive {
 
     onLoad() {
         this.init();
-        DI.bind('IUiDrive', this)
+        DI.bindInstance('IUiDrive', this)
     }
 
     /** 初始化引擎 */

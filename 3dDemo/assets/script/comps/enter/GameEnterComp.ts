@@ -8,9 +8,9 @@ export class GameEnterSystem extends System {
     static async initComp(comp: GameEnterComp) {
         return new Promise<void>(async (resolve, reject) => {
             await xhgame.gameEntity.attachComponent(SdkComp).done()
-            let wg: IWaitGroup = { groupResolve: resolve, groupCount: 3, hasDoneCount: 0 }
-            xhgame.gameEntity.attachComponent(PlayerLoginComp).done(wg)
-            xhgame.gameEntity.attachComponent(GateSenceComp).done(wg)
+            let wg: IWaitGroup = { groupResolve: resolve, groupCount: 1, hasDoneCount: 0 }
+            // xhgame.gameEntity.attachComponent(PlayerLoginComp).done(wg)
+            // xhgame.gameEntity.attachComponent(GateSenceComp).done(wg)
             xhgame.gameEntity.attachComponent(HelpComp).done(wg)
         })
     }

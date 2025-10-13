@@ -102,8 +102,6 @@ const wait0ms = () => {
 // 初始化及开始
 
 let testGame = new TestGame()
-DI.bindI('IGame').toConstantValue(this);
-
 testGame.start().then(() => {
     describe('包裹测试', async () => {
         while (functions.length > 0) {
