@@ -33,7 +33,7 @@ export class TestGameManagers implements IManagers {
         this.setTableManager(getTables())
         this.setFactoryManager(this.getFactorys())
         this.setNetManager(new MyTestNetManager())
-        // this.setGuiManager(new MyUiManager<TestUiDrive, TestNode>(new TestUiDrive()))
+        this.setGuiManager(new MyUiManager())
         // this.setStorageManager(new StorageManager('xhgame', getLocalStorage()))
         // // this.setCameraManager(new CameraManager(new UICamera(), new UICamera()))
         // this.setCryptoManager(new CryptoManager('s', new CryptoEmpty()))
@@ -42,11 +42,11 @@ export class TestGameManagers implements IManagers {
         // let mm = DI.make('mm')
         // console.log('mm', mm, mm.getDdd())
     }
-    guiManager: MyUiManager<TestUiDrive, TestNode>
+    guiManager: MyUiManager
     setGuiManager(guiManager) {
         this.guiManager = guiManager
     }
-    getGuiManager(): MyUiManager<TestUiDrive, TestNode> {
+    getGuiManager(): MyUiManager {
         return this.guiManager
     }
     cryptoManager: CryptoManager<CryptoEmpty>

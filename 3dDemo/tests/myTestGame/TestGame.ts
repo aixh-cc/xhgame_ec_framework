@@ -40,7 +40,9 @@ export class TestGame implements IGame {
         DI.bindInstance('IManagers', managers)
         managers.init(this.node)
         await this.init()
+        console.log('init over')
         await this.play()
+        console.log('play over')
         console.log('等待玩家操作')
     }
 
@@ -60,10 +62,8 @@ export class TestGame implements IGame {
     }
 
     async play(): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            xhgame.timer.timePlay()
-            await xhgame.gameEntity.attachComponent(GameEnterComp).done()
-        })
+        xhgame.timer.timePlay()
+        await xhgame.gameEntity.attachComponent(GameEnterComp).done()
     }
 
     tableInit() {

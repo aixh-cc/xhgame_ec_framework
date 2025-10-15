@@ -96,6 +96,7 @@ export abstract class Comp {
         });
     }
 }
+// @todo 待删除 采用原生的 await Promise.all就可以
 export interface IWaitGroup {
     groupResolve: Function,
     groupCount: number,
