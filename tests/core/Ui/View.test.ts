@@ -11,17 +11,28 @@ const test_00 = () => {
             let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
             let testViewComp = await mygameEntiy.attachComponent(TestViewComp).done() as TestViewComp
             let testView = new TestView()
-            assert.equal(testView.tips, 'tips_default', '原默认正确')
+            assert.equal(testView.tips, 'tips_default', 'testView.tips原默认正确')
+            assert.equal(testView.personAge, 0, 'testView.personAge原默认正确')
+            assert.equal(testView.personBooks.length, 0, 'testView.personBooks原默认正确')
             testView.setViewComp(testViewComp)
-            testView.bindModelMap = {
-                "tips": 'TestViewComp::tips'
-            }
             testViewComp.notify()
-            assert.equal(testView.tips, 'tips_TestViewComp', 'testViewComp.notify后正确')
+            assert.equal(testView.tips, 'tips_TestViewComp', 'testViewComp.notify后testView.tips正确')
+            assert.equal(testView.personAge, 0, 'testViewComp.notify后testView.personAge正确')
+            assert.equal(testView.personBooks.length, 0, 'testViewComp.notify后testView.personBooks正确')
             testViewComp.tips = 'sss'
+            testViewComp.viewVM = {
+                person: {
+                    name: '张三',
+                    age: 23,
+                    books: ['j', 'k']
+                }
+            };
             testViewComp.notify()
-            assert.equal(testView.tips, 'sss', '修改后，再次testViewComp.notify后正确')
-            // console.log(DI.getContainer().getAll('TestViewComp'))
+            assert.equal(testView.tips, 'sss', '再次testViewComp.notify后testView.tips正确')
+            assert.equal(testView.personAge, 23, '再次testViewComp.notify后testView.personAge正确')
+            assert.equal(testView.personName, '张三', '再次testViewComp.notify后testView.personName正确')
+            assert.equal(JSON.stringify(testView.personBooks), '["j","k"]', '再次testViewComp.notify后testView.personBooks正确')
+
         })
     })
 }

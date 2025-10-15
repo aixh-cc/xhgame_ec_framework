@@ -7,11 +7,31 @@ import { DI, autoBindForDI, inject } from "../../../packages/core/src/DI/DI";
 export class TestView extends BaseView {
     name: string = 'TestView'
     tips: string = 'tips_default'
+    personName: string = ''
+    personAge: number = 0
+    personBooks: string[] = []
     reset(): void {
-
+        this.tips = ''
+        this.personAge = 0
+        this.personBooks = []
+    }
+    onLoad() {
+        this.bindModelMap = {
+            "tips": 'TestViewComp::tips',
+            "personName": 'TestViewComp::viewVM.person.name',
+            "personAge": 'TestViewComp::viewVM.person.age',
+            "personBooks": 'TestViewComp::viewVM.person.books',
+        }
+    }
+    constructor() {
+        super()
+        this.onLoad()
     }
 }
 
+interface ITestViewVM {
+    person: { name: string, age: number, books: string[] }
+}
 
 @autoBindForDI('TestViewComp')
 export class TestViewComp extends BaseModelComp {
@@ -19,12 +39,14 @@ export class TestViewComp extends BaseModelComp {
     initBySystems: (typeof System)[] = []
 
     tips: string = 'tips_TestViewComp'
+    viewVM: ITestViewVM | null = null
 
     actions = {
 
     }
     reset() {
         this.tips = 'wwww'
+        this.viewVM = null
     }
     onDetach() {
 
