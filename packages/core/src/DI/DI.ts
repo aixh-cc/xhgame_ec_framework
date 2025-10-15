@@ -80,7 +80,7 @@ class DI {
             const instance = container.get<T>(identifier);
             return instance;
         } catch (error) {
-            console.error(`Application.make: Failed to resolve ${idStr}`, error);
+            console.error(`DI.make: Failed to resolve ${idStr}`, error);
             throw error;
         }
     }
