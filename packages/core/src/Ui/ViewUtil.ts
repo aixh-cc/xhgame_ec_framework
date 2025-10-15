@@ -2,9 +2,7 @@ import { DI } from "../DI/DI";
 import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
 import { IView } from "./View";
 
-
 export class ViewUtil {
-
     static bindAttr(observer: IObserver, bindAttrMap: any) {
         let keys = Object.keys(bindAttrMap);
         for (let key of keys) {
