@@ -8,12 +8,12 @@ const { ccclass, property } = _decorator;
 export abstract class BaseView extends Component implements IObserver {
     abstract reset(): void
 
-    private _bindModelMap: Object = null
-    get bindModelMap() {
-        return this._bindModelMap
+    private _bindAttrMap: Object = null
+    get bindAttrMap() {
+        return this._bindAttrMap
     }
-    set bindModelMap(val) {
-        this._bindModelMap = val
+    set bindAttrMap(val) {
+        this._bindAttrMap = val
         if (xhgame.game && val) {
             let keys = Object.keys(val);
             let compNames: string[] = []
@@ -71,12 +71,12 @@ export abstract class BaseView extends Component implements IObserver {
         }
     }
     updateBySubject(modelComp: BaseModelComp) {
-        if (this._bindModelMap == null) {
+        if (this._bindAttrMap == null) {
             return
         }
-        let keys = Object.keys(this.bindModelMap);
+        let keys = Object.keys(this.bindAttrMap);
         for (let key of keys) {
-            let vals: string = this.bindModelMap[key];
+            let vals: string = this.bindAttrMap[key];
             if (vals.indexOf(modelComp.compName + '::') === -1) {
                 continue; // 如果不在这个 modelComp 内，跳过
             }

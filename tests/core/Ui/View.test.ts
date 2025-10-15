@@ -2,8 +2,6 @@ import { assert, describe, test } from "poku";
 import { TestView, TestViewComp } from "./TestUiData";
 import { Entity } from "../../../packages/core/src/EC/Entity";
 import { GameEntity } from "../EC/TestECData";
-import { DI } from "../../../packages/core/src/DI/DI";
-
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {

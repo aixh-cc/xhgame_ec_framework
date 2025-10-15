@@ -44,7 +44,7 @@ export class GateStorePanelView extends BaseView implements IGateStorePanelViewV
     }
 
     protected onLoad(): void {
-        this.bindModelMap = {
+        this.bindAttrMap = {
             "gold": 'PlayerModelComp::playerInfo.gold',
             "diamond": 'PlayerModelComp::playerInfo.diamond',
         }
@@ -68,4 +68,3 @@ vm.num = 100
 // 放置到场景上
 uiItem.toScene()
 ```
-

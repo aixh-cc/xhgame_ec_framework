@@ -2,7 +2,7 @@ import { BaseModelComp } from "../../../packages/core/src/EC/BaseModelComp"
 import { System } from "../../../packages/core/src/EC/System"
 import { BaseView } from "../../../packages/core/src/Ui/BaseView"
 import { INode, IUiDrive } from "../../../packages/core/src/Ui/UiDrive"
-import { DI, autoBindForDI, inject } from "../../../packages/core/src/DI/DI";
+import { autoBindForDI } from "../../../packages/core/src/DI/DI";
 
 export class TestView extends BaseView {
     name: string = 'TestView'
@@ -16,12 +16,12 @@ export class TestView extends BaseView {
         this.personBooks = []
     }
     onLoad() {
-        this.bindModelMap = {
+        this.setBindAttrMap({
             "tips": 'TestViewComp::tips',
             "personName": 'TestViewComp::viewVM.person.name',
             "personAge": 'TestViewComp::viewVM.person.age',
             "personBooks": 'TestViewComp::viewVM.person.books',
-        }
+        })
     }
     constructor() {
         super()
