@@ -1,15 +1,30 @@
 import { BaseModelComp } from "../../../packages/core/src/EC/BaseModelComp"
 import { System } from "../../../packages/core/src/EC/System"
+import { BaseView } from "../../../packages/core/src/Ui/BaseView"
 import { INode, IUiDrive } from "../../../packages/core/src/Ui/UiDrive"
+import { DI, autoBindForDI, inject } from "../../../packages/core/src/DI/DI";
 
+export class TestView extends BaseView {
+    name: string = 'TestView'
+    tips: string = 'tips_default'
+    reset(): void {
+
+    }
+}
+
+
+@autoBindForDI('TestViewComp')
 export class TestViewComp extends BaseModelComp {
-    compName: string = 'BattleOverViewComp'
+    compName: string = 'TestViewComp'
     initBySystems: (typeof System)[] = []
+
+    tips: string = 'tips_TestViewComp'
+
     actions = {
 
     }
     reset() {
-
+        this.tips = 'wwww'
     }
     onDetach() {
 

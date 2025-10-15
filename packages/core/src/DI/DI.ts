@@ -80,11 +80,21 @@ class DI {
             const instance = container.get<T>(identifier);
             return instance;
         } catch (error) {
-            console.error(`DI.make: Failed to resolve ${idStr}`, error);
-            throw error;
+            // console.error(`DI.make: Failed to resolve ${idStr}`, error);
+            // throw error;
+            return null
         }
     }
-
+    /**
+     * 安全获取服务实例（如果未绑定返回null）
+     */
+    static safeMake<T>(identifier: string | symbol | NewableFunction): T | null {
+        try {
+            return this.make<T>(identifier);
+        } catch {
+            return null;
+        }
+    }
     /**
      * 检查服务是否已绑定
      * @param identifier 服务标识符

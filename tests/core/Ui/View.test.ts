@@ -1,18 +1,33 @@
 import { assert, describe, test } from "poku";
-import { BaseView } from "../../../packages/core/src/Ui/BaseView";
-
-class GateView extends BaseView {
-    name: string = 'GateView'
-    reset(): void {
-
-    }
-}
+import { TestView, TestViewComp } from "./TestUiData";
+import { Entity } from "../../../packages/core/src/EC/Entity";
+import { GameEntity } from "../EC/TestECData";
+import { DI } from "../../../packages/core/src/DI/DI";
 
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试View功能', async () => {
-            let gateView = new GateView()
+
+            let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
+            let arr: number[] = []
+            let testViewComp = await mygameEntiy.attachComponent(TestViewComp).done() as TestViewComp
+            // console.log(testViewComp)
+            let testView = new TestView()
+            console.log('TestView 默认的tips=', testView.tips)
+            testView.setViewComp(testViewComp)
+
+            testView.bindModelMap = {
+                "tips": 'TestViewComp::tips'
+            }
+            testViewComp.notify()
+            console.log('testViewComp.notify 后，testView.tips值为：', testView.tips)
+
+            testViewComp.tips = 'sss'
+            testViewComp.notify()
+            console.log(' sss 后 testViewComp.notify 后，testView.tips值为：', testView.tips)
+
+            console.log(testView.tips)
 
         })
     })

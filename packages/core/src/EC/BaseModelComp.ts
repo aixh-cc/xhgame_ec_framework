@@ -1,3 +1,4 @@
+import { DI } from "../DI/DI";
 import { Comp } from "./Comp";
 /**
  * 组件
@@ -6,7 +7,7 @@ export abstract class BaseModelComp extends Comp implements ISubject {
     compName: string;
     abstract reset(): void
     onAttach() {
-
+        DI.bindInstance(this.compName, this)
     }
     abstract onDetach(): void
     /**
@@ -26,6 +27,7 @@ export abstract class BaseModelComp extends Comp implements ISubject {
         }
         // observer.subjectModelComps.push(this)
         this._viewObservers.push(observer);
+        // console.log(this.compName + '的this._viewObservers', this._viewObservers)
     }
     detachObserver(observer: IObserver): void {
         const observerIndex = this._viewObservers.indexOf(observer);
@@ -36,7 +38,7 @@ export abstract class BaseModelComp extends Comp implements ISubject {
     }
     // todo 下一帧生效
     notify(): void {
-        // console.log('ModelSubject notify', this.observers)
+        // console.log(this.compName + '，开始notify', this._viewObservers)
         for (const _viewObserver of this._viewObservers) {
             _viewObserver.updateBySubject(this);
         }
