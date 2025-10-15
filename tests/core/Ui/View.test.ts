@@ -8,27 +8,20 @@ import { DI } from "../../../packages/core/src/DI/DI";
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试View功能', async () => {
-
             let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
-            let arr: number[] = []
             let testViewComp = await mygameEntiy.attachComponent(TestViewComp).done() as TestViewComp
-            // console.log(testViewComp)
             let testView = new TestView()
-            console.log('TestView 默认的tips=', testView.tips)
+            assert.equal(testView.tips, 'tips_default', '原默认正确')
             testView.setViewComp(testViewComp)
-
             testView.bindModelMap = {
                 "tips": 'TestViewComp::tips'
             }
             testViewComp.notify()
-            console.log('testViewComp.notify 后，testView.tips值为：', testView.tips)
-
+            assert.equal(testView.tips, 'tips_TestViewComp', 'testViewComp.notify后正确')
             testViewComp.tips = 'sss'
             testViewComp.notify()
-            console.log(' sss 后 testViewComp.notify 后，testView.tips值为：', testView.tips)
-
-            console.log(testView.tips)
-
+            assert.equal(testView.tips, 'sss', '修改后，再次testViewComp.notify后正确')
+            // console.log(DI.getContainer().getAll('TestViewComp'))
         })
     })
 }
