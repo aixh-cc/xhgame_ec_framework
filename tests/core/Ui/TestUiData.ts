@@ -1,6 +1,6 @@
 import { BaseModelComp } from "../../../packages/core/src/EC/BaseModelComp"
 import { System } from "../../../packages/core/src/EC/System"
-import { BaseView } from "../../../packages/core/src/Ui/BaseView"
+import { BaseView } from "../../../packages/core/src/Ui/View"
 import { INode, IUiDrive } from "../../../packages/core/src/Ui/UiDrive"
 import { autoBindForDI } from "../../../packages/core/src/DI/DI";
 

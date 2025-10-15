@@ -1,6 +1,6 @@
 import { DI } from "../DI/DI";
 import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
-import { IView } from "./BaseView";
+import { IView } from "./View";
 
 
 export class ViewUtil {
@@ -34,6 +34,9 @@ export class ViewUtil {
     }
     static updateByModel(modelComp: BaseModelComp, observer: IView) {
         let bindAttrMap = observer.getBindAttrMap()
+        if (bindAttrMap == null) {
+            return
+        }
         let keys = Object.keys(bindAttrMap);
         for (let key of keys) {
             let _bindAttrLink: string = bindAttrMap[key];

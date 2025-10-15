@@ -30,6 +30,7 @@ export * from './Net/NetManager';
 // Ui
 export * from './Ui/UiDrive';
 export * from './Ui/UiManager';
+export * from './Ui/UiManager';
 // Game
 export * from './Game/Game';
 // Audio

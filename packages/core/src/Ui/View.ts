@@ -1,7 +1,7 @@
 import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
 import { ViewUtil } from "./ViewUtil";
 
-export interface IView {
+export interface IView extends IObserver {
     setViewComp(modelComp: BaseModelComp): void
     getViewComp(): BaseModelComp
     closeView(): void
@@ -10,7 +10,7 @@ export interface IView {
     updateBySubject(modelComp: BaseModelComp): void
 }
 
-export abstract class BaseView implements IObserver, IView {
+export abstract class BaseView implements IView {
     abstract name: string;
     abstract reset(): void
     /** 当前视图关联的modelComp ，todo 改为ControllerComp */
@@ -40,9 +40,6 @@ export abstract class BaseView implements IObserver, IView {
         }
     }
     updateBySubject(modelComp: BaseModelComp) {
-        if (this._bindAttrMap == null) {
-            return
-        }
         ViewUtil.updateByModel(modelComp, this)
     }
 
