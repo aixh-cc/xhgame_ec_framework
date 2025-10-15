@@ -1,10 +1,10 @@
 import { BaseModelComp } from "../../../packages/core/src/EC/BaseModelComp"
 import { System } from "../../../packages/core/src/EC/System"
-import { BaseView } from "../../../packages/core/src/Ui/View"
+import { SimpleBaseView } from "../../../packages/core/src/Ui/View"
 import { INode, IUiDrive } from "../../../packages/core/src/Ui/UiDrive"
 import { autoBindForDI } from "../../../packages/core/src/DI/DI";
 
-export class TestView extends BaseView {
+export class TestView extends SimpleBaseView {
     name: string = 'TestView'
     tips: string = 'tips_default'
     personName: string = ''

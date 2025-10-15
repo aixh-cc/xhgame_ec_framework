@@ -10,7 +10,7 @@ export interface IView extends IObserver {
     updateBySubject(modelComp: BaseModelComp): void
 }
 
-export abstract class BaseView implements IView {
+export abstract class SimpleBaseView implements IView {
     abstract name: string;
     abstract reset(): void
     /** 当前视图关联的modelComp ，todo 改为ControllerComp */
