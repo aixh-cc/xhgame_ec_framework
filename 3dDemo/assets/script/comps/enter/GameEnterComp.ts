@@ -26,10 +26,6 @@ export class GameEnterSystem extends System {
             // await xhgame.gameEntity.attachComponent(PlayerLoginComp).done(),
             await xhgame.gameEntity.attachComponent(HelpComp).done()
         ])
-        // let wg: IWaitGroup = { groupResolve: resolve, groupCount: 1, hasDoneCount: 0 }
-        // // xhgame.gameEntity.attachComponent(PlayerLoginComp).done(wg)
-        // // xhgame.gameEntity.attachComponent(GateSenceComp).done(wg)
-        // xhgame.gameEntity.attachComponent(HelpComp).done(wg)
     }
 }
 

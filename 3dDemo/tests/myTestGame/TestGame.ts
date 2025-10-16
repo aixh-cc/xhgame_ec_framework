@@ -1,4 +1,4 @@
-import { DI, Entity, IGame, IWaitGroup, Platform } from "@aixh-cc/xhgame_ec_framework";
+import { DI, Entity, IGame, Platform } from "@aixh-cc/xhgame_ec_framework";
 import { TestGameManagers, TestNode } from "./test/TestGameManagers";
 import { GameEntity } from "db://assets/script/GameEntity";
 import { IConfigTableItem } from "db://assets/script/managers/myTable/tables/ConfigTable";

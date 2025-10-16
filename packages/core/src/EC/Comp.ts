@@ -81,24 +81,12 @@ export abstract class Comp {
      */
     initedCallback: (comp: Comp) => void = null
     /**
-     * 当组件初始化时,done所在的group实例
-     */
-    waitGroup: IWaitGroup = null
-    /**
      * 初始化等待异步操作完成指令函数
-     * @param waitGroup 
      * @returns 
      */
-    async done(waitGroup: IWaitGroup = null): Promise<Comp> {
+    async done(): Promise<Comp> {
         return new Promise((resolve) => {
-            this.waitGroup = waitGroup
             this.initedCallback = resolve;
         });
     }
-}
-// @todo 待删除 采用原生的 await Promise.all就可以
-export interface IWaitGroup {
-    groupResolve: Function,
-    groupCount: number,
-    hasDoneCount: number
 }

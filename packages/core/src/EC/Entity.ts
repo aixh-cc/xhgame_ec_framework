@@ -76,13 +76,6 @@ export class Entity {
                 }
             }
             component.initedCallback && component.initedCallback(component)
-            if (component.waitGroup && component.waitGroup.groupCount > 0) {
-                component.waitGroup.hasDoneCount++
-                if (component.waitGroup.hasDoneCount >= component.waitGroup.groupCount) {
-                    component.waitGroup.groupResolve && component.waitGroup.groupResolve()
-                    component.waitGroup = null
-                }
-            }
         })
     }
 
