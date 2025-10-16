@@ -37,7 +37,7 @@ export class TestGameManagers implements IManagers {
         // this.setStorageManager(new StorageManager('xhgame', getLocalStorage()))
         // // this.setCameraManager(new CameraManager(new UICamera(), new UICamera()))
         // this.setCryptoManager(new CryptoManager('s', new CryptoEmpty()))
-        // this.setAudioManager(new MyAudioManager<TestAudioDrive>(new TestAudioDrive()))
+        this.setAudioManager(new MyAudioManager<TestAudioDrive>(new TestAudioDrive()))
         console.log('构建完成')
         // let mm = DI.make('mm')
         // console.log('mm', mm, mm.getDdd())

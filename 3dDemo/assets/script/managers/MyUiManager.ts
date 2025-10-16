@@ -1,10 +1,11 @@
 import { DI, INode, IUiDrive, UiManager } from "@aixh-cc/xhgame_ec_framework"
+import { TestUiDrive } from "../../../tests/myTestGame/test/drive/TestUiDrive"
 
 export class MyUiManager extends UiManager<IUiDrive, INode> {
 
     constructor() {
-        let uiDrive = DI.make<IUiDrive>('IUiDrive')
-        super(uiDrive)
+        DI.bindSingleton<TestUiDrive>('IUiDrive', TestUiDrive)
+        super(DI.make('IUiDrive'))
     }
 
     get enums() {

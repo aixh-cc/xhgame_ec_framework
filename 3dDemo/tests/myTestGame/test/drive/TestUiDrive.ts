@@ -1,4 +1,4 @@
-import { BaseModelComp, INode, IUiDrive } from "@aixh-cc/xhgame_ec_framework"
+import { BaseModelComp, DI, INode, IUiDrive } from "@aixh-cc/xhgame_ec_framework"
 import { TestNode } from "../TestGameManagers"
 
 
