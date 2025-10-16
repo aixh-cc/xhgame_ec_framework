@@ -1,6 +1,5 @@
 import { TestAudioDrive } from "./drive/TestAudioDrive";
 import { TestUiDrive } from "./drive/TestUiDrive";
-import { MyTableConfig } from "db://assets/script/managers/myTable/MyTableConfig";
 import { CryptoEmpty, CryptoManager, DI, EventManager, FactoryManager, FetchHttp, IManagers, INode, NetManager, StorageManager, Websocket } from "@aixh-cc/xhgame_ec_framework";
 import { MyTestFactoryConfig } from "../MyTestFactoryConfig";
 import { MyFactoryActions } from "db://assets/script/managers/myFactory/MyFactoryActions";
@@ -9,15 +8,16 @@ import { MyUiManager } from "db://assets/script/managers/MyUiManager";
 import { MyNetManager } from "db://assets/script/managers/MyNetManager";
 import { MyTableManager } from "db://assets/script/managers/MyTableManager";
 import { MyFactoryManager } from "db://assets/script/managers/MyFactoryManager";
+import { ApiEnums } from "db://assets/script/managers/ApiEnums";
 
 export class MyTestNetManager extends NetManager<FetchHttp, Websocket> {
     constructor() {
         super(new FetchHttp(), new Websocket())
     }
 
-    // get enums() {
-    //     return ApiEnum
-    // }
+    get enums() {
+        return ApiEnums
+    }
 }
 
 export class TestNode implements INode {
@@ -34,7 +34,7 @@ export class TestGameManagers implements IManagers {
         this.setFactoryManager(this.getFactorys())
         this.setNetManager(new MyTestNetManager())
         this.setGuiManager(new MyUiManager())
-        // this.setStorageManager(new StorageManager('xhgame', getLocalStorage()))
+        this.setStorageManager(new StorageManager('xhgame', getLocalStorage()))
         // // this.setCameraManager(new CameraManager(new UICamera(), new UICamera()))
         // this.setCryptoManager(new CryptoManager('s', new CryptoEmpty()))
         this.setAudioManager(new MyAudioManager<TestAudioDrive>(new TestAudioDrive()))
@@ -63,11 +63,11 @@ export class TestGameManagers implements IManagers {
     getAudioManager(): MyAudioManager<TestAudioDrive> {
         return this.audioManager
     }
-    tableManager: MyTableManager<MyTableConfig>
-    setTableManager(tableManager: MyTableManager<MyTableConfig>) {
+    tableManager: MyTableManager
+    setTableManager(tableManager: MyTableManager) {
         this.tableManager = tableManager
     }
-    getTableManager(): MyTableManager<MyTableConfig> {
+    getTableManager(): MyTableManager {
         return this.tableManager
     }
     // factory
@@ -117,7 +117,7 @@ export class TestGameManagers implements IManagers {
 }
 
 const getTables = () => {
-    let tableManager = new MyTableManager<MyTableConfig>(new MyTableConfig())
+    let tableManager = new MyTableManager()
     tableManager.autoRegister()
     return tableManager
 }

@@ -67,16 +67,16 @@ export class TestGame implements IGame {
     }
 
     tableInit() {
-        // var fs = require('fs');
-        // var battledata = fs.readFileSync(__dirname + '/config/client/battle.json', 'utf8');
-        // var unitdata = fs.readFileSync(__dirname + '/config/client/unit.json', 'utf8');
-        // var skilldata = fs.readFileSync(__dirname + '/config/client/skill.json', 'utf8');
-        // var storedata = fs.readFileSync(__dirname + '/config/client/store.json', 'utf8');
-        // var configdata = fs.readFileSync(__dirname + '/config/client/config.json', 'utf8');
-        // xhgame.table.getTable(xhgame.table.enums.skill).init(JSON.parse(skilldata))
-        // xhgame.table.getTable(xhgame.table.enums.unit).init(JSON.parse(unitdata))
-        // xhgame.table.getTable(xhgame.table.enums.battle).init(JSON.parse(battledata))
-        // xhgame.table.getTable(xhgame.table.enums.store).init(JSON.parse(storedata))
-        // xhgame.table.getTable(xhgame.table.enums.config).init(JSON.parse(configdata))
+        var fs = require('fs');
+        var battledata = fs.readFileSync(__dirname + '/config/client/battle.json', 'utf8');
+        var unitdata = fs.readFileSync(__dirname + '/config/client/unit.json', 'utf8');
+        var skilldata = fs.readFileSync(__dirname + '/config/client/skill.json', 'utf8');
+        var storedata = fs.readFileSync(__dirname + '/config/client/store.json', 'utf8');
+        var configdata = fs.readFileSync(__dirname + '/config/client/config.json', 'utf8');
+        xhgame.table.getTable(xhgame.table.enums.skill).init(JSON.parse(skilldata))
+        xhgame.table.getTable(xhgame.table.enums.unit).init(JSON.parse(unitdata))
+        xhgame.table.getTable(xhgame.table.enums.battle).init(JSON.parse(battledata))
+        xhgame.table.getTable(xhgame.table.enums.store).init(JSON.parse(storedata))
+        xhgame.table.getTable(xhgame.table.enums.config).init(JSON.parse(configdata))
     }
 }

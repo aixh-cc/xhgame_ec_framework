@@ -23,7 +23,6 @@ export class CocosGameManagers implements IManagers {
         this.setNetManager(new MyNetManager())
         this.setGuiManager(new MyUiManager())
         this.setStorageManager(new StorageManager('xhgame', sys.localStorage))
-        // this.setCameraManager(new CameraManager(new UICamera(), new UICamera()))
         this.setCryptoManager(new CryptoManager('s', new CryptoEmpty()))
         // 
         this.setAudioManager(new MyAudioManager<CocosAudioDrive>(this.node.addComponent(CocosAudioDrive)))

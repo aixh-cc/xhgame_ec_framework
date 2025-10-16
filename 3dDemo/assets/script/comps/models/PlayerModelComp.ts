@@ -40,8 +40,6 @@ interface IPlayer {
 export class PlayerModelSystem extends System {
 
     static async getAccount(comp: PlayerModelComp, pdata: IPostParam) {
-
-
         return new Promise<IAccountInfo>(async (resolve, reject) => {
             let data = {
                 code: pdata.code,
@@ -50,24 +48,26 @@ export class PlayerModelSystem extends System {
                 version: '1.0.0'//xhgame.game.config.version
             }
             console.time('getAccount')
-            resolve(comp.accountInfo)
-            return
-            // let resdata = await xhgame.net.http.accountPost(xhgame.net.enums.GetServerInfo, data)
-            // if (resdata) {
-            //     console.timeEnd('getAccount')
-            //     let hallDomain = resdata.hallDomain.replace(/^\/+|\/+$/g, '')
-            //     xhgame.storage.origin_set('account', resdata.account)
-            //     xhgame.storage.origin_set('account_token', resdata.account_token)
-            //     xhgame.storage.origin_set('hallDomain', hallDomain)
-            //     comp.accountInfo = {
-            //         account: resdata.account,
-            //         account_token: resdata.account_token,
-            //         hallDomain: hallDomain
-            //     }
-            //     resolve(comp.accountInfo)
-            // } else {
-            //     reject(false)
-            // }
+            // resolve(comp.accountInfo)
+            // return
+            let resdata = await xhgame.net.http.post(xhgame.game.config.account_domain + '/' + xhgame.net.enums.GetServerInfo, data)
+            if (resdata) {
+                resdata = resdata.res
+                console.log(xhgame.game.config.account_domain, resdata)
+                console.timeEnd('getAccount')
+                let hallDomain = resdata.hallDomain.replace(/^\/+|\/+$/g, '')
+                xhgame.storage.origin_set('account', resdata.account)
+                xhgame.storage.origin_set('account_token', resdata.account_token)
+                xhgame.storage.origin_set('hallDomain', hallDomain)
+                comp.accountInfo = {
+                    account: resdata.account,
+                    account_token: resdata.account_token,
+                    hallDomain: hallDomain
+                }
+                resolve(comp.accountInfo)
+            } else {
+                reject(false)
+            }
         })
     }
 
@@ -80,20 +80,22 @@ export class PlayerModelSystem extends System {
                 serverNo: xhgame.game.config.server_no,
             }
             console.time('postPlayerEnter')
-            resolve(true)
-            return
-            // let ret = await xhgame.net.http.hallPost(xhgame.net.enums.PlayerEnter, data)
-            // if (ret) {
-            //     console.timeEnd('postPlayerEnter')
-            //     console.log('PlayerEnter res ', ret)
-            //     xhgame.storage.origin_set('token', ret.token)
-            //     comp.playerInfo = ret.playerInfo
-            //     comp.selectedBattleId = ret.playerInfo.maxBattleId
-            //     comp.notify()
-            //     resolve(true)
-            // } else {
-            //     reject(false)
-            // }
+            // resolve(true)
+            // return
+            let ret = await xhgame.net.http.post(comp.accountInfo.hallDomain + '/' + xhgame.net.enums.PlayerEnter, data)
+            if (ret) {
+                console.log(comp.accountInfo.hallDomain + '/' + xhgame.net.enums.PlayerEnter, ret)
+                ret = ret.res
+                console.timeEnd('postPlayerEnter')
+                console.log('PlayerEnter res ', ret)
+                xhgame.storage.origin_set('token', ret.token)
+                comp.playerInfo = ret.playerInfo
+                comp.selectedBattleId = ret.playerInfo.maxBattleId
+                comp.notify()
+                resolve(true)
+            } else {
+                reject(false)
+            }
         })
     }
 

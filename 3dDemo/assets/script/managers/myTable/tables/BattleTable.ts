@@ -1,4 +1,4 @@
-import { IGoodsItem } from "../../../tsshared/defined/Interface";
+import { IGoodsItem } from "../../../../../extensions/xhgame_plugin/assets/tsshared/defined/Interface";
 import { BaseTable } from "@aixh-cc/xhgame_ec_framework";
 import { TableType } from "../../MyTableManager";
 

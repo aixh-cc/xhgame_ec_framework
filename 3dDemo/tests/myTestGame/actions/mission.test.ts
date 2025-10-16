@@ -1,6 +1,6 @@
 import { GatePackagePanelComp } from "db://assets/script/severs/gate/PackagePanel/GatePackagePanelComp";
 import { GateSignViewComp } from "db://assets/script/severs/gate/GateSignViewComp";
-import { PackageType } from "db://assets/script/tsshared/defined/Interface";
+import { PackageType } from "../../../extensions/xhgame_plugin/assets/tsshared/defined/Interface";
 import { xhgame } from "db://assets/script/xhgame";
 import { assert, describe, test } from "poku";
 import { TestGame } from "../TestGame";
