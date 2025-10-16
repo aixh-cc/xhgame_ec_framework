@@ -2,6 +2,7 @@ import { assert, describe, test } from "poku";
 import { TestView, TestViewComp } from "./TestUiData";
 import { Entity } from "../../../packages/core/src/EC/Entity";
 import { GameEntity } from "../EC/TestECData";
+import { DI } from "../../../packages/core/src/DI/DI";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
@@ -30,6 +31,21 @@ const test_00 = () => {
             assert.equal(testView.personAge, 23, '再次testViewComp.notify后testView.personAge正确')
             assert.equal(testView.personName, '张三', '再次testViewComp.notify后testView.personName正确')
             assert.equal(JSON.stringify(testView.personBooks), '["j","k"]', '再次testViewComp.notify后testView.personBooks正确')
+            // 
+
+            testViewComp.tips = 'www'
+            testViewComp.viewVM = {
+                person: {
+                    name: '李四',
+                    age: 25,
+                    books: ['l', 's']
+                }
+            };
+            testViewComp.notify()
+            assert.equal(testView.tips, 'www', '再再次testViewComp.notify后testView.tips正确')
+            assert.equal(testView.personAge, 25, '再再次testViewComp.notify后testView.personAge正确')
+            assert.equal(testView.personName, '李四', '再再次testViewComp.notify后testView.personName正确')
+            assert.equal(JSON.stringify(testView.personBooks), '["l","s"]', '再再次testViewComp.notify后testView.personBooks正确')
 
         })
     })

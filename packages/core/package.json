@@ -1,6 +1,6 @@
 {
   "name": "@aixh-cc/xhgame_ec_framework",
-  "version": "1.0.39",
+  "version": "1.0.40",
   "description": "cocos的ec框架",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -51,5 +51,8 @@
     "type": "git",
     "url": "https://github.com/aixh-cc/xhgame_ec_framework.git",
     "directory": "packages/core"
+  },
+  "dependencies": {
+    "inversify-inject-decorators": "^3.1.0"
   }
 }

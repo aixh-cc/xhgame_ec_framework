@@ -2,11 +2,21 @@ import { BaseModelComp } from "../../../packages/core/src/EC/BaseModelComp"
 import { System } from "../../../packages/core/src/EC/System"
 import { SimpleBaseView } from "../../../packages/core/src/Ui/View"
 import { INode, IUiDrive } from "../../../packages/core/src/Ui/UiDrive"
-import { autoBindForDI } from "../../../packages/core/src/DI/DI";
+import { autoBindForDI, DI } from "../../../packages/core/src/DI/DI";
 
-export class TestView extends SimpleBaseView {
+@autoBindForDI('TestView')
+export class TestView extends SimpleBaseView implements ITestViewVM {
     name: string = 'TestView'
     tips: string = 'tips_default'
+    person: {
+        name: string,
+        age: number,
+        books: string[]
+    } = {
+            name: '',
+            age: 0,
+            books: []
+        }
     personName: string = ''
     personAge: number = 0
     personBooks: string[] = []
@@ -39,8 +49,8 @@ export class TestViewComp extends BaseModelComp {
     initBySystems: (typeof System)[] = []
 
     tips: string = 'tips_TestViewComp'
-    viewVM: ITestViewVM | null = null
 
+    viewVM: ITestViewVM | null = null
     actions = {
 
     }

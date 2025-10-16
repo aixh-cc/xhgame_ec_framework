@@ -19,12 +19,12 @@ export class ViewUtil {
                 // 逐层检查属性
                 const [valid, last_i, pre_current] = this._getMoreInfo(modelComp, vals_arr)
                 if (valid) {
-                    let final_path = this._getFinalPrePath(compName, vals_arr)
-                    if (last_i == vals_arr.length - 1) {
-                        DI.bindInstance(final_path, pre_current)
-                    } else {
-                        // notify时重新查找
-                    }
+                    // let final_path = this._getFinalPrePath(compName, vals_arr)
+                    // if (last_i == vals_arr.length - 1) {
+                    //     DI.bindInstance(final_path, pre_current)
+                    // } else {
+                    //     // notify时重新查找
+                    // }
                     modelComp.attachObserver(observer)
                 }
             }
@@ -48,19 +48,19 @@ export class ViewUtil {
             }
             let final_path = this._getFinalPrePath(modelComp.compName, vals_arr)
             let vvv = DI.safeMake(final_path) as any
-            if (!vvv) {
-                // console.log('未找到final_path=', final_path)
-                // 再次逐层检查属性
-                const [valid, last_i, pre_current] = this._getMoreInfo(modelComp, vals_arr)
-                if (valid) {
-                    let final_path = this._getFinalPrePath(modelComp.compName, vals_arr)
-                    if (last_i == vals_arr.length - 1) {
-                        // console.log(final_path + '重新注入成功', pre_current)
-                        DI.bindInstance(final_path, pre_current)
-                        vvv = pre_current
-                    }
+            // if (!vvv) {
+            //     console.log('未找到final_path=', final_path)
+            //     // 再次逐层检查属性
+            const [valid, last_i, pre_current] = this._getMoreInfo(modelComp, vals_arr)
+            if (valid) {
+                let final_path = this._getFinalPrePath(modelComp.compName, vals_arr)
+                if (last_i == vals_arr.length - 1) {
+                    // console.log(final_path + '重新注入成功', pre_current)
+                    DI.bindInstance(final_path, pre_current)
+                    vvv = pre_current
                 }
             }
+            // }
             if (vvv) {
                 const that = observer as any
                 if (typeof that[key] != 'undefined' && vvv[last_key] != 'undefined') {

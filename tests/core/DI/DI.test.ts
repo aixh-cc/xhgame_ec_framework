@@ -1,5 +1,5 @@
 import { assert, describe, test } from "poku";
-import { DI, autoBindForDI, inject } from "../../../packages/core/src/DI/DI";
+import { DI, autoBindForDI } from "../../../packages/core/src/DI/DI";
 
 // 定义测试服务接口
 interface IEmailService {
@@ -34,10 +34,11 @@ export class UserService implements IUserService {
 }
 
 export class UserController {
-    constructor(
-        @inject('UserService') private userService: IUserService,
-        @inject('SmsService') private smsService: SmsService
-    ) { }
+
+    @DI.lazyInject('UserService')
+    private userService!: IUserService
+    @DI.lazyInject('SmsService')
+    private smsService!: SmsService
 
     async sendUserSms(userId: number) {
         const user = await this.userService.getUser(userId);

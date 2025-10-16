@@ -1,9 +1,11 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
 import { inject, injectable } from 'inversify';
-
+import getDecorators from "inversify-inject-decorators";
 class DI {
     private static container: Container;
+    private static decorators: any;
+
     /**
      * 初始化应用容器
      * 确保只初始化一次
@@ -25,7 +27,12 @@ class DI {
         }
         return this.container;
     }
-
+    static get lazyInject() {
+        if (!this.decorators) {
+            this.decorators = getDecorators(this.container);
+        }
+        return this.decorators.lazyInject;
+    }
     /**
      * 绑定服务（每次创建新实例）
      * @param identifier 服务标识符
@@ -125,6 +132,5 @@ function autoBindForDI(identifier?: string | symbol, isTransient: boolean = fals
         }
     };
 }
-
 // 3. 导出类和装饰器，供其他文件使用
 export { DI, autoBindForDI, inject, injectable };
