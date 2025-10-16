@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { Container } from 'inversify';
-import { inject, injectable } from 'inversify';
 import getDecorators from "inversify-inject-decorators";
+
 class DI {
     private static container: Container;
     private static decorators: any;
@@ -133,4 +133,4 @@ function autoBindForDI(identifier?: string | symbol, isTransient: boolean = fals
     };
 }
 // 3. 导出类和装饰器，供其他文件使用
-export { DI, autoBindForDI, inject, injectable };
+export { DI, autoBindForDI };
