@@ -1,4 +1,4 @@
-import { autoBindForDI, BaseModelComp, System } from "@aixh-cc/xhgame_ec_framework";
+import { BaseModelComp, System } from "@aixh-cc/xhgame_ec_framework";
 // import { IAccountInfo, IPlayer } from "../../tsshared/defined/Interface"
 import { xhgame } from "db://assets/script/xhgame";
 

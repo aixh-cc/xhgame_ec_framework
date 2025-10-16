@@ -24,8 +24,7 @@ export class GameEnterSystem extends System {
     static async initComp(comp: GameEnterComp) {
         await xhgame.gameEntity.attachComponent(SdkComp).done()
         console.log('SdkComp done')
-        DI.bindSingleton('PlayerModelComp', PlayerModelComp)
-
+        xhgame.gameEntity.attachComponent(PlayerModelComp)
 
         await Promise.all([
             await xhgame.gameEntity.attachComponent(GateSenceComp).done(),
