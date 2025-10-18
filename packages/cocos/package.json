@@ -32,6 +32,9 @@
   },
   "author": "aixh-cc",
   "license": "MIT",
+  "dependencies": {
+    "@aixh-cc/xhgame_ec_framework": "^1.0"
+  },
   "devDependencies": {
     "@cocos/creator-types": "^3.8.0",
     "@rollup/plugin-terser": "^0.4.4",

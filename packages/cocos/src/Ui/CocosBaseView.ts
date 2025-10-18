@@ -1,17 +1,7 @@
-import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
-import { ViewUtil } from "./ViewUtil";
+import { Component } from 'cc';
+import { BaseModelComp, ViewUtil, IView } from '@aixh-cc/xhgame_ec_framework';
 
-export interface IView extends IObserver {
-    setViewComp(modelComp: BaseModelComp): void
-    getViewComp(): BaseModelComp
-    closeView(): void
-    getBindAttrMap(): any
-    setBindAttrMap(val: any): void
-    updateBySubject(modelComp: BaseModelComp): void
-}
-
-export abstract class SimpleBaseView implements IView {
-    abstract name: string;
+export abstract class CocosBaseView extends Component implements IView {
     abstract reset(): void
     viewModelComp: BaseModelComp = null
     setViewComp(comp: BaseModelComp) {

@@ -17,6 +17,8 @@
     "include": [
         "./src/**/*",
         "../../tests/core/Ui/TestUiDrive.ts" // "libs"
+        ,
+        "../cocos/src/Ui/CocosBaseView.ts"
     ],
     // 排除
     "exclude": [
