@@ -1,3 +1,5 @@
+import { IAssetDrive } from "./Asset/AssetDrive"
+import { AssetManager } from "./Asset/AssetManager"
 import { IAudioDrive } from "./Audio/AudioDrive"
 import { AudioManager } from "./Audio/AudioManager"
 import { ICrypto } from "./Crypto/Crypto"
@@ -38,6 +40,6 @@ export interface IManagers {
     setAudioManager(audioManager: AudioManager<IAudioDrive>): void
     getAudioManager(): AudioManager<IAudioDrive>
     // asset
-    setAudioManager(audioManager: AssetManager<IAudioDrive>): void
-    getAudioManager(): AudioManager<IAudioDrive>
+    setAssetManager(audioManager: AssetManager<IAssetDrive>): void
+    getAssetManager(): AssetManager<IAssetDrive>
 }
