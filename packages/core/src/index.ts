@@ -37,6 +37,9 @@ export * from './Game/Game';
 // Audio
 export * from './Audio/AudioDrive';
 export * from './Audio/AudioManager';
+// Asset
+export * from './Asset/AssetDrive';
+export * from './Asset/AssetManager';
 // Managers
 export { IManagers } from './Managers';
 // DI

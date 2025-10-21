@@ -37,4 +37,7 @@ export interface IManagers {
     // audio
     setAudioManager(audioManager: AudioManager<IAudioDrive>): void
     getAudioManager(): AudioManager<IAudioDrive>
+    // asset
+    setAudioManager(audioManager: AssetManager<IAudioDrive>): void
+    getAudioManager(): AudioManager<IAudioDrive>
 }
