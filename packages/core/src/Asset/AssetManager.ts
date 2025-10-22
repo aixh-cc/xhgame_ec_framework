@@ -5,6 +5,9 @@ export class AssetManager<T extends IAssetDrive> implements IAssetDrive {
     constructor(drive: T) {
         this._drive = drive
     }
+    getDrive() {
+        return this._drive
+    }
     loadBundle<T extends IBundle>(nameOrUrl: string, onComplete?: (err: Error, data: T) => void) {
         return this._drive.loadBundle(nameOrUrl, onComplete)
     }

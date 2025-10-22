@@ -8,6 +8,9 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
     constructor(uiDrive: T) {
         this._uiDrive = uiDrive
     }
+    getDrive() {
+        return this._uiDrive
+    }
     get gui_root(): NT {
         return this._uiDrive.getGuiRoot() as NT
     }
