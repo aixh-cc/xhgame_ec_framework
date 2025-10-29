@@ -16,7 +16,7 @@ export abstract class SimpleBaseView implements IView {
     viewModelComp: BaseModelComp = null
     setViewComp(comp: BaseModelComp, isRebindAttr: boolean = false) {
         this.viewModelComp = comp
-        if (isRebindAttr) {
+        if (isRebindAttr && this._bindAttrMap) {
             ViewUtil.bindAttr(this, this._bindAttrMap)
         }
     }
