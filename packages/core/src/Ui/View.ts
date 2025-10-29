@@ -2,7 +2,7 @@ import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
 import { ViewUtil } from "./ViewUtil";
 
 export interface IView extends IObserver {
-    setViewComp(modelComp: BaseModelComp): void
+    setViewComp(modelComp: BaseModelComp, isRebindAttr?: boolean): void
     getViewComp(): BaseModelComp
     closeView(): void
     getBindAttrMap(): any
@@ -14,9 +14,9 @@ export abstract class SimpleBaseView implements IView {
     abstract name: string;
     abstract reset(): void
     viewModelComp: BaseModelComp = null
-    setViewComp(comp: BaseModelComp) {
+    setViewComp(comp: BaseModelComp, isRebindAttr: boolean = false) {
         this.viewModelComp = comp
-        if (this._bindAttrMap) {
+        if (isRebindAttr) {
             ViewUtil.bindAttr(this, this._bindAttrMap)
         }
     }
@@ -37,6 +37,9 @@ export abstract class SimpleBaseView implements IView {
     }
     setBindAttrMap(val: any) {
         this._bindAttrMap = val
+        if (this._bindAttrMap) {
+            ViewUtil.bindAttr(this, this._bindAttrMap)
+        }
     }
     updateBySubject(modelComp: BaseModelComp) {
         ViewUtil.updateByModel(modelComp, this)
