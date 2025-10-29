@@ -1,5 +1,6 @@
 import { BaseModelComp } from "../EC/BaseModelComp"
 import { INode, IUiDrive } from "./UiDrive"
+import { IView } from "./View"
 
 export class UiManager<T extends IUiDrive, NT extends INode> {
 
@@ -26,7 +27,9 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
     getUI(uiid: string): NT {
         return this._uiDrive.getUI(uiid) as NT
     }
-
+    getFirstUIView(): IView {
+        return this._uiDrive.getFirstUIView() as IView
+    }
     toast(msg: string) {
         this._uiDrive.toast(msg)
     }

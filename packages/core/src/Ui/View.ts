@@ -16,6 +16,9 @@ export abstract class SimpleBaseView implements IView {
     viewModelComp: BaseModelComp = null
     setViewComp(comp: BaseModelComp) {
         this.viewModelComp = comp
+        if (this._bindAttrMap) {
+            ViewUtil.bindAttr(this, this._bindAttrMap)
+        }
     }
     getViewComp() {
         return this.viewModelComp
@@ -34,9 +37,6 @@ export abstract class SimpleBaseView implements IView {
     }
     setBindAttrMap(val: any) {
         this._bindAttrMap = val
-        if (val) {
-            ViewUtil.bindAttr(this, val)
-        }
     }
     updateBySubject(modelComp: BaseModelComp) {
         ViewUtil.updateByModel(modelComp, this)
