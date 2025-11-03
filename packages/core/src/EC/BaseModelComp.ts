@@ -6,6 +6,9 @@ import { Comp } from "./Comp";
 export abstract class BaseModelComp extends Comp implements ISubject {
     compName: string;
     abstract reset(): void
+    /**
+     * 监听挂载
+     */
     onAttach() {
 
     }
