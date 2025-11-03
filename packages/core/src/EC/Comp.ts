@@ -51,10 +51,12 @@ export abstract class Comp {
      * 监听挂载到实体
      */
     abstract onAttach(): void
+    protected bindToDI(): void { }
     attach(entity: Entity): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.entity = entity
             setTimeout(() => {
+                this.bindToDI && this.bindToDI()
                 this.onAttach && this.onAttach()
                 resolve(true)
             }, 0)

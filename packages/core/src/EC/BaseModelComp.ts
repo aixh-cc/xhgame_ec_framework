@@ -7,6 +7,10 @@ export abstract class BaseModelComp extends Comp implements ISubject {
     compName: string;
     abstract reset(): void
     onAttach() {
+
+    }
+    /** 所有model都需要挂载到DI中 */
+    bindToDI() {
         DI.bindInstance(this.compName, this)
     }
     abstract onDetach(): void
