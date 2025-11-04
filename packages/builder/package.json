@@ -1,7 +1,7 @@
 {
-  "name": "@aixh-cc/xhgame_cocos",
-  "version": "0.0.2",
-  "description": "cocos的开发组件",
+  "name": "@aixh-cc/xhgame_builder",
+  "version": "0.0.3",
+  "description": "xhgame的包构建管理工具",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -33,14 +33,14 @@
   "author": "aixh-cc",
   "license": "MIT",
   "dependencies": {
-    "@aixh-cc/xhgame_ec_framework": "^1.0"
+    "adm-zip": "^0.5.16"
   },
   "devDependencies": {
-    "@cocos/creator-types": "^3.8.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
+    "@types/adm-zip": "^0.5.7",
     "@types/lodash": "^4.17.13",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.19.0",
     "rollup": "^4.28.1",
     "rollup-plugin-dts": "^6.1.1",
     "ts-node": "^10.9.2",
@@ -52,7 +52,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aixh-cc/xhgame_cocos.git",
+    "url": "https://github.com/aixh-cc/xhgame_builder.git",
     "directory": "packages/core"
   }
 }
