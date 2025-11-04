@@ -1,12 +1,12 @@
 import { join, resolve } from 'path';
 
 export const getPluginPath = (pluginName: string) => {
-    return resolve('./');
-    // if (typeof Editor != 'undefined' && Editor.Project) {
-    //     return path.join(Editor.Project.path, 'extensions', pluginName);
-    // } else {
-    //     return process.cwd();
-    // }
+    // return resolve('./');
+    if (typeof Editor != 'undefined' && Editor.Project) {
+        return join(Editor.Project.path, 'extensions', pluginName);
+    } else {
+        return resolve('./');
+    }
 };
 
 // 获取项目根目录下的 packages 路径

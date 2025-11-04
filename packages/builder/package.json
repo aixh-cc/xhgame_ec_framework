@@ -1,7 +1,7 @@
 {
   "name": "@aixh-cc/xhgame_builder",
-  "version": "0.0.3",
-  "description": "xhgame的包构建管理工具",
+  "version": "0.0.4",
+  "description": "xhgame的资源管理简易构建工具",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -36,6 +36,7 @@
     "adm-zip": "^0.5.16"
   },
   "devDependencies": {
+    "@cocos/creator-types": "^3.8.7",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/adm-zip": "^0.5.7",

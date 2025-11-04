@@ -11,7 +11,8 @@
         "stripInternal": true,
         "types": [
             "node",
-            "adm-zip"
+            "adm-zip",
+            "@cocos/creator-types/editor"
         ]
     },
     "include": [
