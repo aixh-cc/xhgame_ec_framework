@@ -12,6 +12,12 @@ export class InstallInfoManager {
         const extensionPath = getExtensionsPath();
         this.installInfoPath = join(extensionPath, pluginName + '-installInfo.json');
     }
+    /**
+     * 检查安装信息文件是否存在
+     */
+    exists(): boolean {
+        return fs.existsSync(this.installInfoPath);
+    }
 
     /**
      * 读取安装信息文件
@@ -39,23 +45,18 @@ export class InstallInfoManager {
     /**
      * 写入安装信息文件
      */
-    async writeInstallInfo(installInfo: IInstallInfo): Promise<void> {
+    async writeInstallInfo(installInfo: IInstallInfo): Promise<boolean> {
         try {
             installInfo.lastUpdated = new Date().toISOString();
             await fs.promises.writeFile(this.installInfoPath, JSON.stringify(installInfo, null, 2), 'utf-8');
             console.log(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath}`);
+            return true;
         } catch (error) {
             console.error(`[${this.pluginName}] 写入安装信息失败:`, error);
-            throw error;
+            return false;
         }
     }
 
-    /**
-     * 检查安装信息文件是否存在
-     */
-    exists(): boolean {
-        return fs.existsSync(this.installInfoPath);
-    }
 
     /**
      * 获取已安装组件列表
