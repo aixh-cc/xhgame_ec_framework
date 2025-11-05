@@ -103,11 +103,11 @@ export class Handles {
             };
         }
 
-        console.log(`[xhgame_plugin] 安装组件请求: ${compName}`, param);
+        console.log(`[xhgame_builder] 安装组件请求: ${compName}`, param);
         let extractTempDir = '';
         try {
             let packagePath = getPackagesPath(pluginName, group)
-            console.log(`[xhgame_plugin] 组件安装目录: ${packagePath}`);
+            console.log(`[xhgame_builder] 组件安装目录: ${packagePath}`);
 
             const zipFilePath = join(packagePath, `${compName}.zip`);
             const legacyDirPath = join(packagePath, compName);
@@ -115,13 +115,13 @@ export class Handles {
             // 解压源目录（如果是zip）或使用旧目录模式
             let assetsSourcePath = legacyDirPath;
             if (fs.existsSync(zipFilePath)) {
-                console.log(`[xhgame_plugin] 发现zip包，准备解压: ${zipFilePath}`);
+                console.log(`[xhgame_builder] 发现zip包，准备解压: ${zipFilePath}`);
                 extractTempDir = join(packagePath, '__extract', compName);
                 await fs.promises.mkdir(extractTempDir, { recursive: true });
 
                 const zip = new AdmZip(zipFilePath);
                 zip.extractAllTo(extractTempDir, true);
-                console.log(`[xhgame_plugin] 解压完成到: ${extractTempDir}`);
+                console.log(`[xhgame_builder] 解压完成到: ${extractTempDir}`);
 
                 // 选择正确的根目录：
                 // 1) 若存在单个顶级目录（排除 __MACOSX），以该目录为根
@@ -136,7 +136,7 @@ export class Handles {
                 const extractedAssetsDir = join(baseRoot, 'assets');
                 assetsSourcePath = fs.existsSync(extractedAssetsDir) ? extractedAssetsDir : baseRoot;
             } else if (fs.existsSync(legacyDirPath)) {
-                console.log(`[xhgame_plugin] 使用旧目录模式: ${legacyDirPath}`);
+                console.log(`[xhgame_builder] 使用旧目录模式: ${legacyDirPath}`);
                 assetsSourcePath = legacyDirPath;
             } else {
                 return {
@@ -152,8 +152,8 @@ export class Handles {
             // 确保目标目录存在
             await fs.promises.mkdir(targetPath, { recursive: true });
 
-            console.log(`[xhgame_plugin] 源路径: ${assetsSourcePath}`);
-            console.log(`[xhgame_plugin] 目标路径: ${targetPath}`);
+            console.log(`[xhgame_builder] 源路径: ${assetsSourcePath}`);
+            console.log(`[xhgame_builder] 目标路径: ${targetPath}`);
 
             // 复制所需文件到项目 assets 目录
             const copiedFiles: string[] = [];
@@ -215,14 +215,14 @@ export class Handles {
                         } catch { }
                     }
                     if (conflictFiles.length > 0) {
-                        console.log(`[xhgame_plugin] 检测到冲突文件: ${conflictFiles.join('\n')}`);
+                        console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
                         return {
                             success: false,
                             error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
                         };
                     }
 
-                    console.log(`[xhgame_plugin] 使用meta files列表进行复制，文件数量: ${filesList.length}`);
+                    console.log(`[xhgame_builder] 使用meta files列表进行复制，文件数量: ${filesList.length}`);
 
                     // 复制列出的文件
                     async function copySelectedFiles(files: string[]) {
@@ -238,11 +238,11 @@ export class Handles {
                                     await fs.promises.mkdir(dirname(destPath), { recursive: true });
                                     await fs.promises.copyFile(srcPath, destPath);
                                     copiedFiles.push(fileRel);
-                                    console.log(`[xhgame_plugin] 复制文件: ${fileRel}`);
+                                    console.log(`[xhgame_builder] 复制文件: ${fileRel}`);
                                 }
                             } catch (e) {
                                 missingFiles.push(fileRel);
-                                console.warn(`[xhgame_plugin] 缺失文件（未在压缩包中找到）: ${fileRel}`);
+                                console.warn(`[xhgame_builder] 缺失文件（未在压缩包中找到）: ${fileRel}`);
                             }
                         }
                     }
@@ -265,13 +265,13 @@ export class Handles {
                 // 旧模式或无meta：复制整个源目录（保持兼容）
                 await checkConflicts(assetsSourcePath, targetPath);
                 if (conflictFiles.length > 0) {
-                    console.log(`[xhgame_plugin] 检测到冲突文件: ${conflictFiles.join('\n')}`);
+                    console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
                     return {
                         success: false,
                         error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
                     };
                 }
-                console.log(`[xhgame_plugin] 没有冲突文件，开始复制整个目录...`);
+                console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
                 await copyDirectory(assetsSourcePath, targetPath);
             }
 
@@ -297,22 +297,22 @@ export class Handles {
                         // 复制文件
                         await fs.promises.copyFile(srcPath, destPath);
                         copiedFiles.push(relPath);
-                        console.log(`[xhgame_plugin] 复制文件: ${relPath}`);
+                        console.log(`[xhgame_builder] 复制文件: ${relPath}`);
                     }
                 }
             }
 
-            console.log(`[xhgame_plugin] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
+            console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
 
-            // 记录安装信息到配置文件 copiedFiles等到xhgame_plugin-installInfo.json中的 installedComponents
+            // 记录安装信息到配置文件 copiedFiles等到xhgame_builder-installInfo.json中的 installedComponents
             try {
                 const installInfoManager = Handles.getInstallInfoManager(pluginName);
                 await installInfoManager.recordInstallation(zipFilePath, compName, targetPath, copiedFiles);
             } catch (writeErr) {
-                console.warn(`[xhgame_plugin] 写入安装信息失败，但组件安装已完成:`, writeErr);
+                console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
             }
 
-            // 记录安装信息到配置文件 copiedFiles等到xhgame_plugin-installInfo.json中的 installedComponents
+            // 记录安装信息到配置文件 copiedFiles等到xhgame_builder-installInfo.json中的 installedComponents
 
 
 
@@ -323,7 +323,7 @@ export class Handles {
             };
 
         } catch (error) {
-            console.error(`[xhgame_plugin] 从内置资源安装组件失败: `, error);
+            console.error(`[xhgame_builder] 从内置资源安装组件失败: `, error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : String(error)
@@ -342,7 +342,7 @@ export class Handles {
                         }
                     } catch { }
                 } catch (cleanupErr) {
-                    console.warn(`[xhgame_plugin] 清理临时目录失败: ${extractTempDir}`, cleanupErr);
+                    console.warn(`[xhgame_builder] 清理临时目录失败: ${extractTempDir}`, cleanupErr);
                 }
             }
         }
@@ -357,7 +357,7 @@ export class Handles {
             };
         }
 
-        console.log(`[xhgame_plugin] 安装卸载组件请求: ${compName}`, param);
+        console.log(`[xhgame_builder] 安装卸载组件请求: ${compName}`, param);
 
         try {
             // 获取项目路径
@@ -397,10 +397,10 @@ export class Handles {
                     // 删除原文件
                     await fs.promises.unlink(fullFilePath);
                     deletedFiles.push(relativeFilePath);
-                    console.log(`[xhgame_plugin] 删除文件: ${relativeFilePath}`);
+                    console.log(`[xhgame_builder] 删除文件: ${relativeFilePath}`);
 
                 } catch (error) {
-                    console.warn(`[xhgame_plugin] 文件不存在或处理失败: ${relativeFilePath}`, error);
+                    console.warn(`[xhgame_builder] 文件不存在或处理失败: ${relativeFilePath}`, error);
                     notFoundFiles.push(relativeFilePath);
                 }
             }
@@ -423,7 +423,7 @@ export class Handles {
                     const remainingItems = await fs.promises.readdir(dirPath);
                     if (remainingItems.length === 0) {
                         await fs.promises.rmdir(dirPath);
-                        console.log(`[xhgame_plugin] 删除空目录: ${dirPath}`);
+                        console.log(`[xhgame_builder] 删除空目录: ${dirPath}`);
                     }
                 } catch (error) {
                     // 忽略清理目录时的错误
@@ -438,11 +438,11 @@ export class Handles {
                 const installInfoManager = Handles.getInstallInfoManager(pluginName);
                 await installInfoManager.removeComponent(compName);
             } catch (error) {
-                console.warn(`[xhgame_plugin] 移除组件记录失败:`, error);
+                console.warn(`[xhgame_builder] 移除组件记录失败:`, error);
                 // 不影响卸载结果，只是记录移除失败
             }
 
-            console.log(`[xhgame_plugin] 组件卸载完成: ${component.componentName}`);
+            console.log(`[xhgame_builder] 组件卸载完成: ${component.componentName}`);
 
             return {
                 success: true,
@@ -454,7 +454,7 @@ export class Handles {
             };
 
         } catch (error) {
-            console.error(`[xhgame_plugin] 卸载组件失败: `, error);
+            console.error(`[xhgame_builder] 卸载组件失败: `, error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : String(error)
@@ -487,7 +487,7 @@ export class Handles {
             }
 
         } catch (error) {
-            console.error(`[xhgame_plugin] 检查备份文件失败:`, error);
+            console.error(`[xhgame_builder] 检查备份文件失败:`, error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : String(error),
