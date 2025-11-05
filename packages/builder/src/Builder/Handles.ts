@@ -11,7 +11,7 @@ export class Handles {
     }
 
     static async getVersion(pluginName: string): Promise<IGetVersionRes> {
-        const projectPath = getProjectPath(pluginName);
+        const projectPath = getProjectPath();
         // 检查备份信息文件是否存在
         const packagePath = join(projectPath, 'package.json');
         const hasFile = fs.existsSync(packagePath);
@@ -146,7 +146,7 @@ export class Handles {
             }
 
             // 获取项目assets/script目录路径
-            const projectPath = getProjectPath(pluginName);
+            const projectPath = getProjectPath();
             const targetPath = join(projectPath, 'assets');
 
             // 确保目标目录存在
@@ -361,7 +361,7 @@ export class Handles {
 
         try {
             // 获取项目路径
-            const projectPath = getProjectPath(pluginName)
+            const projectPath = getProjectPath()
             const assetsPath = join(projectPath, 'assets');
 
             const installInfoManager = Handles.getInstallInfoManager(pluginName);

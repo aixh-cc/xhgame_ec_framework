@@ -38,10 +38,14 @@ const test_02 = () => {
             })
             assert.equal(is_write_success, true, 'installedInfoManager的写入正常')
             // 检查写入的文件内容是否正确
-            let installInfo = await installedInfoManager.readInstallInfo()
-            assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
-            assert.equal(installInfo.installedComponents.length, 0, 'installedInfoManager的获取已安装组件列表正常')
-            assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[test_02] 安装信息已写入: /Users/hd/Documents/website/aixh/xhgame_ec_framework/extensions/test_02-installInfo.json"]', 'installedInfoManager的logs正常')
+            let installInfo = await installedInfoManager.checkInstallExists()
+            if (installInfo) {
+                assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
+                assert.equal(installInfo.installedComponents.length, 0, 'installedInfoManager的获取已安装组件列表正常')
+                assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[test_02] 安装信息已写入: /extensions/test_02-installInfo.json"]', 'installedInfoManager的logs正常')
+            } else {
+                assert.equal(installInfo, '错误', 'installedInfoManager的获取安装信息失败')
+            }
             resolve(true)
         })
     })

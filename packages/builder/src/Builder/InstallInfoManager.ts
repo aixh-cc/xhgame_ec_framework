@@ -1,17 +1,20 @@
 import * as fs from 'fs';
 import { join } from 'path';
-import { getExtensionsPath } from './Util';
+import { getExtensionsPath, getProjectPath } from './Util';
 import { IComponentMetadata, IInstallInfo } from './Defined';
 
 export class InstallInfoManager {
     private pluginName: string;
     private installInfoPath: string;
     private logs: string[] = []
+    private extensionPath: string = ''
+    private projectPath: string = ''
 
     constructor(pluginName: string) {
         this.pluginName = pluginName;
-        const extensionPath = getExtensionsPath();
-        this.installInfoPath = join(extensionPath, pluginName + '-installInfo.json');
+        this.extensionPath = getExtensionsPath();
+        this.projectPath = getProjectPath();
+        this.installInfoPath = join(this.extensionPath, pluginName + '-installInfo.json');
     }
     /**
      * 检查安装信息文件是否存在
@@ -50,7 +53,7 @@ export class InstallInfoManager {
         try {
             installInfo.lastUpdated = new Date().toISOString();
             await fs.promises.writeFile(this.installInfoPath, JSON.stringify(installInfo, null, 2), 'utf-8');
-            this.logs.push(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath}`)
+            this.logs.push(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath.replace(this.projectPath, '')}`)
             return true;
         } catch (error) {
             this.logs.push(`[${this.pluginName}] 写入安装信息失败: ${error}`)
@@ -58,6 +61,10 @@ export class InstallInfoManager {
             return false;
         }
     }
+    /**
+     * 获取安装信息写入日志
+     * @returns 安装信息写入日志数组
+     */
     getLogs(): string[] {
         return this.logs
     }
