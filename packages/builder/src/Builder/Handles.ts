@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IGetPackagesRes, IGetVersionRes, IInstallInfoRes, IInstallRes, IPackageInfoWithStatus, IUninstallRes } from './Defined';
-import { getPackagesPath, getProjectPath } from './Util';
+import { IComponentInfoWithStatus, IGetComponentInfosRes, IGetVersionRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
+import { getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
 
 export class Handles {
@@ -30,16 +30,16 @@ export class Handles {
         };
     }
 
-    static async getPackages(pluginName: string, group: string): Promise<IGetPackagesRes> {
-        console.log('getPackages', pluginName, group)
+    static async getComponentInfos(pluginName: string, group: string): Promise<IGetComponentInfosRes> {
+        console.log('getComponentInfos', pluginName, group)
         try {
-            const packagesPath = getPackagesPath(pluginName, group);
-            if (!fs.existsSync(packagesPath)) {
+            const groupPath = getGroupPath(pluginName, group);
+            if (!fs.existsSync(groupPath)) {
                 return {
                     success: false,
                     error: 'Packages directory not found',
-                    packagesPath: '',
-                    packages: []
+                    groupPath: '',
+                    componentInfos: []
                 };
             }
             // 当前组件安装情况
@@ -47,11 +47,11 @@ export class Handles {
             const installInfo = await installInfoManager.checkInstallExists();
             let installedLists = installInfo?.installedComponents?.map((item: any) => item.componentCode) || []
             console.log('installedLists', installedLists)
-            const items = fs.readdirSync(packagesPath);
-            const packages = [];
+            const items = fs.readdirSync(groupPath);
+            const componentInfos = [];
 
             for (const item of items) {
-                const itemPath = join(packagesPath, item);
+                const itemPath = join(groupPath, item);
                 const stats = fs.statSync(itemPath);
 
                 if (stats.isDirectory()) {
@@ -66,12 +66,12 @@ export class Handles {
                             const metaContent = fs.readFileSync(metaPath, 'utf-8');
                             const metaData = JSON.parse(metaContent);
                             if (metaData.userData && typeof metaData.userData === 'object') {
-                                let packageInfoWithStatus: IPackageInfoWithStatus = metaData.userData
+                                let componentInfoWithStatus: IComponentInfoWithStatus = metaData.userData
                                 // 检查是否已安装
-                                packageInfoWithStatus.installStatus = installedLists.indexOf(packageInfoWithStatus.name) > -1 ? 'has' : 'none';
+                                componentInfoWithStatus.installStatus = installedLists.indexOf(componentInfoWithStatus.code) > -1 ? 'has' : 'none';
                                 // 检查备份状态
-                                packageInfoWithStatus.backupStatus = 'none';
-                                packages.push(packageInfoWithStatus);
+                                componentInfoWithStatus.backupStatus = 'none';
+                                componentInfos.push(componentInfoWithStatus);
                             }
                         } catch (error) {
                             console.error(`Error reading meta for ${item}:`, error);
@@ -81,15 +81,15 @@ export class Handles {
             }
             return {
                 success: true,
-                packagesPath,
-                packages
+                groupPath,
+                componentInfos
             };
         } catch (error) {
             return {
                 success: false,
-                error: 'Failed to get packages',
-                packagesPath: '',
-                packages: []
+                error: 'Failed to get items',
+                groupPath: '',
+                componentInfos: []
             };
         }
     }
@@ -106,17 +106,17 @@ export class Handles {
         console.log(`[xhgame_builder] 安装组件请求: ${compName}`, param);
         let extractTempDir = '';
         try {
-            let packagePath = getPackagesPath(pluginName, group)
-            console.log(`[xhgame_builder] 组件安装目录: ${packagePath}`);
+            let groupPath = getGroupPath(pluginName, group)
+            console.log(`[xhgame_builder] 组件安装目录: ${groupPath}`);
 
-            const zipFilePath = join(packagePath, `${compName}.zip`);
-            const legacyDirPath = join(packagePath, compName);
+            const zipFilePath = join(groupPath, `${compName}.zip`);
+            const legacyDirPath = join(groupPath, compName);
 
             // 解压源目录（如果是zip）或使用旧目录模式
             let assetsSourcePath = legacyDirPath;
             if (fs.existsSync(zipFilePath)) {
                 console.log(`[xhgame_builder] 发现zip包，准备解压: ${zipFilePath}`);
-                extractTempDir = join(packagePath, '__extract', compName);
+                extractTempDir = join(groupPath, '__extract', compName);
                 await fs.promises.mkdir(extractTempDir, { recursive: true });
 
                 const zip = new AdmZip(zipFilePath);
@@ -333,7 +333,7 @@ export class Handles {
             if (extractTempDir && fs.existsSync(extractTempDir)) {
                 try {
                     await fs.promises.rm(extractTempDir, { recursive: true, force: true });
-                    const parentExtractDir = join(getPackagesPath(pluginName, group), '__extract');
+                    const parentExtractDir = join(getGroupPath(pluginName, group), '__extract');
                     // 若父目录为空则清理
                     try {
                         const remain = await fs.promises.readdir(parentExtractDir);

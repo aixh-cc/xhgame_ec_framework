@@ -13,6 +13,7 @@ export const getProjectPath = () => {
                 const stat = fs.statSync(extensionsDir);
                 if (stat.isDirectory()) {
                     // 找到“extensions”，其父目录即为项目根目录
+                    console.log('getProjectPath:' + current)
                     return current;
                 }
             } catch (_) {
@@ -40,10 +41,14 @@ export const getPluginPath = (pluginName: string) => {
     return join(projectPath, 'extensions', pluginName);
 };
 
-// 获取项目根目录下的 packages 路径
-export const getPackagesPath = (pluginName: string, target: string) => {
+export const getPackagesPath = (pluginName: string) => {
     let projectPath = getProjectPath()
-    return join(projectPath, 'extensions', pluginName, 'assets', target);
+    return join(projectPath, 'extensions', pluginName, 'packages');
+};
+
+export const getGroupPath = (pluginName: string, target: string) => {
+    let projectPath = getProjectPath()
+    return join(projectPath, 'extensions', pluginName, 'packages', target);
 };
 
 

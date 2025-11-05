@@ -1,5 +1,5 @@
 import { assert, describe, test } from "poku";
-import { getPluginPath, getPackagesPath, getExtensionsPath, getProjectPath } from "../../../packages/builder/src/builder/Util";
+import { getPluginPath, getGroupPath, getExtensionsPath, getProjectPath } from "../../../packages/builder/src/builder/Util";
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {
@@ -10,8 +10,8 @@ const test_01 = () => {
             assert.equal(extensionsPath.replace(projectPath + '/', ''), 'extensions', 'getExtensionsPath正常')
             let pluginPath = getPluginPath('xhgame_plugin')
             assert.equal(pluginPath.replace(projectPath + '/', ''), 'extensions/xhgame_plugin', 'getPluginPath正常')
-            let uiItemsPath = getPackagesPath('xhgame_plugin', 'uiItems')
-            assert.equal(uiItemsPath.replace(projectPath + '/', ''), 'extensions/xhgame_plugin/assets/uiItems', 'getPackagesPath正常')
+            let uiItemsPath = getGroupPath('xhgame_plugin', 'uiItems')
+            assert.equal(uiItemsPath.replace(projectPath + '/', ''), 'extensions/xhgame_plugin/packages/uiItems', 'getGroupPath正常')
             resolve(true)
         })
     })

@@ -3,11 +3,11 @@ export interface IGetVersionRes {
     success: boolean
     version: string
 }
-export interface IGetPackagesRes {
+export interface IGetComponentInfosRes {
     success: boolean,
     error?: string,
-    packagesPath: string
-    packages: IPackageInfoWithStatus[]
+    groupPath: string
+    componentInfos: IComponentInfoWithStatus[]
 }
 export interface IInstallRes {
     success: boolean,
@@ -43,10 +43,10 @@ export interface InstalledComp {
     installedAt: string;
     copiedFiles: string[];
 }
-// 包信息接口定义
-export interface IPackageInfo {
-    /** 包名,英文字母 */
-    name: string;
+// 组件信息接口定义
+export interface IComponentInfo {
+    /** 组件code标识 */
+    code: string;
     /** 包显示名,中文字符 */
     displayName: string;
     /** 版本号 */
@@ -79,7 +79,7 @@ export interface IPackageInfo {
     usage?: string;
 }
 
-export interface IPackageInfoWithStatus extends IPackageInfo {
+export interface IComponentInfoWithStatus extends IComponentInfo {
     /** 安装状态 */
     installStatus: string
     /** 备份状态 */
