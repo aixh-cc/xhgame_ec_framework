@@ -3,13 +3,15 @@ import { InstallInfoManager } from "../../../packages/builder/src/builder/Instal
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {
-        // test('测试InstallInfoManager的CryptoEmpty', async () => {
-        //     let cryptoManager = new CryptoManager('ssdsd', new CryptoEmpty())
-        //     assert.equal(cryptoManager.md5('aixh-cc'), 'aixh-cc', 'CryptoEmpty的md5正常')
-        //     assert.equal(cryptoManager.encrypt('aixh-cc'), 'aixh-cc', 'CryptoEmpty的encrypt正常')
-        //     assert.equal(cryptoManager.decrypt('aixh-cc'), 'aixh-cc', 'CryptoEmpty的decrypt正常')
-        //     resolve(true)
-        // })
+        test('测试InstallInfoManager的从未安装过', async () => {
+            let notInstalledInfoManager = new InstallInfoManager('xhgame_plugin_not_exists')
+            let is_exists = notInstalledInfoManager.exists()
+            assert.equal(is_exists, false, 'notInstalledInfoManager的exists正常')
+            let installInfo = await notInstalledInfoManager.readInstallInfo()
+            assert.equal(installInfo.version, '1.0.0', 'notInstalledInfoManager的获取默认版本号正常')
+            assert.equal(installInfo.installedComponents.length, 0, 'notInstalledInfoManager的获取已安装组件列表正常')
+            resolve(true)
+        })
     })
 }
 

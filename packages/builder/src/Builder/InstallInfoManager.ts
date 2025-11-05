@@ -9,7 +9,7 @@ export class InstallInfoManager {
 
     constructor(pluginName: string) {
         this.pluginName = pluginName;
-        const extensionPath = getExtensionsPath(pluginName);
+        const extensionPath = getExtensionsPath();
         this.installInfoPath = join(extensionPath, pluginName + '-installInfo.json');
     }
 
@@ -180,7 +180,7 @@ export class InstallInfoManager {
      */
     async checkInstallExists(): Promise<IInstallInfo | null> {
         try {
-            if (await this.exists()) {
+            if (this.exists()) {
                 return await this.readInstallInfo();
             }
             return null;
