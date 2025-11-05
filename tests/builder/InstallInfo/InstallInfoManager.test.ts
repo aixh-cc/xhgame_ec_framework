@@ -41,6 +41,7 @@ const test_02 = () => {
             let installInfo = await installedInfoManager.readInstallInfo()
             assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
             assert.equal(installInfo.installedComponents.length, 0, 'installedInfoManager的获取已安装组件列表正常')
+            assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[test_02] 安装信息已写入: /Users/hd/Documents/website/aixh/xhgame_ec_framework/extensions/test_02-installInfo.json"]', 'installedInfoManager的logs正常')
             resolve(true)
         })
     })

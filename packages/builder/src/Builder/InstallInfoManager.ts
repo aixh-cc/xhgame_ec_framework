@@ -6,6 +6,7 @@ import { IComponentMetadata, IInstallInfo } from './Defined';
 export class InstallInfoManager {
     private pluginName: string;
     private installInfoPath: string;
+    private logs: string[] = []
 
     constructor(pluginName: string) {
         this.pluginName = pluginName;
@@ -49,12 +50,16 @@ export class InstallInfoManager {
         try {
             installInfo.lastUpdated = new Date().toISOString();
             await fs.promises.writeFile(this.installInfoPath, JSON.stringify(installInfo, null, 2), 'utf-8');
-            console.log(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath}`);
+            this.logs.push(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath}`)
             return true;
         } catch (error) {
+            this.logs.push(`[${this.pluginName}] 写入安装信息失败: ${error}`)
             console.error(`[${this.pluginName}] 写入安装信息失败:`, error);
             return false;
         }
+    }
+    getLogs(): string[] {
+        return this.logs
     }
 
 
