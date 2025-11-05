@@ -68,12 +68,25 @@ export class InstallInfoManager {
     getLogs(): string[] {
         return this.logs
     }
-
+    /**
+       * 检查安装信息是否存在
+       */
+    async checkInstallExists(): Promise<IInstallInfo | null> {
+        try {
+            if (this.exists()) {
+                return await this.readInstallInfo();
+            }
+            return null;
+        } catch (error) {
+            console.warn(`[${this.pluginName}] 检查安装信息失败:`, error);
+            return null;
+        }
+    }
 
     /**
      * 获取已安装组件列表
      */
-    async getInstalledComponents(): Promise<string[]> {
+    async getInstalledComponentCodes(): Promise<string[]> {
         const installInfo = await this.readInstallInfo();
         return installInfo.installedComponents.map(comp => comp.componentCode);
     }
@@ -82,7 +95,7 @@ export class InstallInfoManager {
      * 检查组件是否已安装
      */
     async isComponentInstalled(componentCode: string): Promise<boolean> {
-        const installedComponents = await this.getInstalledComponents();
+        const installedComponents = await this.getInstalledComponentCodes();
         return installedComponents.indexOf(componentCode) > -1;
     }
 
@@ -188,18 +201,5 @@ export class InstallInfoManager {
         }
     }
 
-    /**
-     * 检查安装信息是否存在
-     */
-    async checkInstallExists(): Promise<IInstallInfo | null> {
-        try {
-            if (this.exists()) {
-                return await this.readInstallInfo();
-            }
-            return null;
-        } catch (error) {
-            console.warn(`[${this.pluginName}] 检查安装信息失败:`, error);
-            return null;
-        }
-    }
+
 }
