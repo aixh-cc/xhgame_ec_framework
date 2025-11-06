@@ -3,6 +3,7 @@
 import * as fs from 'fs';
 import { join, basename } from 'path';
 import { getProjectPath } from '../Builder/Util';
+import { IComponentInfo } from '../Builder/Defined';
 
 export interface IPackResult {
     success: boolean;
@@ -67,6 +68,14 @@ export class Pack {
                 copiedFiles.push(join('bundle_factory', 'item_views', group, itemName + '.meta'));
             }
 
+            // 生成或更新 setup.json（位于 group 目录下，如: extensions/<plugin>/packages/<group>/<item>.setup.json）
+            const setupJsonPath = join(projectPath, 'extensions', pluginName, 'packages', group, `${itemName}.setup.json`);
+            await Pack.writeSetupJson(setupJsonPath, {
+                itemName,
+                group,
+                files: copiedFiles
+            });
+
             return {
                 success: true,
                 targetPath: targetRoot,
@@ -92,5 +101,42 @@ export class Pack {
                 onCopied && onCopied(item.name);
             }
         }
+    }
+
+    private static async writeSetupJson(setupPath: string, info: { itemName: string, group: string, files: string[] }) {
+        const { itemName, group, files } = info;
+        let data: IComponentInfo | null = null;
+        try {
+            if (fs.existsSync(setupPath)) {
+                const content = await fs.promises.readFile(setupPath, 'utf-8');
+                const parsed = JSON.parse(content);
+                // 仅更新 files 字段
+                if (typeof parsed === 'object' && parsed) {
+                    parsed.files = files;
+                    data = parsed as IComponentInfo;
+                }
+            }
+        } catch (_) {
+            // 解析失败则走默认
+            data = null;
+        }
+
+        if (!data) {
+            const defaultInfo: IComponentInfo = {
+                code: itemName,
+                displayName: itemName,
+                version: '1.0.0',
+                description: '',
+                author: 'auto',
+                category: group,
+                tags: [],
+                path: join('bundle_factory', 'item_views', group, itemName),
+                dependencies: [],
+                files: files,
+            };
+            data = defaultInfo;
+        }
+
+        await fs.promises.writeFile(setupPath, JSON.stringify(data, null, 2), 'utf-8');
     }
 }
