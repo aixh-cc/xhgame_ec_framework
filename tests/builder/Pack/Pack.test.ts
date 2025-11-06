@@ -8,12 +8,13 @@ const test_01 = () => {
     return new Promise((resolve, reject) => {
         test('测试拷贝', async () => {
             const assetPath = 'assets/bundle_factory/item_views/textUiItems/toast_item'
-            const res = await Pack.packItem(assetPath)
+            const pluginName = 'pack_demo'
+            const res = await Pack.packItem(assetPath, pluginName)
 
             assert.equal(res.success, true, 'packItem 应返回 success=true')
 
             const projectPath = getProjectPath()
-            const targetRoot = join(projectPath, 'extensions', 'pack_demo', 'packages', 'textUiItems', 'toast_item')
+            const targetRoot = join(projectPath, 'extensions', pluginName, 'packages', 'textUiItems', 'toast_item')
             const targetItemDir = join(targetRoot, 'bundle_factory', 'item_views', 'textUiItems', 'toast_item')
 
             assert.equal(fs.existsSync(targetRoot), true, '目标根目录已创建')

@@ -17,7 +17,7 @@ export class Pack {
      * 打包复制到 extensions/pack_demo/packages/<group>/<item>/bundle_factory/item_views/<group>/<item>
      * 并包含同级的 <item>.meta 文件。
      */
-    static async packItem(assetItemPath: string): Promise<IPackResult> {
+    static async packItem(assetItemPath: string, pluginName: string = 'pack_demo'): Promise<IPackResult> {
         try {
             const projectPath = getProjectPath();
 
@@ -43,7 +43,7 @@ export class Pack {
             const group = parts[parts.length - 2];
 
             // 目标根：extensions/pack_demo/packages/<group>/<item>
-            const targetRoot = join(projectPath, 'extensions', 'pack_demo', 'packages', group, itemName);
+            const targetRoot = join(projectPath, 'extensions', pluginName, 'packages', group, itemName);
             // 目标内部结构：bundle_factory/item_views/<group>/<item>
             const targetInternalBase = join(targetRoot, 'bundle_factory', 'item_views', group);
             const targetItemDir = join(targetInternalBase, itemName);
