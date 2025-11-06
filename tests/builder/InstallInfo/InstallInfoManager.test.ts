@@ -1,5 +1,5 @@
 import { assert, describe, test } from "poku";
-import { InstallInfoManager } from "../../../packages/builder/src/builder/InstallInfoManager";
+import { InstallInfoManager } from "../../../packages/builder/src/Builder/InstallInfoManager";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
