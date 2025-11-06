@@ -48,35 +48,37 @@ export class Handles {
             let installedLists = installInfo?.installedComponents?.map((item: any) => item.componentCode) || []
             console.log('installedLists', installedLists)
             const items = fs.readdirSync(groupPath);
-            const componentInfos = [];
+            const componentInfos: IComponentInfoWithStatus[] = [];
 
+            // 新逻辑：检测并读取 *.setup.json 文件，取消从 .meta 中读取
             for (const item of items) {
-                const itemPath = join(groupPath, item);
-                const stats = fs.statSync(itemPath);
-
-                if (stats.isDirectory()) {
-                    console.error('当前只支持zip')
-                } else if (item.endsWith('.zip')) {
-                    // 处理 .zip 包文件
-                    const zipName = basename(item, '.zip');
-                    const metaPath = itemPath + '.meta';
-                    // 尝试从 .meta 文件读取包信息
-                    if (fs.existsSync(metaPath)) {
-                        try {
-                            const metaContent = fs.readFileSync(metaPath, 'utf-8');
-                            const metaData = JSON.parse(metaContent);
-                            if (metaData.userData && typeof metaData.userData === 'object') {
-                                let componentInfoWithStatus: IComponentInfoWithStatus = metaData.userData
-                                // 检查是否已安装
-                                componentInfoWithStatus.installStatus = installedLists.indexOf(componentInfoWithStatus.code) > -1 ? 'has' : 'none';
-                                // 检查备份状态
-                                componentInfoWithStatus.backupStatus = 'none';
-                                componentInfos.push(componentInfoWithStatus);
-                            }
-                        } catch (error) {
-                            console.error(`Error reading meta for ${item}:`, error);
-                        }
+                // 仅处理以 .setup.json 结尾的文件（例如：toast_item.setup.json）
+                if (!item.endsWith('.setup.json')) continue;
+                const setupPath = join(groupPath, item);
+                try {
+                    const content = await fs.promises.readFile(setupPath, 'utf-8');
+                    const json = JSON.parse(content);
+                    if (json && typeof json === 'object') {
+                        const info: IComponentInfoWithStatus = {
+                            // 直接使用 setup.json 中的字段
+                            code: json.code || basename(item, '.setup.json'),
+                            displayName: json.displayName || basename(item, '.setup.json'),
+                            version: json.version || '1.0.0',
+                            description: json.description || '',
+                            author: json.author || '',
+                            category: json.category || group,
+                            tags: Array.isArray(json.tags) ? json.tags : [],
+                            path: json.path || '',
+                            dependencies: Array.isArray(json.dependencies) ? json.dependencies : [],
+                            files: Array.isArray(json.files) ? json.files : [],
+                            // 状态字段
+                            installStatus: installedLists.indexOf(json.code || basename(item, '.setup.json')) > -1 ? 'has' : 'none',
+                            backupStatus: 'none'
+                        };
+                        componentInfos.push(info);
                     }
+                } catch (error) {
+                    console.error(`读取或解析 ${item} 失败:`, error);
                 }
             }
             return {

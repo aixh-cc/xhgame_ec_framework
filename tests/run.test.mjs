@@ -5,7 +5,7 @@ const prepareService = () => new Promise((resolve) => resolve(undefined));
 const resetService = () => new Promise((resolve) => resolve(undefined));
 
 // core
-await poku('tests/core', {
+await poku(['tests/core', 'tests/builder'], {
   reporter: 'classic',
   debug: true,
   // beforeEach: prepareService,
