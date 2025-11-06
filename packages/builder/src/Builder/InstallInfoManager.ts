@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { getExtensionsPath, getProjectPath } from './Util';
 import { IComponentMetadata, IInstallInfo } from './Defined';
 
@@ -117,16 +117,26 @@ export class InstallInfoManager {
         let componentVersion = '1.0.0';
 
         try {
-            const metaPath = zipFilePath + '.meta';
-            if (fs.existsSync(metaPath)) {
-                const metaContent = await fs.promises.readFile(metaPath, 'utf-8');
-                const metaData = JSON.parse(metaContent);
-                if (metaData?.userData) {
-                    componentCode = metaData.userData.name || compName;
-                    componentId = metaData.userData.name || compName;
-                    componentDisplayName = metaData.userData.displayName || compName;
-                    componentVersion = metaData.userData.version || componentVersion;
-                }
+            const baseDir = dirname(zipFilePath);
+            // 优先读取 setup.json，其次兼容旧的 .zip.meta
+            const setupJsonPath = join(baseDir, `${compName}.setup.json`);
+            const legacyZipMetaPath = zipFilePath + '.meta';
+
+            let raw: any = null;
+            if (fs.existsSync(setupJsonPath)) {
+                const content = await fs.promises.readFile(setupJsonPath, 'utf-8');
+                raw = JSON.parse(content);
+            } else if (fs.existsSync(legacyZipMetaPath)) {
+                const content = await fs.promises.readFile(legacyZipMetaPath, 'utf-8');
+                raw = JSON.parse(content);
+            }
+
+            if (raw) {
+                const data = raw.userData || raw; // 兼容两种结构
+                componentCode = data.code || data.name || componentCode;
+                componentId = data.code || data.name || componentId;
+                componentDisplayName = data.displayName || componentDisplayName;
+                componentVersion = data.version || componentVersion;
             }
         } catch (error) {
             console.warn(`[${this.pluginName}] 提取组件元数据失败:`, error);
