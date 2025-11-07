@@ -438,7 +438,7 @@ export class Handles {
             // 从配置中移除组件记录 
             try {
                 const installInfoManager = Handles.getInstallInfoManager(pluginName);
-                await installInfoManager.removeComponent(compName);
+                await installInfoManager.removeComponentRecord(compName);
             } catch (error) {
                 console.warn(`[xhgame_builder] 移除组件记录失败:`, error);
                 // 不影响卸载结果，只是记录移除失败

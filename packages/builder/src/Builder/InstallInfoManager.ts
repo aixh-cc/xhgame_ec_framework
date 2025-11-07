@@ -54,7 +54,7 @@ export class InstallInfoManager {
             installInfo.lastUpdated = new Date().toISOString();
             await fs.promises.writeFile(this.installInfoPath, JSON.stringify(installInfo, null, 2), 'utf-8');
             this.logs.push(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath.replace(this.projectPath, '')}`)
-            console.log(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath.replace(this.projectPath, '')}`)
+            // console.log(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath.replace(this.projectPath, '')}`)
             return true;
         } catch (error) {
             this.logs.push(`[${this.pluginName}] 写入安装信息失败: ${error}`)
