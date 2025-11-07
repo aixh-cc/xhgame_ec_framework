@@ -1,6 +1,19 @@
 import { join, resolve } from 'path';
 import * as fs from 'fs';
 
+export async function getCocosVersion(): Promise<string> {
+    const projectPath = getProjectPath();
+    const packagePath = join(projectPath, 'package.json');
+    const hasFile = fs.existsSync(packagePath);
+    if (hasFile) {
+        const packageInfo = JSON.parse(await fs.promises.readFile(packagePath, 'utf-8'));
+        if (typeof packageInfo.creator != 'undefined') {
+            return packageInfo.creator.version
+        }
+    }
+    return 'unknown'
+}
+
 export const getProjectPath = () => {
     if (typeof Editor != 'undefined' && Editor.Project) {
         return Editor.Project.path;

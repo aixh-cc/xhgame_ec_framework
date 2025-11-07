@@ -1,33 +1,19 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IComponentInfoWithStatus, IGetComponentInfosRes, IGetVersionRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
+import { IComponentInfoWithStatus, IGetComponentInfosRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
 import { getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
 
 export class Handles {
-    private static getInstallInfoManager(pluginName: string): InstallInfoManager {
-        return new InstallInfoManager(pluginName);
-    }
 
-    static async getVersion(pluginName: string): Promise<IGetVersionRes> {
-        const projectPath = getProjectPath();
-        // 检查备份信息文件是否存在
-        const packagePath = join(projectPath, 'package.json');
-        const hasFile = fs.existsSync(packagePath);
-        if (hasFile) {
-            const packageInfo = JSON.parse(await fs.promises.readFile(packagePath, 'utf-8'));
-            if (typeof packageInfo.creator != 'undefined') {
-                return {
-                    success: true,
-                    version: packageInfo.creator.version
-                };
-            }
+    static managerMap: Map<string, InstallInfoManager> = new Map();
+
+    private static getInstallInfoManager(pluginName: string): InstallInfoManager {
+        if (!Handles.managerMap.has(pluginName)) {
+            Handles.managerMap.set(pluginName, new InstallInfoManager(pluginName));
         }
-        return {
-            success: true,
-            version: '未知版本'
-        };
+        return Handles.managerMap.get(pluginName)!;
     }
 
     static async getComponentInfos(pluginName: string, group: string): Promise<IGetComponentInfosRes> {

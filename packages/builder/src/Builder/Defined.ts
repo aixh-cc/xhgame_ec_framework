@@ -1,8 +1,3 @@
-
-export interface IGetVersionRes {
-    success: boolean
-    version: string
-}
 export interface IGetComponentInfosRes {
     success: boolean,
     error?: string,
