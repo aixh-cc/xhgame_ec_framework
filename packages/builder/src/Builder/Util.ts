@@ -34,7 +34,6 @@ export const getProjectPath = (): string => {
                 const stat = fs.statSync(extensionsDir);
                 if (stat.isDirectory()) {
                     // 找到“extensions”，其父目录即为项目根目录
-                    console.log('getProjectPath:' + current)
                     return current;
                 }
             } catch (_) {
