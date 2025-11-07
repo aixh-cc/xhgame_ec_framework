@@ -1,7 +1,7 @@
 import * as fs from 'fs';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { getExtensionsPath, getProjectPath } from './Util';
-import { IComponentMetadata, IInstallInfo } from './Defined';
+import { IInstallInfo, InstalledComp } from './Defined';
 
 export class InstallInfoManager {
     private pluginName: string;
@@ -87,81 +87,34 @@ export class InstallInfoManager {
     /**
      * 获取组件的安装信息
      */
-    async getComponentInfo(componentCode: string): Promise<any | null> {
+    async getInstalledComponentInfo(componentCode: string): Promise<InstalledComp | null> {
         const installInfo = await this.readInstallInfo();
         return installInfo.installedComponents.find(comp => comp.componentCode === componentCode) || null;
     }
-
     /**
-     * 从 setup.json 文件中提取组件元数据
+     * 更新组件安装信息
      */
-    async extractComponentMetadata(zipFilePath: string, componentCode: string): Promise<IComponentMetadata> {
-        let componentName = componentCode;
-        let componentVersion = '1.0.0';
-
-        try {
-            const baseDir = dirname(zipFilePath);
-            // 优先读取 setup.json，其次兼容旧的 .zip.meta
-            const setupJsonPath = join(baseDir, `${componentCode}.setup.json`);
-            const legacyZipMetaPath = zipFilePath + '.meta';
-
-            let raw: any = null;
-            if (fs.existsSync(setupJsonPath)) {
-                const content = await fs.promises.readFile(setupJsonPath, 'utf-8');
-                raw = JSON.parse(content);
-            } else if (fs.existsSync(legacyZipMetaPath)) {
-                const content = await fs.promises.readFile(legacyZipMetaPath, 'utf-8');
-                raw = JSON.parse(content);
-            }
-
-            if (raw) {
-                const data = raw.userData || raw; // 兼容两种结构
-                componentCode = data.code || data.name || componentCode;
-                // componentId = data.code || data.name || componentId;
-                componentName = data.displayName || componentName;
-                componentVersion = data.version || componentVersion;
-            }
-        } catch (error) {
-            console.warn(`[${this.pluginName}] 提取组件元数据失败:`, error);
-        }
-
-        return {
-            componentCode,
-            // componentId,
-            componentName,
-            componentVersion
-        };
-    }
-
-    /**
-     * 记录组件安装信息
-     */
-    async recordInstallation(
-        zipFilePath: string,
+    async updateComponentRecord(
         componentCode: string,
+        componentName: string,
+        componentVersion: string,
         copiedFiles: string[]
     ): Promise<void> {
         try {
             const installInfo = await this.readInstallInfo();
-
-            // 从 meta 中获取组件元数据
-            const metadata = await this.extractComponentMetadata(zipFilePath, componentCode);
-
             // 更新 installedComponents 列表（去重后追加）
             installInfo.installedComponents = installInfo.installedComponents.filter(
-                (c: any) => c.componentCode !== metadata.componentCode
+                (c: any) => c.componentCode !== componentCode
             );
             installInfo.installedComponents.push({
-                componentName: metadata.componentName,
-                // componentId: metadata.componentId,
-                componentCode: metadata.componentCode,
-                componentVersion: metadata.componentVersion,
+                componentName: componentName,
+                componentCode: componentCode,
+                componentVersion: componentVersion,
                 copiedFiles: copiedFiles,
                 installedAt: new Date().toISOString()
             });
-
             await this.writeInstallInfo(installInfo);
-            console.log(`[${this.pluginName}] 组件安装信息已记录: ${metadata.componentCode}`);
+            console.log(`[${this.pluginName}] 组件安装信息已记录: ${componentCode}`);
         } catch (error) {
             console.warn(`[${this.pluginName}] 记录安装信息失败，但组件安装已完成:`, error);
             throw error;

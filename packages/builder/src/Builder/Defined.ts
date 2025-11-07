@@ -12,23 +12,16 @@ export interface IUninstallRes {
     success: boolean,
     error?: string,
 }
-export interface IInstallInfo {
-    version: string;
-    installedComponents: InstalledComp[];
-    lastUpdated: string;
-}
 export interface IInstallInfoRes {
     success: boolean;
     error?: string;
     installInfo?: IInstallInfo
 }
-
-export interface IComponentMetadata {
-    componentCode: string;
-    componentName: string;
-    componentVersion: string;
+export interface IInstallInfo {
+    version: string;
+    installedComponents: InstalledComp[];
+    lastUpdated: string;
 }
-
 export interface InstalledComp {
     componentCode: string;
     componentName: string;

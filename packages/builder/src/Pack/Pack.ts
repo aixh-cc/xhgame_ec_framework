@@ -50,7 +50,7 @@ export class Pack {
             const targetItemDir = join(targetInternalBase, itemName);
 
             // 如果已有旧内容，删除后重建
-            await fs.promises.rm(targetRoot, { recursive: true, force: true }).catch(() => {});
+            await fs.promises.rm(targetRoot, { recursive: true, force: true }).catch(() => { });
             await fs.promises.mkdir(targetItemDir, { recursive: true });
 
             const copiedFiles: string[] = [];
@@ -105,7 +105,7 @@ export class Pack {
 
     private static async writeSetupJson(setupPath: string, info: { itemName: string, group: string, files: string[] }) {
         const { itemName, group, files } = info;
-        let data: IComponentInfo | null = null;
+        let setupComponentInfo: IComponentInfo | null = null;
         try {
             if (fs.existsSync(setupPath)) {
                 const content = await fs.promises.readFile(setupPath, 'utf-8');
@@ -113,19 +113,19 @@ export class Pack {
                 // 仅更新 files 字段
                 if (typeof parsed === 'object' && parsed) {
                     parsed.files = files;
-                    data = parsed as IComponentInfo;
+                    setupComponentInfo = parsed as IComponentInfo;
                 }
             }
         } catch (_) {
             // 解析失败则走默认
-            data = null;
+            setupComponentInfo = null;
         }
 
-        if (!data) {
+        if (!setupComponentInfo) {
             const defaultInfo: IComponentInfo = {
-                code: itemName,
-                displayName: itemName,
-                version: '1.0.0',
+                componentCode: itemName,
+                componentName: itemName,
+                componentVersion: '1.0.0',
                 description: '',
                 author: 'auto',
                 category: group,
@@ -134,9 +134,9 @@ export class Pack {
                 dependencies: [],
                 files: files,
             };
-            data = defaultInfo;
+            setupComponentInfo = defaultInfo;
         }
 
-        await fs.promises.writeFile(setupPath, JSON.stringify(data, null, 2), 'utf-8');
+        await fs.promises.writeFile(setupPath, JSON.stringify(setupComponentInfo, null, 2), 'utf-8');
     }
 }

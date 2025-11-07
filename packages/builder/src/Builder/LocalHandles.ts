@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IComponentInfoWithStatus, IgetGroupComponentListRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
+import { IComponentInfo, IComponentInfoWithStatus, IgetGroupComponentListRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
 import { getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
 
@@ -190,91 +190,18 @@ export class LocalHandles {
                 }
             }
 
-            // 若为zip并存在meta，则按meta中的userData.files进行安装
-            const metaPath = zipFilePath + '.meta';
-            const useMetaList = fs.existsSync(zipFilePath) && fs.existsSync(metaPath);
-            if (useMetaList) {
-                try {
-                    const metaContent = await fs.promises.readFile(metaPath, 'utf-8');
-                    const metaData = JSON.parse(metaContent);
-                    const filesList: string[] = Array.isArray(metaData?.userData?.files) ? metaData.userData.files : [];
-                    console.log('需要进行copy的filesList', filesList)
-                    if (!filesList.length) {
-                        return {
-                            success: false,
-                            error: `安装失败：组件 ${componentCode} 的 meta 未声明要安装的 files`,
-                        };
-                    }
-
-                    // 检查冲突（仅针对列出的文件）
-                    for (const fileRel of filesList) {
-                        if (fileRel.endsWith('.meta')) continue;
-                        const destPath = join(targetPath, fileRel);
-                        try {
-                            await fs.promises.access(destPath);
-                            conflictFiles.push(fileRel);
-                        } catch { }
-                    }
-                    if (conflictFiles.length > 0) {
-                        console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
-                        return {
-                            success: false,
-                            error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
-                        };
-                    }
-
-                    console.log(`[xhgame_builder] 使用meta files列表进行复制，文件数量: ${filesList.length}`);
-
-                    // 复制列出的文件
-                    async function copySelectedFiles(files: string[]) {
-                        for (const fileRel of files) {
-                            const srcPath = join(assetsSourcePath, fileRel);
-                            const destPath = join(targetPath, fileRel);
-                            try {
-                                const stat = await fs.promises.stat(srcPath);
-                                if (stat.isDirectory()) {
-                                    await fs.promises.mkdir(destPath, { recursive: true });
-                                    await copyDirectory(srcPath, destPath, fileRel);
-                                } else {
-                                    await fs.promises.mkdir(dirname(destPath), { recursive: true });
-                                    await fs.promises.copyFile(srcPath, destPath);
-                                    copiedFiles.push(fileRel);
-                                    console.log(`[xhgame_builder] 复制文件: ${fileRel}`);
-                                }
-                            } catch (e) {
-                                missingFiles.push(fileRel);
-                                console.warn(`[xhgame_builder] 缺失文件（未在压缩包中找到）: ${fileRel}`);
-                            }
-                        }
-                    }
-
-                    await copySelectedFiles(filesList);
-
-                    if (missingFiles.length > 0) {
-                        return {
-                            success: false,
-                            error: `安装失败：以下声明的文件在压缩包中未找到：\n${missingFiles.join('\n')}`,
-                        };
-                    }
-                } catch (err) {
-                    return {
-                        success: false,
-                        error: `安装失败：读取组件meta失败或格式错误（${String(err)}）`,
-                    };
-                }
-            } else {
-                // 旧模式或无meta：复制整个源目录（保持兼容）
-                await checkConflicts(assetsSourcePath, targetPath);
-                if (conflictFiles.length > 0) {
-                    console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
-                    return {
-                        success: false,
-                        error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
-                    };
-                }
-                console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
-                await copyDirectory(assetsSourcePath, targetPath);
+            // 旧模式或无meta：复制整个源目录（保持兼容）
+            await checkConflicts(assetsSourcePath, targetPath);
+            if (conflictFiles.length > 0) {
+                console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
+                return {
+                    success: false,
+                    error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
+                };
             }
+            console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
+            await copyDirectory(assetsSourcePath, targetPath);
+
 
             async function copyDirectory(srcDir: string, destDir: string, relativePath: string = '') {
                 const items = await fs.promises.readdir(srcDir, { withFileTypes: true });
@@ -308,7 +235,10 @@ export class LocalHandles {
             // 记录安装信息到配置文件 copiedFiles等到xhgame_builder-installInfo.json中的 installedComponents
             try {
                 const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
-                await installInfoManager.recordInstallation(zipFilePath, componentCode, copiedFiles);
+                const setupPath = join(groupPath, componentCode);
+                const content = await fs.promises.readFile(setupPath, 'utf-8');
+                const json: IComponentInfoWithStatus = JSON.parse(content);
+                await installInfoManager.updateComponentRecord(componentCode, json.componentName, json.componentVersion, copiedFiles);
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
             }

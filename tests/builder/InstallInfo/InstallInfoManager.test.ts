@@ -68,7 +68,7 @@ const test_03 = () => {
             const componentCode = 'toast_item';
             const zipFilePath = join(groupPath, `${componentCode}.zip`);
             const metaPath = join(groupPath, `${componentCode}.setup.json`);
-            const metaData: IComponentInfo = {
+            const setupComponentInfo: IComponentInfo = {
                 // 支持顶层结构或 userData 结构
                 componentCode: componentCode,
                 componentName: '吐司提示',
@@ -83,15 +83,15 @@ const test_03 = () => {
                     join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
                 ],
             };
-            await fs.promises.writeFile(metaPath, JSON.stringify(metaData, null, 2), 'utf-8');
+            await fs.promises.writeFile(metaPath, JSON.stringify(setupComponentInfo, null, 2), 'utf-8');
             const copiedFiles = [
                 join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
             ];
 
             // 记录安装信息
-            await iim.recordInstallation(zipFilePath, componentCode, copiedFiles);
+            await iim.updateComponentRecord(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles);
 
-            // 验证 getInstalledComponentCodes / isComponentInstalled / getComponentInfo
+            // 验证 
             const codes = await iim.getInstalledComponentCodes();
             assert.equal(Array.isArray(codes), true, 'getInstalledComponentCodes返回数组');
             assert.equal(codes.includes(componentCode), true, '组件代码已包含在已安装列表中');
@@ -99,12 +99,12 @@ const test_03 = () => {
             const installed = await iim.isComponentInstalled(componentCode);
             assert.equal(installed, true, 'isComponentInstalled判断正确');
 
-            const info = await iim.getComponentInfo(componentCode);
-            assert.equal(!!info, true, 'getComponentInfo能获取到组件信息');
+            const info = await iim.getInstalledComponentInfo(componentCode);
+            assert.equal(!!info, true, 'getInstalledComponentInfo能获取到组件信息');
             if (info) {
                 assert.equal(info.componentName, '吐司提示', '组件显示名正确');
                 assert.equal(info.componentCode, componentCode, '组件code正确');
-                assert.equal(info.version, '1.2.3', '组件版本正确');
+                assert.equal(info.componentVersion, '1.2.3', '组件版本正确');
                 assert.equal(JSON.stringify(info.copiedFiles), JSON.stringify(copiedFiles), '已安装文件列表正确');
             }
 
