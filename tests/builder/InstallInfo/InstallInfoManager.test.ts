@@ -65,97 +65,52 @@ const test_03 = () => {
             // 准备一个伪造
             const groupPath = join(projectPath, 'extensions', pluginName, 'packages', 'textUiItems');
             await fs.promises.mkdir(groupPath, { recursive: true });
-            const compName = 'toast_item';
-            const zipFilePath = join(groupPath, `${compName}.zip`);
-            const metaPath = join(groupPath, `${compName}.setup.json`);
+            const componentCode = 'toast_item';
+            const zipFilePath = join(groupPath, `${componentCode}.zip`);
+            const metaPath = join(groupPath, `${componentCode}.setup.json`);
             const metaData: IComponentInfo = {
                 // 支持顶层结构或 userData 结构
-                code: compName,
-                displayName: '吐司提示',
-                version: '1.2.3',
+                componentCode: componentCode,
+                componentName: '吐司提示',
+                componentVersion: '1.2.3',
                 description: '显示一个简单的文本提示',
                 author: '测试作者',
                 category: 'UI',
                 tags: ['提示', '文本'],
-                path: join('bundle_factory', 'item_views', 'textUiItems', compName),
+                path: join('bundle_factory', 'item_views', 'textUiItems', componentCode),
                 dependencies: [],
                 files: [
-                    join('bundle_factory', 'item_views', 'textUiItems', compName, 'toast_item.prefab')
+                    join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
                 ],
             };
             await fs.promises.writeFile(metaPath, JSON.stringify(metaData, null, 2), 'utf-8');
             const copiedFiles = [
-                join('bundle_factory', 'item_views', 'textUiItems', compName, 'toast_item.prefab')
+                join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
             ];
 
             // 记录安装信息
-            await iim.recordInstallation(zipFilePath, compName, copiedFiles);
+            await iim.recordInstallation(zipFilePath, componentCode, copiedFiles);
 
             // 验证 getInstalledComponentCodes / isComponentInstalled / getComponentInfo
             const codes = await iim.getInstalledComponentCodes();
             assert.equal(Array.isArray(codes), true, 'getInstalledComponentCodes返回数组');
-            assert.equal(codes.includes(compName), true, '组件代码已包含在已安装列表中');
+            assert.equal(codes.includes(componentCode), true, '组件代码已包含在已安装列表中');
 
-            const installed = await iim.isComponentInstalled(compName);
+            const installed = await iim.isComponentInstalled(componentCode);
             assert.equal(installed, true, 'isComponentInstalled判断正确');
 
-            const info = await iim.getComponentInfo(compName);
+            const info = await iim.getComponentInfo(componentCode);
             assert.equal(!!info, true, 'getComponentInfo能获取到组件信息');
             if (info) {
                 assert.equal(info.componentName, '吐司提示', '组件显示名正确');
-                assert.equal(info.componentCode, compName, '组件code正确');
+                assert.equal(info.componentCode, componentCode, '组件code正确');
                 assert.equal(info.version, '1.2.3', '组件版本正确');
                 assert.equal(JSON.stringify(info.copiedFiles), JSON.stringify(copiedFiles), '已安装文件列表正确');
             }
-            resolve(true);
-        });
-    });
-}
-
-const test_04 = () => {
-    return new Promise((resolve, reject) => {
-        test('测试InstallInfoManager的安装记录与查询', async () => {
-            const pluginName = 'test_04';
-            const iim = new InstallInfoManager(pluginName);
-            const projectPath = getProjectPath();
-
-            // 准备一个伪造
-            const groupPath = join(projectPath, 'extensions', pluginName, 'packages', 'textUiItems');
-            await fs.promises.mkdir(groupPath, { recursive: true });
-            const compName = 'toast_item';
-            const zipFilePath = join(groupPath, `${compName}.zip`);
-            const metaPath = join(groupPath, `${compName}.setup.json`);
-            const metaData: IComponentInfo = {
-                // 支持顶层结构或 userData 结构
-                code: compName,
-                displayName: '吐司提示',
-                version: '1.2.3',
-                description: '显示一个简单的文本提示',
-                author: '测试作者',
-                category: 'UI',
-                tags: ['提示', '文本'],
-                path: join('bundle_factory', 'item_views', 'textUiItems', compName),
-                dependencies: [],
-                files: [
-                    join('bundle_factory', 'item_views', 'textUiItems', compName, 'toast_item.prefab')
-                ],
-            };
-            await fs.promises.writeFile(metaPath, JSON.stringify(metaData, null, 2), 'utf-8');
-
-            const copiedFiles = [
-                join('bundle_factory', 'item_views', 'textUiItems', compName, 'toast_item.prefab')
-            ];
-
-            // 记录安装信息
-            await iim.recordInstallation(zipFilePath, compName, copiedFiles);
-            // 
-            const installed = await iim.isComponentInstalled(compName);
-            assert.equal(installed, true, '移除前isComponentInstalled判断正确');
-
 
             // 验证 removeComponent 后状态
-            await iim.removeComponentRecord(compName);
-            const installedAfterRemove = await iim.isComponentInstalled(compName);
+            await iim.removeComponentRecord(componentCode);
+            const installedAfterRemove = await iim.isComponentInstalled(componentCode);
             assert.equal(installedAfterRemove, false, '组件移除后未安装');
 
             // 日志包含写入记录（不做严格等值比较，以免受其他测试影响）
@@ -171,8 +126,7 @@ let functions = [
     test_00,
     test_01,
     test_02,
-    test_03,
-    test_04
+    test_03
 ]
 
 describe('InstallInfoManager功能', async () => {

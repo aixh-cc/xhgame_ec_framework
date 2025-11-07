@@ -25,27 +25,25 @@ export interface IInstallInfoRes {
 
 export interface IComponentMetadata {
     componentCode: string;
-    // componentId: string;
-    componentDisplayName: string;
+    componentName: string;
     componentVersion: string;
 }
 
 export interface InstalledComp {
-    componentName: string;
-    // componentId: string;
     componentCode: string;
-    version: string;
+    componentName: string;
+    componentVersion: string;
     installedAt: string;
     copiedFiles: string[];
 }
 // 组件信息接口定义
 export interface IComponentInfo {
     /** 组件code标识 */
-    code: string;
+    componentCode: string;
     /** 包显示名,中文字符 */
-    displayName: string;
+    componentName: string;
     /** 版本号 */
-    version: string;
+    componentVersion: string;
     /** 说明 */
     description: string;
     /** 作者 */
@@ -60,18 +58,8 @@ export interface IComponentInfo {
     dependencies: string[];
     /** 安装文件 */
     files: string[];
-    /** 安装状态 */
-    installStatus?: string;
-    /** 备份状态 */
-    backupStatus?: string;
-    /** 是否需要更新 */
-    needsUpdate?: boolean;
     /** 评分 */
     stars?: number;
-    /** 包ID */
-    id?: number;
-    /** 使用方法 */
-    usage?: string;
 }
 
 export interface IComponentInfoWithStatus extends IComponentInfo {

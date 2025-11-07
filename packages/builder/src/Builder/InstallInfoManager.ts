@@ -95,16 +95,14 @@ export class InstallInfoManager {
     /**
      * 从 setup.json 文件中提取组件元数据
      */
-    async extractComponentMetadata(zipFilePath: string, compName: string): Promise<IComponentMetadata> {
-        let componentCode = compName;
-        // let componentId = compName;
-        let componentDisplayName = compName;
+    async extractComponentMetadata(zipFilePath: string, componentCode: string): Promise<IComponentMetadata> {
+        let componentName = componentCode;
         let componentVersion = '1.0.0';
 
         try {
             const baseDir = dirname(zipFilePath);
             // 优先读取 setup.json，其次兼容旧的 .zip.meta
-            const setupJsonPath = join(baseDir, `${compName}.setup.json`);
+            const setupJsonPath = join(baseDir, `${componentCode}.setup.json`);
             const legacyZipMetaPath = zipFilePath + '.meta';
 
             let raw: any = null;
@@ -120,7 +118,7 @@ export class InstallInfoManager {
                 const data = raw.userData || raw; // 兼容两种结构
                 componentCode = data.code || data.name || componentCode;
                 // componentId = data.code || data.name || componentId;
-                componentDisplayName = data.displayName || componentDisplayName;
+                componentName = data.displayName || componentName;
                 componentVersion = data.version || componentVersion;
             }
         } catch (error) {
@@ -130,7 +128,7 @@ export class InstallInfoManager {
         return {
             componentCode,
             // componentId,
-            componentDisplayName,
+            componentName,
             componentVersion
         };
     }
@@ -140,24 +138,24 @@ export class InstallInfoManager {
      */
     async recordInstallation(
         zipFilePath: string,
-        compName: string,
+        componentCode: string,
         copiedFiles: string[]
     ): Promise<void> {
         try {
             const installInfo = await this.readInstallInfo();
 
             // 从 meta 中获取组件元数据
-            const metadata = await this.extractComponentMetadata(zipFilePath, compName);
+            const metadata = await this.extractComponentMetadata(zipFilePath, componentCode);
 
             // 更新 installedComponents 列表（去重后追加）
             installInfo.installedComponents = installInfo.installedComponents.filter(
                 (c: any) => c.componentCode !== metadata.componentCode
             );
             installInfo.installedComponents.push({
-                componentName: metadata.componentDisplayName,
+                componentName: metadata.componentName,
                 // componentId: metadata.componentId,
                 componentCode: metadata.componentCode,
-                version: metadata.componentVersion,
+                componentVersion: metadata.componentVersion,
                 copiedFiles: copiedFiles,
                 installedAt: new Date().toISOString()
             });
