@@ -20,7 +20,7 @@ export interface IInstallInfo {
 export interface IInstallInfoRes {
     success: boolean;
     error?: string;
-    installInfo?: any
+    installInfo?: IInstallInfo
 }
 
 export interface IComponentMetadata {

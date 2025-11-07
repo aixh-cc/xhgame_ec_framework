@@ -30,7 +30,7 @@ export class Handles {
             }
             // 当前组件安装情况
             const installInfoManager = Handles.getInstallInfoManager(pluginName);
-            const installInfo = await installInfoManager.checkInstallExists();
+            const installInfo = await installInfoManager.readInstallInfo();
             let installedLists = installInfo?.installedComponents?.map((item: any) => item.componentCode) || []
             console.log('installedLists', installedLists)
             const items = fs.readdirSync(groupPath);
@@ -353,7 +353,7 @@ export class Handles {
             const assetsPath = join(projectPath, 'assets');
 
             const installInfoManager = Handles.getInstallInfoManager(pluginName);
-            const installInfo = await installInfoManager.checkInstallExists();
+            const installInfo = await installInfoManager.readInstallInfo();
             if (!installInfo) {
                 return {
                     success: false,
@@ -450,7 +450,12 @@ export class Handles {
         }
     }
 
-    static async checkInstallExists(param: any): Promise<IInstallInfoRes> {
+    /**
+     * 读取插件安装信息
+     * @param param 包含插件名的参数对象
+     * @returns 包含安装信息或错误信息的响应对象
+     */
+    static async readInstallInfo(param: any): Promise<IInstallInfoRes> {
         const { pluginName } = param;
         if (!pluginName) {
             return {
@@ -458,28 +463,11 @@ export class Handles {
                 error: '插件名不能为空',
             };
         }
-        try {
-            const installInfoManager = Handles.getInstallInfoManager(pluginName);
-            const installInfo = await installInfoManager.checkInstallExists();
-
-            if (installInfo) {
-                return {
-                    success: true,
-                    installInfo: installInfo
-                };
-            } else {
-                return {
-                    success: true,
-                    installInfo: []
-                };
-            }
-
-        } catch (error) {
-            console.error(`[xhgame_builder] 检查备份文件失败:`, error);
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : String(error),
-            };
-        }
+        const installInfoManager = Handles.getInstallInfoManager(pluginName);
+        const installInfo = await installInfoManager.readInstallInfo();
+        return {
+            success: true,
+            installInfo: installInfo
+        };
     }
 }

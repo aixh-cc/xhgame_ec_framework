@@ -70,28 +70,12 @@ export class InstallInfoManager {
         return this.logs
     }
     /**
-       * 检查安装信息是否存在
-       */
-    async checkInstallExists(): Promise<IInstallInfo | null> {
-        try {
-            if (this.exists()) {
-                return await this.readInstallInfo();
-            }
-            return null;
-        } catch (error) {
-            console.warn(`[${this.pluginName}] 检查安装信息失败:`, error);
-            return null;
-        }
-    }
-
-    /**
      * 获取已安装组件列表
      */
     async getInstalledComponentCodes(): Promise<string[]> {
         const installInfo = await this.readInstallInfo();
         return installInfo.installedComponents.map(comp => comp.componentCode);
     }
-
     /**
      * 检查组件是否已安装
      */

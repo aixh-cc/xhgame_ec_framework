@@ -42,7 +42,7 @@ const test_02 = () => {
             })
             assert.equal(is_write_success, true, 'installedInfoManager的写入正常')
             // 检查写入的文件内容是否正确
-            let installInfo = await installedInfoManager.checkInstallExists()
+            let installInfo = await installedInfoManager.readInstallInfo()
             if (installInfo) {
                 assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
                 assert.equal(installInfo.installedComponents.length, 0, 'installedInfoManager的获取已安装组件列表正常')
