@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes } from './Defined';
+import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta } from './Defined';
 import { getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
 
@@ -62,21 +62,26 @@ export class LocalHandles {
             // 当前组件安装情况
             const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
             const installInfo = await installInfoManager.readInstallInfo();
-            let installedLists = installInfo?.installedComponentMetas?.map((item: any) => item.componentCode) || []
-            console.log('installedLists', installedLists)
+            const installedLists = installInfo?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
             const items = fs.readdirSync(groupPath);
             const list: IComponentInfoWithStatus[] = [];
-
             // 新逻辑：检测并读取 *.setup.json 文件，取消从 .meta 中读取
             for (const item of items) {
                 // 仅处理以 .setup.json 结尾的文件（例如：toast_item.setup.json）
                 if (!item.endsWith('.setup.json')) continue;
-                const setupPath = join(groupPath, item);
+                const setupFilePath = join(groupPath, item);
                 try {
-                    const content = await fs.promises.readFile(setupPath, 'utf-8');
-                    const json: IComponentInfoWithStatus = JSON.parse(content);
+                    const content = await fs.promises.readFile(setupFilePath, 'utf-8');
+                    const json: IComponentInfo = JSON.parse(content);
                     if (json && typeof json === 'object') {
-                        list.push(json);
+                        // 带上 installStatus 和 backupStatus
+                        const info: IComponentInfoWithStatus = {
+                            ...json,
+                            // 状态字段
+                            installStatus: installedLists.indexOf(json.componentCode || basename(item, '.setup.json')) > -1 ? 'has' : 'none',
+                            backupStatus: 'none'
+                        };
+                        list.push(info);
                     }
                 } catch (error) {
                     console.error(`读取或解析 ${item} 失败:`, error);
