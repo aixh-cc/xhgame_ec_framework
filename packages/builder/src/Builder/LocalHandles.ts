@@ -5,15 +5,15 @@ import { IComponentInfoWithStatus, IgetGroupComponentListRes, IInstallInfoRes, I
 import { getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
 
-export class Handles {
+export class LocalHandles {
 
     static managerMap: Map<string, InstallInfoManager> = new Map();
 
     private static getInstallInfoManager(pluginName: string): InstallInfoManager {
-        if (!Handles.managerMap.has(pluginName)) {
-            Handles.managerMap.set(pluginName, new InstallInfoManager(pluginName));
+        if (!LocalHandles.managerMap.has(pluginName)) {
+            LocalHandles.managerMap.set(pluginName, new InstallInfoManager(pluginName));
         }
-        return Handles.managerMap.get(pluginName)!;
+        return LocalHandles.managerMap.get(pluginName)!;
     }
 
 
@@ -30,7 +30,7 @@ export class Handles {
                 error: '插件名不能为空',
             };
         }
-        const installInfoManager = Handles.getInstallInfoManager(pluginName);
+        const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
         const installInfo = await installInfoManager.readInstallInfo();
         if (!installInfoManager.exists()) {
             installInfoManager.writeInstallInfo(installInfo);
@@ -60,7 +60,7 @@ export class Handles {
                 };
             }
             // 当前组件安装情况
-            const installInfoManager = Handles.getInstallInfoManager(pluginName);
+            const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
             const installInfo = await installInfoManager.readInstallInfo();
             let installedLists = installInfo?.installedComponents?.map((item: any) => item.componentCode) || []
             console.log('installedLists', installedLists)
@@ -325,7 +325,7 @@ export class Handles {
 
             // 记录安装信息到配置文件 copiedFiles等到xhgame_builder-installInfo.json中的 installedComponents
             try {
-                const installInfoManager = Handles.getInstallInfoManager(pluginName);
+                const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
                 await installInfoManager.recordInstallation(zipFilePath, compName, copiedFiles);
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
@@ -383,7 +383,7 @@ export class Handles {
             const projectPath = getProjectPath()
             const assetsPath = join(projectPath, 'assets');
 
-            const installInfoManager = Handles.getInstallInfoManager(pluginName);
+            const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
             const installInfo = await installInfoManager.readInstallInfo();
             if (!installInfo) {
                 return {
@@ -454,7 +454,7 @@ export class Handles {
 
             // 从配置中移除组件记录 
             try {
-                const installInfoManager = Handles.getInstallInfoManager(pluginName);
+                const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
                 await installInfoManager.removeComponentRecord(compName);
             } catch (error) {
                 console.warn(`[xhgame_builder] 移除组件记录失败:`, error);
