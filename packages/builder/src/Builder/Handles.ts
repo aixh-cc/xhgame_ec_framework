@@ -309,7 +309,7 @@ export class Handles {
             // 记录安装信息到配置文件 copiedFiles等到xhgame_builder-installInfo.json中的 installedComponents
             try {
                 const installInfoManager = Handles.getInstallInfoManager(pluginName);
-                await installInfoManager.recordInstallation(zipFilePath, compName, targetPath, copiedFiles);
+                await installInfoManager.recordInstallation(zipFilePath, compName, copiedFiles);
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
             }

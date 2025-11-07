@@ -1,5 +1,15 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2025-11-06T05:20:37.577Z",
-  "installedComponents": []
+  "lastUpdated": "2025-11-07T04:26:22.203Z",
+  "installedComponents": [
+    {
+      "componentName": "吐司提示",
+      "componentCode": "toast_item",
+      "version": "1.2.3",
+      "copiedFiles": [
+        "bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab"
+      ],
+      "installedAt": "2025-11-07T04:26:22.203Z"
+    }
+  ]
 }

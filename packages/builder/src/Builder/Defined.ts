@@ -30,14 +30,14 @@ export interface IInstallInfoRes {
 
 export interface IComponentMetadata {
     componentCode: string;
-    componentId: string;
+    // componentId: string;
     componentDisplayName: string;
     componentVersion: string;
 }
 
 export interface InstalledComp {
     componentName: string;
-    componentId: string;
+    // componentId: string;
     componentCode: string;
     version: string;
     installedAt: string;
