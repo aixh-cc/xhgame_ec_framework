@@ -92,3 +92,56 @@ export const getGroupPath = (pluginName: string, group: string) => {
 };
 
 
+// 先检查是否有同名文件冲突
+export async function checkConflicts(conflictFiles: string[], srcDir: string, destDir: string, relativePath: string = '') {
+    const items = await fs.promises.readdir(srcDir, { withFileTypes: true });
+
+    for (const item of items) {
+        const destPath = join(destDir, item.name);
+        const relPath = join(relativePath, item.name);
+
+        // 跳过所有 .meta 文件和文件夹
+        if (item.name.endsWith('.meta')) {
+            continue;
+        }
+
+        if (item.isDirectory()) {
+            // 检查目录下的文件
+            const srcSubDir = join(srcDir, item.name);
+            await checkConflicts(conflictFiles, srcSubDir, destPath, relPath);
+        } else {
+            // 检查文件是否已存在
+            try {
+                await fs.promises.access(destPath);
+                conflictFiles.push(relPath);
+            } catch (error) {
+                // 文件不存在，没有冲突
+            }
+        }
+    }
+}
+
+
+export async function copyDirectory(copiedFiles: string[], srcDir: string, destDir: string, relativePath: string = '') {
+    const items = await fs.promises.readdir(srcDir, { withFileTypes: true });
+
+    for (const item of items) {
+        const srcPath = join(srcDir, item.name);
+        const destPath = join(destDir, item.name);
+        const relPath = join(relativePath, item.name);
+        if (item.isDirectory()) {
+            // 文件夹的meta可以跳过
+            if (item.name.endsWith('.meta')) {
+                continue;
+            }
+            // 创建目录
+            await fs.promises.mkdir(destPath, { recursive: true });
+            await copyDirectory(copiedFiles, srcPath, destPath, relPath);
+        } else {
+            // 复制文件
+            await fs.promises.copyFile(srcPath, destPath);
+            copiedFiles.push(relPath);
+            console.log(`[xhgame_builder] 复制文件: ${relPath}`);
+        }
+    }
+}

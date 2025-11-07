@@ -2,8 +2,10 @@ import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta } from './Defined';
-import { getGroupPath, getProjectPath } from './Util';
+import { checkConflicts, copyDirectory, getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
+
+
 
 export class LocalHandles {
 
@@ -101,6 +103,11 @@ export class LocalHandles {
             };
         }
     }
+    /**
+     * 安装组件
+     * @param param 包含组件码、插件名和分组的参数对象
+     * @returns 包含安装结果或错误信息的响应对象
+     */
     static async installComponent(param: { componentCode: string, pluginName: string, group: string }): Promise<IInstallRes> {
 
         const { componentCode, pluginName, group } = param;
@@ -120,7 +127,11 @@ export class LocalHandles {
 
             // 解压源目录（如果是zip）或使用旧目录模式
             let assetsSourcePath = legacyDirPath;
-            if (fs.existsSync(zipFilePath)) {
+            // 如果存在已手动解压的文件夹,优先使用
+            if (fs.existsSync(legacyDirPath)) {
+                console.log(`[xhgame_builder] 使用目录模式: ${legacyDirPath}`);
+                assetsSourcePath = legacyDirPath;
+            } else if (fs.existsSync(zipFilePath)) {
                 console.log(`[xhgame_builder] 发现zip包，准备解压: ${zipFilePath}`);
                 extractTempDir = join(groupPath, '__extract', componentCode);
                 await fs.promises.mkdir(extractTempDir, { recursive: true });
@@ -129,6 +140,7 @@ export class LocalHandles {
                 zip.extractAllTo(extractTempDir, true);
                 console.log(`[xhgame_builder] 解压完成到: ${extractTempDir}`);
 
+                // todo 排查这段
                 // 选择正确的根目录：
                 // 1) 若存在单个顶级目录（排除 __MACOSX），以该目录为根
                 // 2) 若根目录下存在 assets，则以 assets 作为源
@@ -141,9 +153,6 @@ export class LocalHandles {
                 }
                 const extractedAssetsDir = join(baseRoot, 'assets');
                 assetsSourcePath = fs.existsSync(extractedAssetsDir) ? extractedAssetsDir : baseRoot;
-            } else if (fs.existsSync(legacyDirPath)) {
-                console.log(`[xhgame_builder] 使用旧目录模式: ${legacyDirPath}`);
-                assetsSourcePath = legacyDirPath;
             } else {
                 return {
                     success: false,
@@ -164,39 +173,9 @@ export class LocalHandles {
             // 复制所需文件到项目 assets 目录
             const copiedFiles: string[] = [];
             const conflictFiles: string[] = [];
-            const missingFiles: string[] = [];
-
-            // 先检查是否有同名文件冲突
-            async function checkConflicts(srcDir: string, destDir: string, relativePath: string = '') {
-                const items = await fs.promises.readdir(srcDir, { withFileTypes: true });
-
-                for (const item of items) {
-                    const destPath = join(destDir, item.name);
-                    const relPath = join(relativePath, item.name);
-
-                    // 跳过所有 .meta 文件和文件夹
-                    if (item.name.endsWith('.meta')) {
-                        continue;
-                    }
-
-                    if (item.isDirectory()) {
-                        // 检查目录下的文件
-                        const srcSubDir = join(srcDir, item.name);
-                        await checkConflicts(srcSubDir, destPath, relPath);
-                    } else {
-                        // 检查文件是否已存在
-                        try {
-                            await fs.promises.access(destPath);
-                            conflictFiles.push(relPath);
-                        } catch (error) {
-                            // 文件不存在，没有冲突
-                        }
-                    }
-                }
-            }
 
             // 旧模式或无meta：复制整个源目录（保持兼容）
-            await checkConflicts(assetsSourcePath, targetPath);
+            await checkConflicts(conflictFiles, assetsSourcePath, targetPath);
             if (conflictFiles.length > 0) {
                 console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
                 return {
@@ -205,61 +184,24 @@ export class LocalHandles {
                 };
             }
             console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
-            await copyDirectory(assetsSourcePath, targetPath);
-
-
-            async function copyDirectory(srcDir: string, destDir: string, relativePath: string = '') {
-                const items = await fs.promises.readdir(srcDir, { withFileTypes: true });
-
-                for (const item of items) {
-                    const srcPath = join(srcDir, item.name);
-                    const destPath = join(destDir, item.name);
-                    const relPath = join(relativePath, item.name);
-
-
-
-                    if (item.isDirectory()) {
-                        // 所有 .meta 文件夹可以跳过
-                        if (item.name.endsWith('.meta')) {
-                            continue;
-                        }
-                        // 创建目录
-                        await fs.promises.mkdir(destPath, { recursive: true });
-                        await copyDirectory(srcPath, destPath, relPath);
-                    } else {
-                        // 复制文件
-                        await fs.promises.copyFile(srcPath, destPath);
-                        copiedFiles.push(relPath);
-                        console.log(`[xhgame_builder] 复制文件: ${relPath}`);
-                    }
-                }
-            }
-
+            await copyDirectory(copiedFiles, assetsSourcePath, targetPath);
             console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
-
-            // 记录安装信息到配置文件 copiedFiles等到xhgame_builder-installInfo.json中的 installedComponents
+            // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
                 const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
-                const setupPath = join(groupPath, componentCode);
-                const content = await fs.promises.readFile(setupPath, 'utf-8');
-                const json: IComponentInfoWithStatus = JSON.parse(content);
-                await installInfoManager.updateComponentRecord(componentCode, json.componentName, json.componentVersion, copiedFiles);
+                const setupFilePath = join(groupPath, componentCode);
+                const content = await fs.promises.readFile(setupFilePath, 'utf-8');
+                const json: IComponentInfo = JSON.parse(content);
+                await installInfoManager.updateInstalledComponentMetas(componentCode, json.componentName, json.componentVersion, copiedFiles);
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
             }
-
-            // 记录安装信息到配置文件 copiedFiles等到xhgame_builder-installInfo.json中的 installedComponents
-
-
-
             return {
                 success: true,
-                error: `组件 ${componentCode} 从内置资源安装成功！`,
-                // copiedFiles: copiedFiles
+                error: `组件 ${componentCode} 安装成功！`,
             };
-
         } catch (error) {
-            console.error(`[xhgame_builder] 从内置资源安装组件失败: `, error);
+            console.error(`[xhgame_builder] 组件失败: `, error);
             return {
                 success: false,
                 error: error instanceof Error ? error.message : String(error)

@@ -94,7 +94,7 @@ export class InstallInfoManager {
     /**
      * 更新组件安装信息
      */
-    async updateComponentRecord(
+    async updateInstalledComponentMetas(
         componentCode: string,
         componentName: string,
         componentVersion: string,

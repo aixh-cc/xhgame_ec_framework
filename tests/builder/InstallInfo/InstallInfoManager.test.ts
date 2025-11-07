@@ -89,7 +89,7 @@ const test_03 = () => {
             ];
 
             // 记录安装信息
-            await iim.updateComponentRecord(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles);
+            await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles);
 
             // 验证 
             const codes = await iim.getInstalledComponentCodes();
