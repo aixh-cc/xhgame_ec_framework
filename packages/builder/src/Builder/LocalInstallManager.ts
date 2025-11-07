@@ -2,20 +2,20 @@ import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta } from './Defined';
-import { checkConflicts, copyDirectory, getGroupPath, getProjectPath } from './Util';
-import { InstallInfoManager } from './InstallInfoManager';
+import { checkConflicts, cleanupEmptyDirs, copyDirectory, getGroupPath, getProjectPath } from './Util';
+import { InstallMetaManager } from './InstallMetaManager';
+/**
+ * 本地组件安装
+ */
+export class LocalInstallManager {
 
+    static managerMap: Map<string, InstallMetaManager> = new Map();
 
-
-export class LocalHandles {
-
-    static managerMap: Map<string, InstallInfoManager> = new Map();
-
-    static getInstallInfoManager(pluginName: string): InstallInfoManager {
-        if (!LocalHandles.managerMap.has(pluginName)) {
-            LocalHandles.managerMap.set(pluginName, new InstallInfoManager(pluginName));
+    static getInstallMetaManager(pluginName: string): InstallMetaManager {
+        if (!LocalInstallManager.managerMap.has(pluginName)) {
+            LocalInstallManager.managerMap.set(pluginName, new InstallMetaManager(pluginName));
         }
-        return LocalHandles.managerMap.get(pluginName)!;
+        return LocalInstallManager.managerMap.get(pluginName)!;
     }
 
 
@@ -32,7 +32,7 @@ export class LocalHandles {
                 error: '插件名不能为空',
             };
         }
-        const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
+        const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
         const installInfo = await installInfoManager.readInstallInfo();
         if (!installInfoManager.exists()) {
             installInfoManager.writeInstallInfo(installInfo);
@@ -62,7 +62,7 @@ export class LocalHandles {
                 };
             }
             // 当前组件安装情况
-            const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
+            const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
             const installInfo = await installInfoManager.readInstallInfo();
             const installedLists = installInfo?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
             const items = fs.readdirSync(groupPath);
@@ -188,7 +188,7 @@ export class LocalHandles {
             console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
-                const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
+                const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
                 const setupFilePath = join(groupPath, `${componentCode}.setup.json`);
                 const content = await fs.promises.readFile(setupFilePath, 'utf-8');
                 const json: IComponentInfo = JSON.parse(content);
@@ -239,15 +239,12 @@ export class LocalHandles {
                 error: '组件名或插件名不能为空'
             };
         }
-
-        console.log(`[xhgame_builder] 安装卸载组件请求: ${componentCode}`, param);
-
         try {
             // 获取项目路径
             const projectPath = getProjectPath()
             const assetsPath = join(projectPath, 'assets');
 
-            const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
+            const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
             const installInfo = await installInfoManager.readInstallInfo();
             if (!installInfo) {
                 return {
@@ -263,17 +260,12 @@ export class LocalHandles {
                     error: `未找到组件 ${componentCode} 的安装记录`
                 };
             }
-
-            // 备份和删除文件
-            // const backedUpFiles: string[] = [];
+            // 删除文件
             const deletedFiles: string[] = [];
             const notFoundFiles: string[] = [];
 
             for (const relativeFilePath of component.copiedFiles) {
                 const fullFilePath = join(assetsPath, relativeFilePath);
-                const metaFilePath = fullFilePath + '.meta';
-                const relativeMetaFilePath = relativeFilePath + '.meta';
-
                 try {
                     // 检查文件是否存在
                     await fs.promises.access(fullFilePath);
@@ -287,55 +279,20 @@ export class LocalHandles {
                     notFoundFiles.push(relativeFilePath);
                 }
             }
-
-            // 清理空目录
-            const cleanupEmptyDirs = async (dirPath: string) => {
-                try {
-                    const items = await fs.promises.readdir(dirPath);
-
-                    // 递归清理子目录
-                    for (const item of items) {
-                        const itemPath = join(dirPath, item);
-                        const stat = await fs.promises.stat(itemPath);
-                        if (stat.isDirectory()) {
-                            await cleanupEmptyDirs(itemPath);
-                        }
-                    }
-
-                    // 检查目录是否为空
-                    const remainingItems = await fs.promises.readdir(dirPath);
-                    if (remainingItems.length === 0) {
-                        await fs.promises.rmdir(dirPath);
-                        console.log(`[xhgame_builder] 删除空目录: ${dirPath}`);
-                    }
-                } catch (error) {
-                    // 忽略清理目录时的错误
-                }
-            };
-
             // 从assets目录开始清理空目录
             await cleanupEmptyDirs(assetsPath);
 
             // 从配置中移除组件记录 
             try {
-                const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
+                const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
                 await installInfoManager.removeComponentRecord(componentCode);
             } catch (error) {
                 console.warn(`[xhgame_builder] 移除组件记录失败:`, error);
-                // 不影响卸载结果，只是记录移除失败
             }
-
             console.log(`[xhgame_builder] 组件卸载完成: ${component.componentName}`);
-
             return {
                 success: true,
-                // error: `组件 ${component.componentName} 卸载成功！\n备份位置: ${backupFolderName}`,
-                // backupPath: componentBackupDir,
-                // backedUpFiles: backedUpFiles,
-                // deletedFiles: deletedFiles,
-                // notFoundFiles: notFoundFiles
             };
-
         } catch (error) {
             console.error(`[xhgame_builder] 卸载组件失败: `, error);
             return {
@@ -344,5 +301,4 @@ export class LocalHandles {
             };
         }
     }
-
 }

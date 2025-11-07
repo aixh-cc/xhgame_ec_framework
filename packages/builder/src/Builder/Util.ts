@@ -145,3 +145,29 @@ export async function copyDirectory(copiedFiles: string[], srcDir: string, destD
         }
     }
 }
+
+
+// 清理空目录
+export const cleanupEmptyDirs = async (dirPath: string) => {
+    try {
+        const items = await fs.promises.readdir(dirPath);
+
+        // 递归清理子目录
+        for (const item of items) {
+            const itemPath = join(dirPath, item);
+            const stat = await fs.promises.stat(itemPath);
+            if (stat.isDirectory()) {
+                await cleanupEmptyDirs(itemPath);
+            }
+        }
+
+        // 检查目录是否为空
+        const remainingItems = await fs.promises.readdir(dirPath);
+        if (remainingItems.length === 0) {
+            await fs.promises.rmdir(dirPath);
+            console.log(`[xhgame_builder] 删除空目录: ${dirPath}`);
+        }
+    } catch (error) {
+        // 忽略清理目录时的错误
+    }
+};
