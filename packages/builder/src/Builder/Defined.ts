@@ -1,8 +1,8 @@
-export interface IGetComponentInfosRes {
+export interface IgetGroupComponentListRes {
     success: boolean,
     error?: string,
     groupPath: string
-    componentInfos: IComponentInfoWithStatus[]
+    list: IComponentInfoWithStatus[]
 }
 export interface IInstallRes {
     success: boolean,

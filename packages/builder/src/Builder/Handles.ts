@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IComponentInfoWithStatus, IGetComponentInfosRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
+import { IComponentInfoWithStatus, IgetGroupComponentListRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
 import { getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
 
@@ -16,8 +16,39 @@ export class Handles {
         return Handles.managerMap.get(pluginName)!;
     }
 
-    static async getComponentInfos(pluginName: string, group: string): Promise<IGetComponentInfosRes> {
-        console.log('getComponentInfos', pluginName, group)
+
+    /**
+     * 读取插件安装信息
+     * @param param 包含插件名的参数对象
+     * @returns 包含安装信息或错误信息的响应对象
+     */
+    static async readInstallInfo(param: { pluginName: string }): Promise<IInstallInfoRes> {
+        const { pluginName } = param;
+        if (!pluginName) {
+            return {
+                success: false,
+                error: '插件名不能为空',
+            };
+        }
+        const installInfoManager = Handles.getInstallInfoManager(pluginName);
+        const installInfo = await installInfoManager.readInstallInfo();
+        if (!installInfoManager.exists()) {
+            installInfoManager.writeInstallInfo(installInfo);
+        }
+        return {
+            success: true,
+            installInfo: installInfo
+        };
+    }
+
+    /**
+     * 获取插件分组下的组件列表
+     * @param pluginName 插件名称
+     * @param group 分组名称
+     * @returns 包含组件列表或错误信息的响应对象
+     */
+    static async getGroupComponentList(pluginName: string, group: string): Promise<IgetGroupComponentListRes> {
+        console.log('getGroupComponentList', pluginName, group)
         try {
             const groupPath = getGroupPath(pluginName, group);
             if (!fs.existsSync(groupPath)) {
@@ -25,7 +56,7 @@ export class Handles {
                     success: false,
                     error: 'Packages directory not found',
                     groupPath: '',
-                    componentInfos: []
+                    list: []
                 };
             }
             // 当前组件安装情况
@@ -34,7 +65,7 @@ export class Handles {
             let installedLists = installInfo?.installedComponents?.map((item: any) => item.componentCode) || []
             console.log('installedLists', installedLists)
             const items = fs.readdirSync(groupPath);
-            const componentInfos: IComponentInfoWithStatus[] = [];
+            const list: IComponentInfoWithStatus[] = [];
 
             // 新逻辑：检测并读取 *.setup.json 文件，取消从 .meta 中读取
             for (const item of items) {
@@ -61,7 +92,7 @@ export class Handles {
                             installStatus: installedLists.indexOf(json.code || basename(item, '.setup.json')) > -1 ? 'has' : 'none',
                             backupStatus: 'none'
                         };
-                        componentInfos.push(info);
+                        list.push(info);
                     }
                 } catch (error) {
                     console.error(`读取或解析 ${item} 失败:`, error);
@@ -70,14 +101,14 @@ export class Handles {
             return {
                 success: true,
                 groupPath,
-                componentInfos
+                list
             };
         } catch (error) {
             return {
                 success: false,
                 error: 'Failed to get items',
                 groupPath: '',
-                componentInfos: []
+                list: []
             };
         }
     }
@@ -450,24 +481,4 @@ export class Handles {
         }
     }
 
-    /**
-     * 读取插件安装信息
-     * @param param 包含插件名的参数对象
-     * @returns 包含安装信息或错误信息的响应对象
-     */
-    static async readInstallInfo(param: any): Promise<IInstallInfoRes> {
-        const { pluginName } = param;
-        if (!pluginName) {
-            return {
-                success: false,
-                error: '插件名不能为空',
-            };
-        }
-        const installInfoManager = Handles.getInstallInfoManager(pluginName);
-        const installInfo = await installInfoManager.readInstallInfo();
-        return {
-            success: true,
-            installInfo: installInfo
-        };
-    }
 }

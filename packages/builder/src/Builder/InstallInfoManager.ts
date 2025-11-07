@@ -29,7 +29,7 @@ export class InstallInfoManager {
     async readInstallInfo(): Promise<IInstallInfo> {
         const defaultInstallInfo: IInstallInfo = {
             version: '1.0.0',
-            lastUpdated: new Date().toISOString(),
+            lastUpdated: '',
             installedComponents: []
         };
 
