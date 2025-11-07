@@ -189,10 +189,15 @@ export class LocalHandles {
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
                 const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
-                const setupFilePath = join(groupPath, componentCode);
+                const setupFilePath = join(groupPath, `${componentCode}.setup.json`);
                 const content = await fs.promises.readFile(setupFilePath, 'utf-8');
                 const json: IComponentInfo = JSON.parse(content);
-                await installInfoManager.updateInstalledComponentMetas(componentCode, json.componentName, json.componentVersion, copiedFiles);
+                await installInfoManager.updateInstalledComponentMetas(
+                    componentCode,
+                    json.componentName,
+                    json.componentVersion,
+                    copiedFiles
+                );
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
             }

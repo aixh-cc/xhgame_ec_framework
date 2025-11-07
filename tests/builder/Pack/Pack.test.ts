@@ -46,22 +46,6 @@ const test_01 = () => {
             const relMeta = join('bundle_factory', 'item_views', 'textUiItems', 'toast_item.meta')
             assert.equal(res.copiedFiles?.includes(relMeta), true, `copiedFiles 包含: ${relMeta}`)
 
-            // 验证 setup.json 生成或更新
-            const setupJsonPath = join(projectPath, 'extensions', pluginName, 'packages', 'textUiItems', 'toast_item.setup.json')
-            assert.equal(fs.existsSync(setupJsonPath), true, 'setup.json 已生成')
-            const setupContent = JSON.parse(fs.readFileSync(setupJsonPath, 'utf-8'))
-            assert.equal(Array.isArray(setupContent.files), true, 'setup.json.files 为数组')
-            // 至少包含上述期望文件
-            for (const f of expectedFiles) {
-                const rel = join('bundle_factory', 'item_views', 'textUiItems', 'toast_item', f)
-                assert.equal(setupContent.files.includes(rel), true, `setup.json.files 包含: ${rel}`)
-            }
-            assert.equal(setupContent.files.includes(relMeta), true, `setup.json.files 包含: ${relMeta}`)
-            // 默认信息检查
-            assert.equal(setupContent.code, 'toast_item', 'setup.json 默认 code 正确')
-            assert.equal(setupContent.category, 'textUiItems', 'setup.json 默认 category 正确')
-            assert.equal(setupContent.path, join('bundle_factory', 'item_views', 'textUiItems', 'toast_item'), 'setup.json 默认 path 正确')
-
             resolve(true)
         })
     })

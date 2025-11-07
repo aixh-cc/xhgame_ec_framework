@@ -35,9 +35,9 @@ const test_02 = () => {
             assert.equal(componentList.list.length, 1, '获取组件列表正常')
 
             // 移除
-            // let uninstallRes = await LocalHandles.uninstallComponent({ componentCode: 'ui_item_01', pluginName })
-            // console.log(uninstallRes)
-            // assert.equal(uninstallRes.success, true, '移除组件-断言成功')
+            let uninstallRes = await LocalHandles.uninstallComponent({ componentCode: 'ui_item_01', pluginName })
+            console.log(uninstallRes)
+            assert.equal(uninstallRes.success, true, '移除组件-断言成功')
 
 
             let rmain_codes = await installInfoManager.getInstalledComponentCodes()
