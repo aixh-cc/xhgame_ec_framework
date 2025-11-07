@@ -13,7 +13,7 @@ const test_00 = () => {
             assert.equal(is_exists, false, 'notInstalledInfoManager的exists正常')
             let installInfo = await notInstalledInfoManager.readInstallInfo()
             assert.equal(installInfo.version, '1.0.0', 'notInstalledInfoManager的获取默认版本号正常')
-            assert.equal(installInfo.installedComponents.length, 0, 'notInstalledInfoManager的获取已安装组件列表正常')
+            assert.equal(installInfo.installedComponentMetas.length, 0, 'notInstalledInfoManager的获取已安装组件列表正常')
             resolve(true)
         })
     })
@@ -26,7 +26,7 @@ const test_01 = () => {
             assert.equal(is_exists, true, 'installedInfoManager的exists正常')
             let installInfo = await installedInfoManager.readInstallInfo()
             assert.equal(installInfo.version, '1.0.1', 'installedInfoManager的获取默认版本号正常')
-            assert.equal(installInfo.installedComponents.length, 0, 'installedInfoManager的获取已安装组件列表正常')
+            assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
             resolve(true)
         })
     })
@@ -37,7 +37,7 @@ const test_02 = () => {
             let installedInfoManager = new InstallInfoManager('test_02')
             let is_write_success = await installedInfoManager.writeInstallInfo({
                 version: '1.0.2',
-                installedComponents: [],
+                installedComponentMetas: [],
                 lastUpdated: new Date().toISOString()
             })
             assert.equal(is_write_success, true, 'installedInfoManager的写入正常')
@@ -45,7 +45,7 @@ const test_02 = () => {
             let installInfo = await installedInfoManager.readInstallInfo()
             if (installInfo) {
                 assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
-                assert.equal(installInfo.installedComponents.length, 0, 'installedInfoManager的获取已安装组件列表正常')
+                assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
                 assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[test_02] 安装信息已写入: /extensions/test_02-installInfo.json"]', 'installedInfoManager的logs正常')
             } else {
                 assert.equal(installInfo, '错误', 'installedInfoManager的获取安装信息失败')

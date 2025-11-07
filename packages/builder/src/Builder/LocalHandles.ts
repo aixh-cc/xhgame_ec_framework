@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IComponentInfo, IComponentInfoWithStatus, IgetGroupComponentListRes, IInstallInfoRes, IInstallRes, IUninstallRes } from './Defined';
+import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes } from './Defined';
 import { getGroupPath, getProjectPath } from './Util';
 import { InstallInfoManager } from './InstallInfoManager';
 
@@ -22,7 +22,7 @@ export class LocalHandles {
      * @param param 包含插件名的参数对象
      * @returns 包含安装信息或错误信息的响应对象
      */
-    static async readInstallInfo(param: { pluginName: string }): Promise<IInstallInfoRes> {
+    static async readInstallInfo(param: { pluginName: string }): Promise<ILocalInstalledInfoRes> {
         const { pluginName } = param;
         if (!pluginName) {
             return {
@@ -37,7 +37,7 @@ export class LocalHandles {
         }
         return {
             success: true,
-            installInfo: installInfo
+            localInstalledInfo: installInfo
         };
     }
 
@@ -47,7 +47,7 @@ export class LocalHandles {
      * @param group 分组名称
      * @returns 包含组件列表或错误信息的响应对象
      */
-    static async getGroupComponentList(pluginName: string, group: string): Promise<IgetGroupComponentListRes> {
+    static async getGroupComponentList(pluginName: string, group: string): Promise<IGetGroupComponentListRes> {
         console.log('getGroupComponentList', pluginName, group)
         try {
             const groupPath = getGroupPath(pluginName, group);
@@ -62,7 +62,7 @@ export class LocalHandles {
             // 当前组件安装情况
             const installInfoManager = LocalHandles.getInstallInfoManager(pluginName);
             const installInfo = await installInfoManager.readInstallInfo();
-            let installedLists = installInfo?.installedComponents?.map((item: any) => item.componentCode) || []
+            let installedLists = installInfo?.installedComponentMetas?.map((item: any) => item.componentCode) || []
             console.log('installedLists', installedLists)
             const items = fs.readdirSync(groupPath);
             const list: IComponentInfoWithStatus[] = [];
@@ -304,7 +304,7 @@ export class LocalHandles {
                 };
             }
             // 查找组件信息
-            const component = installInfo.installedComponents?.find((c: { componentCode: any; }) => c.componentCode === componentCode);
+            const component = installInfo.installedComponentMetas?.find((c: { componentCode: any; }) => c.componentCode === componentCode);
             if (!component) {
                 return {
                     success: false,

@@ -1,35 +1,59 @@
-export interface IgetGroupComponentListRes {
+/**
+ * 接口返回
+ * 获取组件列表
+ */
+export interface IGetGroupComponentListRes {
     success: boolean,
     error?: string,
     groupPath: string
     list: IComponentInfoWithStatus[]
 }
+/**
+ * 接口返回
+ * 安装结果
+ */
 export interface IInstallRes {
     success: boolean,
     error?: string,
 }
+/**
+ * 接口返回
+ * 卸载结果
+ */
 export interface IUninstallRes {
     success: boolean,
     error?: string,
 }
-export interface IInstallInfoRes {
+/**
+ * 接口返回
+ * 本地安装接口结果
+ */
+export interface ILocalInstalledInfoRes {
     success: boolean;
     error?: string;
-    installInfo?: IInstallInfo
+    localInstalledInfo?: ILocalInstalledInfo
 }
-export interface IInstallInfo {
+/**
+ * 本地安装结果
+ */
+export interface ILocalInstalledInfo {
     version: string;
-    installedComponents: InstalledComp[];
+    installedComponentMetas: InstalledComponentMeta[];
     lastUpdated: string;
 }
-export interface InstalledComp {
+/**
+ * 已安装组件元数据
+ */
+export interface InstalledComponentMeta {
     componentCode: string;
     componentName: string;
     componentVersion: string;
     installedAt: string;
     copiedFiles: string[];
 }
-// 组件信息接口定义
+/**
+ * 组件信息
+ */
 export interface IComponentInfo {
     /** 组件code标识 */
     componentCode: string;
@@ -54,7 +78,9 @@ export interface IComponentInfo {
     /** 评分 */
     stars?: number;
 }
-
+/**
+ * 组件信息 With 安装状态
+ */
 export interface IComponentInfoWithStatus extends IComponentInfo {
     /** 安装状态 */
     installStatus: string

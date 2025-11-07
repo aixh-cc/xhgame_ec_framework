@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join } from 'path';
 import { getExtensionsPath, getProjectPath } from './Util';
-import { IInstallInfo, InstalledComp } from './Defined';
+import { ILocalInstalledInfo, InstalledComponentMeta } from './Defined';
 
 export class InstallInfoManager {
     private pluginName: string;
@@ -26,11 +26,11 @@ export class InstallInfoManager {
     /**
      * 读取安装信息文件
      */
-    async readInstallInfo(): Promise<IInstallInfo> {
-        const defaultInstallInfo: IInstallInfo = {
+    async readInstallInfo(): Promise<ILocalInstalledInfo> {
+        const defaultInstallInfo: ILocalInstalledInfo = {
             version: '1.0.0',
             lastUpdated: '',
-            installedComponents: []
+            installedComponentMetas: []
         };
 
         try {
@@ -49,7 +49,7 @@ export class InstallInfoManager {
     /**
      * 写入安装信息文件
      */
-    async writeInstallInfo(installInfo: IInstallInfo): Promise<boolean> {
+    async writeInstallInfo(installInfo: ILocalInstalledInfo): Promise<boolean> {
         try {
             installInfo.lastUpdated = new Date().toISOString();
             await fs.promises.writeFile(this.installInfoPath, JSON.stringify(installInfo, null, 2), 'utf-8');
@@ -74,7 +74,7 @@ export class InstallInfoManager {
      */
     async getInstalledComponentCodes(): Promise<string[]> {
         const installInfo = await this.readInstallInfo();
-        return installInfo.installedComponents.map(comp => comp.componentCode);
+        return installInfo.installedComponentMetas.map(comp => comp.componentCode);
     }
     /**
      * 检查组件是否已安装
@@ -87,9 +87,9 @@ export class InstallInfoManager {
     /**
      * 获取组件的安装信息
      */
-    async getInstalledComponentInfo(componentCode: string): Promise<InstalledComp | null> {
+    async getInstalledComponentInfo(componentCode: string): Promise<InstalledComponentMeta | null> {
         const installInfo = await this.readInstallInfo();
-        return installInfo.installedComponents.find(comp => comp.componentCode === componentCode) || null;
+        return installInfo.installedComponentMetas.find(comp => comp.componentCode === componentCode) || null;
     }
     /**
      * 更新组件安装信息
@@ -103,10 +103,10 @@ export class InstallInfoManager {
         try {
             const installInfo = await this.readInstallInfo();
             // 更新 installedComponents 列表（去重后追加）
-            installInfo.installedComponents = installInfo.installedComponents.filter(
+            installInfo.installedComponentMetas = installInfo.installedComponentMetas.filter(
                 (c: any) => c.componentCode !== componentCode
             );
-            installInfo.installedComponents.push({
+            installInfo.installedComponentMetas.push({
                 componentName: componentName,
                 componentCode: componentCode,
                 componentVersion: componentVersion,
@@ -128,12 +128,12 @@ export class InstallInfoManager {
         try {
             const installInfo = await this.readInstallInfo();
             // 从 installedComponents 中移除组件记录
-            if (installInfo.installedComponents && Array.isArray(installInfo.installedComponents)) {
-                const originalLength = installInfo.installedComponents.length;
-                installInfo.installedComponents = installInfo.installedComponents.filter(
+            if (installInfo.installedComponentMetas && Array.isArray(installInfo.installedComponentMetas)) {
+                const originalLength = installInfo.installedComponentMetas.length;
+                installInfo.installedComponentMetas = installInfo.installedComponentMetas.filter(
                     (comp: any) => comp.componentCode !== componentCode
                 );
-                if (installInfo.installedComponents.length < originalLength) {
+                if (installInfo.installedComponentMetas.length < originalLength) {
                     console.log(`[${this.pluginName}] 已从 installedComponents 中移除组件: ${componentCode}`);
                 }
             }
