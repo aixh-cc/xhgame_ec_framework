@@ -24,14 +24,7 @@ export class LocalInstallManager {
      * @param param 包含插件名的参数对象
      * @returns 包含安装信息或错误信息的响应对象
      */
-    static async readInstallInfo(param: { pluginName: string }): Promise<ILocalInstalledInfoRes> {
-        const { pluginName } = param;
-        if (!pluginName) {
-            return {
-                success: false,
-                error: '插件名不能为空',
-            };
-        }
+    static async readInstallInfo(pluginName: string): Promise<ILocalInstalledInfoRes> {
         const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
         const installInfo = await installInfoManager.readInstallInfo();
         if (!installInfoManager.exists()) {
@@ -108,15 +101,7 @@ export class LocalInstallManager {
      * @param param 包含组件码、插件名和分组的参数对象
      * @returns 包含安装结果或错误信息的响应对象
      */
-    static async installComponent(param: { componentCode: string, pluginName: string, group: string }): Promise<IInstallRes> {
-
-        const { componentCode, pluginName, group } = param;
-        if (!componentCode || !pluginName || !group) {
-            return {
-                success: false,
-                error: '组件名或插件名或者分组不能为空'
-            };
-        }
+    static async installComponent(pluginName: string, group: string, componentCode: string): Promise<IInstallRes> {
         let extractTempDir = '';
         try {
             let groupPath = getGroupPath(pluginName, group)
@@ -230,15 +215,7 @@ export class LocalInstallManager {
             }
         }
     }
-    static async uninstallComponent(param: { componentCode: string; pluginName: string; }): Promise<IUninstallRes> {
-        console.log('uninstallComponent', param)
-        const { componentCode, pluginName } = param;
-        if (!componentCode || !pluginName) {
-            return {
-                success: false,
-                error: '组件名或插件名不能为空'
-            };
-        }
+    static async uninstallComponent(pluginName: string, componentCode: string): Promise<IUninstallRes> {
         try {
             // 获取项目路径
             const projectPath = getProjectPath()
