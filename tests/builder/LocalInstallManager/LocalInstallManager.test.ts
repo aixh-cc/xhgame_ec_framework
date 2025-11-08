@@ -48,14 +48,10 @@ const test_02 = () => {
         })
     })
 }
-
-let functions = [
-    test_01,
-    test_02,
-    // 依赖校验：存在性与 .meta uuid 一致性
-    () => new Promise((resolve) => {
+const test_03 = () => {
+    return new Promise((resolve, reject) => {
         test('依赖校验-存在与UUID一致性', async () => {
-            const pluginName = 'localhandles_test_02';
+            const pluginName = 'localhandles_test_03';
             const group = 'uiItems';
             const componentCode = 'ui_item_01';
 
@@ -120,6 +116,12 @@ let functions = [
             resolve(true);
         })
     })
+}
+
+let functions = [
+    test_01,
+    test_02,
+    test_03
 ]
 
 describe('LocalInstallManager功能', async () => {
