@@ -72,10 +72,11 @@ export interface IComponentInfo {
     /** 
      *  依赖（项目文件依赖）。支持三种写法：
      *  - 字符串：表示相对 `assets` 根目录的文件或目录路径，仅校验存在；
-     *  - 对象：{ path, requireUuid? }，当提供 requireUuid 时，会读取同路径的 `.meta` 文件并校验 uuid 一致。
-     *  - 对象：{ componentCode }
+     *  - 对象：{ path, requireUuid?, replaceUuid? }：当提供 requireUuid 时，会读取同路径的 `.meta` 文件并校验 uuid 一致；
+     *    若不一致且提供 replaceUuid，则在插件包内替换所有 `.meta` 中的 requireUuid 为 replaceUuid；
+     *  - 对象：{ componentCode }：要求同插件中该组件已被安装（通过安装信息文件判断）。
      */
-    dependencies: Array<string | IFileDependency>;
+    dependencies: Array<string | IFileDependency | IComponentCodeDependency>;
     /** 安装文件 */
     files: string[];
     /** 评分 */
@@ -93,6 +94,12 @@ export interface IFileDependency {
      * 默认情况该值为空,如果按照时有冲突,提示用户修改replaceUuid为项目中的实际值可完成安装
      */
     replaceUuid?: string;
+}
+
+/** 组件安装依赖（同插件内） */
+export interface IComponentCodeDependency {
+    /** 依赖的组件代码（同插件内） */
+    componentCode: string;
 }
 /**
  * 组件信息 With 安装状态

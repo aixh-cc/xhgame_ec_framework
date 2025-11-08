@@ -191,12 +191,16 @@ export class LocalInstallManager {
                 files: rawJson.files || []
             } as IComponentInfo;
 
-            // 校验依赖：存在性 + 可选 uuid 一致性（支持 replaceUuid 解决冲突）
+            // 校验依赖：存在性 + 可选 uuid 一致性（支持 replaceUuid 解决冲突）+ 组件安装依赖（componentCode）
             const projectAssetsRoot = join(getProjectPath(), 'assets');
             const missingDeps: string[] = [];
             const unresolvedUuidMismatchDeps: { depPath: string; expected: string; actual?: string }[] = [];
+            const missingComponentDeps: string[] = [];
             // 需要替换的 uuid 对
             const uuidReplacements: { from: string; to: string }[] = [];
+            // 已安装组件列表（同插件）
+            const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
+            const installedCodes = await installInfoManager.getInstalledComponentCodes();
 
             const deps: any[] = Array.isArray(normalized.dependencies) ? normalized.dependencies : [];
             for (const dep of deps) {
@@ -206,6 +210,15 @@ export class LocalInstallManager {
                 if (typeof dep === 'string') {
                     depPath = dep;
                 } else if (dep && typeof dep === 'object') {
+                    // 组件安装依赖
+                    if (dep.componentCode) {
+                        const needCode: string = dep.componentCode;
+                        if (!installedCodes.includes(needCode)) {
+                            missingComponentDeps.push(needCode);
+                        }
+                        continue; // 该分支不再进行文件路径校验
+                    }
+                    // 文件依赖
                     depPath = dep.path;
                     expectedUuid = dep.requireUuid;
                 }
@@ -246,13 +259,16 @@ export class LocalInstallManager {
                 }
             }
 
-            if (missingDeps.length > 0 || unresolvedUuidMismatchDeps.length > 0) {
+            if (missingDeps.length > 0 || unresolvedUuidMismatchDeps.length > 0 || missingComponentDeps.length > 0) {
                 const messages: string[] = [];
                 if (missingDeps.length > 0) {
                     messages.push(`缺少依赖文件：\n${missingDeps.map(p => `- ${p}`).join('\n')}`);
                 }
                 if (unresolvedUuidMismatchDeps.length > 0) {
                     messages.push(`UUID 不匹配且未提供 replaceUuid：\n${unresolvedUuidMismatchDeps.map(m => `- ${m.depPath} 期望=${m.expected} 实际=${m.actual ?? '未知'}`).join('\n')}`);
+                }
+                if (missingComponentDeps.length > 0) {
+                    messages.push(`未安装依赖组件（同插件）：\n${missingComponentDeps.map(c => `- ${c}`).join('\n')}`);
                 }
                 return {
                     success: false,

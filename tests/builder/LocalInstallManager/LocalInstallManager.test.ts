@@ -152,10 +152,62 @@ const test_03 = () => {
     })
 }
 
+const test_04 = () => {
+    return new Promise((resolve, reject) => {
+        test('componentCode 依赖-安装前后状态校验', async () => {
+            const pluginName = 'localhandles_test_03';
+            const group = 'uiItems';
+            const depCode = 'ui_item_dep';
+            const targetCode = 'ui_item_01';
+
+            const groupPath = join(process.cwd(), 'extensions', pluginName, 'packages', group);
+            const targetSetupPath = join(groupPath, `${targetCode}.setup.json`);
+
+            // 备份目标 setup
+            const original = await fs.promises.readFile(targetSetupPath, 'utf-8');
+            const setupJson = JSON.parse(original);
+
+            try {
+                // 1) 设置目标组件依赖：{ componentCode: ui_item_dep }
+                const depSetup = {
+                    ...setupJson,
+                    dependencies: [{ componentCode: depCode }]
+                };
+                await fs.promises.writeFile(targetSetupPath, JSON.stringify(depSetup, null, 2), 'utf-8');
+
+                // 2) 未安装依赖时，安装目标组件应失败
+                const resFail = await LocalInstallManager.installComponent(pluginName, group, targetCode);
+                assert.equal(resFail.success, false, '未安装依赖组件-安装失败');
+
+                // 3) 安装依赖组件
+                const resDep = await LocalInstallManager.installComponent(pluginName, group, depCode);
+                assert.equal(resDep.success, true, '安装依赖组件-成功');
+
+                // 4) 再次安装目标组件，应成功
+                const resOk = await LocalInstallManager.installComponent(pluginName, group, targetCode);
+                assert.equal(resOk.success, true, '依赖已安装-目标安装成功');
+
+                // 清理：卸载目标与依赖
+                const resUnTarget = await LocalInstallManager.uninstallComponent(pluginName, targetCode);
+                assert.equal(resUnTarget.success, true, '卸载目标组件-成功');
+
+                const resUnDep = await LocalInstallManager.uninstallComponent(pluginName, depCode);
+                assert.equal(resUnDep.success, true, '卸载依赖组件-成功');
+            } finally {
+                // 还原目标 setup 内容
+                await fs.promises.writeFile(targetSetupPath, JSON.stringify(setupJson, null, 2), 'utf-8');
+            }
+
+            resolve(true);
+        })
+    })
+}
+
 let functions = [
     test_01,
     test_02,
-    test_03
+    test_03,
+    test_04
 ]
 
 describe('LocalInstallManager功能', async () => {
