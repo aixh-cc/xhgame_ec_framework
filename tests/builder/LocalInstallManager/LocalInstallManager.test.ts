@@ -2,6 +2,7 @@ import { assert, describe, test } from "poku";
 import { LocalInstallManager } from "../../../packages/builder/src/Builder/LocalInstallManager";
 import * as fs from 'fs';
 import { join } from 'path';
+import { getProjectPath } from "../../../packages/builder/src/Builder/Util";
 
 
 const test_01 = () => {
@@ -50,20 +51,23 @@ const test_02 = () => {
 }
 const test_03 = () => {
     return new Promise((resolve, reject) => {
-        test('依赖校验-存在与UUID一致性', async () => {
+        test('依赖校验与 replaceUuid 行为', async () => {
             const pluginName = 'localhandles_test_03';
             const group = 'uiItems';
             const componentCode = 'ui_item_01';
 
-            const groupPath = join(process.cwd(), 'extensions', pluginName, 'packages', group);
+            const groupPath = join(getProjectPath(), 'extensions', pluginName, 'packages', group);
             const setupPath = join(groupPath, `${componentCode}.setup.json`);
+            const extMetaPath = join(groupPath, componentCode, 'bundle_factory', 'item_views', 'uiItems', 'ui_item_01.meta');
 
             // 备份原始 setup 内容
             const original = await fs.promises.readFile(setupPath, 'utf-8');
             const setupJson = JSON.parse(original);
+            const extMetaOriginal = await fs.promises.readFile(extMetaPath, 'utf-8');
+            const extMetaJson = JSON.parse(extMetaOriginal);
 
             // 读取一个已存在的 .meta 文件，获取 uuid
-            const depMetaPath = join(process.cwd(), 'assets', 'bundle_factory', 'item_views', 'textUiItems', 'toast_item.meta');
+            const depMetaPath = join(getProjectPath(), 'assets', 'bundle_factory', 'item_views', 'textUiItems', 'toast_item.meta');
             const depMetaContent = await fs.promises.readFile(depMetaPath, 'utf-8');
             const depMetaJson = JSON.parse(depMetaContent);
             const uuid = depMetaJson.uuid;
@@ -108,9 +112,39 @@ const test_03 = () => {
 
                 const resMissing = await LocalInstallManager.installComponent(pluginName, group, componentCode);
                 assert.equal(resMissing.success, false, '依赖缺失-安装失败');
+
+                // 4) uuid 不一致但提供正确 replaceUuid，应当安装成功且安装包内 uuid 被替换
+                const wrongUuid = '11111111-1111-1111-1111-111111111111';
+                // 将扩展包中的 meta 写入一个错误的 uuid，以便测试替换
+                const editedExtMeta = { ...extMetaJson, uuid: wrongUuid };
+                await fs.promises.writeFile(extMetaPath, JSON.stringify(editedExtMeta, null, 2), 'utf-8');
+
+                const replaceSetup = {
+                    ...setupJson,
+                    dependencies: [{
+                        path: 'bundle_factory/item_views/textUiItems/toast_item',
+                        requireUuid: wrongUuid,
+                        replaceUuid: uuid
+                    }]
+                };
+                await fs.promises.writeFile(setupPath, JSON.stringify(replaceSetup, null, 2), 'utf-8');
+
+                const resReplace = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                assert.equal(resReplace.success, true, '提供replaceUuid-安装成功');
+
+                // 验证安装到项目后的 meta uuid 已经替换为项目实际值
+                const installedMetaPath = join(getProjectPath(), 'assets', 'bundle_factory', 'item_views', 'uiItems', 'ui_item_01.meta');
+                const installedMetaContent = await fs.promises.readFile(installedMetaPath, 'utf-8');
+                const installedMetaJson = JSON.parse(installedMetaContent);
+                assert.equal(installedMetaJson.uuid, uuid, '安装包内uuid已替换为项目实际值');
+
+                // 卸载，清理安装产物
+                const resUn2 = await LocalInstallManager.uninstallComponent(pluginName, componentCode);
+                assert.equal(resUn2.success, true, '卸载成功');
             } finally {
                 // 还原原始 setup 内容，避免影响其他用例
                 await fs.promises.writeFile(setupPath, JSON.stringify(setupJson, null, 2), 'utf-8');
+                await fs.promises.writeFile(extMetaPath, JSON.stringify(extMetaJson, null, 2), 'utf-8');
             }
 
             resolve(true);

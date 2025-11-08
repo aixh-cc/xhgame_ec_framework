@@ -168,7 +168,7 @@ export class LocalInstallManager {
             const copiedFiles: string[] = [];
             const conflictFiles: string[] = [];
 
-            // 旧模式或无meta：复制整个源目录（保持兼容）
+            // 检测目标路径是否存在冲突文件
             await checkConflicts(conflictFiles, assetsSourcePath, targetPath);
             if (conflictFiles.length > 0) {
                 console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
@@ -184,17 +184,19 @@ export class LocalInstallManager {
 
             // 归一化字段（兼容旧格式：code/displayName/version）
             const normalized = {
-                componentCode: rawJson.componentCode || rawJson.code || componentCode,
-                componentName: rawJson.componentName || rawJson.displayName || componentCode,
-                componentVersion: rawJson.componentVersion || rawJson.version || '1.0.0',
+                componentCode: rawJson.componentCode || componentCode,
+                componentName: rawJson.componentName || componentCode,
+                componentVersion: rawJson.componentVersion || '1.0.0',
                 dependencies: rawJson.dependencies || [],
                 files: rawJson.files || []
             } as IComponentInfo;
 
-            // 校验依赖：存在性 + 可选 uuid 一致性
+            // 校验依赖：存在性 + 可选 uuid 一致性（支持 replaceUuid 解决冲突）
             const projectAssetsRoot = join(getProjectPath(), 'assets');
             const missingDeps: string[] = [];
-            const uuidMismatchDeps: { depPath: string; expected: string; actual?: string }[] = [];
+            const unresolvedUuidMismatchDeps: { depPath: string; expected: string; actual?: string }[] = [];
+            // 需要替换的 uuid 对
+            const uuidReplacements: { from: string; to: string }[] = [];
 
             const deps: any[] = Array.isArray(normalized.dependencies) ? normalized.dependencies : [];
             for (const dep of deps) {
@@ -221,26 +223,74 @@ export class LocalInstallManager {
                         const metaJson = JSON.parse(metaContent);
                         const actualUuid = metaJson?.uuid;
                         if (!actualUuid || actualUuid !== expectedUuid) {
-                            uuidMismatchDeps.push({ depPath: depPath.endsWith('.meta') ? depPath : `${depPath}.meta`, expected: expectedUuid, actual: actualUuid });
+                            const replaceUuid: string | undefined = typeof dep === 'object' ? dep.replaceUuid : undefined;
+                            if (replaceUuid && actualUuid && replaceUuid === actualUuid) {
+                                // 可通过替换解决：记录替换映射
+                                uuidReplacements.push({ from: expectedUuid, to: replaceUuid });
+                            } else {
+                                unresolvedUuidMismatchDeps.push({ depPath: depPath.endsWith('.meta') ? depPath : `${depPath}.meta`, expected: expectedUuid, actual: actualUuid });
+                            }
                         }
                     } catch (e) {
-                        uuidMismatchDeps.push({ depPath: depPath.endsWith('.meta') ? depPath : `${depPath}.meta`, expected: expectedUuid });
+                        const replaceUuid: string | undefined = typeof dep === 'object' ? dep.replaceUuid : undefined;
+                        if (replaceUuid) {
+                            // 无法读取 meta，但提供了 replaceUuid，仍尝试替换安装包中的 uuid
+                            uuidReplacements.push({ from: expectedUuid, to: replaceUuid });
+                        } else {
+                            unresolvedUuidMismatchDeps.push({ depPath: depPath.endsWith('.meta') ? depPath : `${depPath}.meta`, expected: expectedUuid });
+                        }
                     }
                 }
             }
 
-            if (missingDeps.length > 0 || uuidMismatchDeps.length > 0) {
+            if (missingDeps.length > 0 || unresolvedUuidMismatchDeps.length > 0) {
                 const messages: string[] = [];
                 if (missingDeps.length > 0) {
                     messages.push(`缺少依赖文件：\n${missingDeps.map(p => `- ${p}`).join('\n')}`);
                 }
-                if (uuidMismatchDeps.length > 0) {
-                    messages.push(`UUID 不匹配或无法读取 .meta：\n${uuidMismatchDeps.map(m => `- ${m.depPath} 期望=${m.expected} 实际=${m.actual ?? '未知'}`).join('\n')}`);
+                if (unresolvedUuidMismatchDeps.length > 0) {
+                    messages.push(`UUID 不匹配且未提供有效 replaceUuid：\n${unresolvedUuidMismatchDeps.map(m => `- ${m.depPath} 期望=${m.expected} 实际=${m.actual ?? '未知'}`).join('\n')}`);
                 }
                 return {
                     success: false,
                     error: `安装失败：依赖校验未通过。\n${messages.join('\n')}`
                 };
+            }
+
+            // 若存在可替换的 uuid，先在安装包源目录中进行替换，然后再复制
+            if (uuidReplacements.length > 0) {
+                const metaFilesToProcess: string[] = [];
+                const collectMetaFiles = async (dir: string) => {
+                    const entries = await fs.promises.readdir(dir, { withFileTypes: true });
+                    for (const entry of entries) {
+                        const p = join(dir, entry.name);
+                        if (entry.isDirectory()) {
+                            await collectMetaFiles(p);
+                        } else if (entry.isFile() && entry.name.endsWith('.meta')) {
+                            metaFilesToProcess.push(p);
+                        }
+                    }
+                };
+                await collectMetaFiles(assetsSourcePath);
+
+                for (const filePath of metaFilesToProcess) {
+                    try {
+                        let content = await fs.promises.readFile(filePath, 'utf-8');
+                        let replaced = false;
+                        for (const { from, to } of uuidReplacements) {
+                            if (content.includes(from)) {
+                                content = content.split(from).join(to);
+                                replaced = true;
+                            }
+                        }
+                        if (replaced) {
+                            await fs.promises.writeFile(filePath, content, 'utf-8');
+                            console.log(`[xhgame_builder] 已在安装包中替换 UUID: ${filePath}`);
+                        }
+                    } catch (e) {
+                        console.warn(`[xhgame_builder] 替换安装包 UUID 失败: ${filePath}`, e);
+                    }
+                }
             }
 
             console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
