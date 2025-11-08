@@ -74,6 +74,8 @@ export class LocalInstallManager {
                             ...json,
                             // 状态字段
                             isInstalled: installedLists.indexOf(json.componentCode || basename(item, '.setup.json')) > -1,
+                            // 安装时间
+                            installedAt: installInfo?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.installedAt || '',
                             // 是否备份，todo
                             isBackedUp: false, // todo
                             // 版本对比，是否可更新(当前为最简单的版本不一致作为判断)

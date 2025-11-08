@@ -107,6 +107,8 @@ export interface IComponentCodeDependency {
 export interface IComponentInfoWithStatus extends IComponentInfo {
     /** 安装状态 */
     isInstalled: boolean
+    /** 安装时间 */
+    installedAt: string
     /** 备份状态 */
     isBackedUp: boolean
     /** 可更新状态 */
