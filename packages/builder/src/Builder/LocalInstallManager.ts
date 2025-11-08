@@ -177,19 +177,82 @@ export class LocalInstallManager {
                     error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
                 };
             }
+            // 在复制之前，读取 setup 并校验依赖
+            const setupFilePath = join(groupPath, `${componentCode}.setup.json`);
+            const rawContent = await fs.promises.readFile(setupFilePath, 'utf-8');
+            const rawJson: any = JSON.parse(rawContent);
+
+            // 归一化字段（兼容旧格式：code/displayName/version）
+            const normalized = {
+                componentCode: rawJson.componentCode || rawJson.code || componentCode,
+                componentName: rawJson.componentName || rawJson.displayName || componentCode,
+                componentVersion: rawJson.componentVersion || rawJson.version || '1.0.0',
+                dependencies: rawJson.dependencies || [],
+                files: rawJson.files || []
+            } as IComponentInfo;
+
+            // 校验依赖：存在性 + 可选 uuid 一致性
+            const projectAssetsRoot = join(getProjectPath(), 'assets');
+            const missingDeps: string[] = [];
+            const uuidMismatchDeps: { depPath: string; expected: string; actual?: string }[] = [];
+
+            const deps: any[] = Array.isArray(normalized.dependencies) ? normalized.dependencies : [];
+            for (const dep of deps) {
+                let depPath: string = '';
+                let expectedUuid: string | undefined;
+
+                if (typeof dep === 'string') {
+                    depPath = dep;
+                } else if (dep && typeof dep === 'object') {
+                    depPath = dep.path;
+                    expectedUuid = dep.requireUuid;
+                }
+
+                if (!depPath) continue;
+                const fullPath = join(projectAssetsRoot, depPath);
+                if (!fs.existsSync(fullPath)) {
+                    missingDeps.push(depPath);
+                    continue;
+                }
+                if (expectedUuid) {
+                    const metaPath = depPath.endsWith('.meta') ? fullPath : `${fullPath}.meta`;
+                    try {
+                        const metaContent = await fs.promises.readFile(metaPath, 'utf-8');
+                        const metaJson = JSON.parse(metaContent);
+                        const actualUuid = metaJson?.uuid;
+                        if (!actualUuid || actualUuid !== expectedUuid) {
+                            uuidMismatchDeps.push({ depPath: depPath.endsWith('.meta') ? depPath : `${depPath}.meta`, expected: expectedUuid, actual: actualUuid });
+                        }
+                    } catch (e) {
+                        uuidMismatchDeps.push({ depPath: depPath.endsWith('.meta') ? depPath : `${depPath}.meta`, expected: expectedUuid });
+                    }
+                }
+            }
+
+            if (missingDeps.length > 0 || uuidMismatchDeps.length > 0) {
+                const messages: string[] = [];
+                if (missingDeps.length > 0) {
+                    messages.push(`缺少依赖文件：\n${missingDeps.map(p => `- ${p}`).join('\n')}`);
+                }
+                if (uuidMismatchDeps.length > 0) {
+                    messages.push(`UUID 不匹配或无法读取 .meta：\n${uuidMismatchDeps.map(m => `- ${m.depPath} 期望=${m.expected} 实际=${m.actual ?? '未知'}`).join('\n')}`);
+                }
+                return {
+                    success: false,
+                    error: `安装失败：依赖校验未通过。\n${messages.join('\n')}`
+                };
+            }
+
             console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
             await copyDirectory(copiedFiles, assetsSourcePath, targetPath);
             console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
                 const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
-                const setupFilePath = join(groupPath, `${componentCode}.setup.json`);
-                const content = await fs.promises.readFile(setupFilePath, 'utf-8');
-                const json: IComponentInfo = JSON.parse(content);
                 await installInfoManager.updateInstalledComponentMetas(
-                    componentCode,
-                    json.componentName,
-                    json.componentVersion,
+                    normalized.componentCode,
+                    normalized.componentName,
+                    normalized.componentVersion,
                     copiedFiles
                 );
             } catch (writeErr) {

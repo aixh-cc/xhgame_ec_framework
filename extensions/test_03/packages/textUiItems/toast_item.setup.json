@@ -9,7 +9,6 @@
     "提示",
     "文本"
   ],
-  "path": "bundle_factory/item_views/textUiItems/toast_item",
   "dependencies": [],
   "files": [
     "bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab"

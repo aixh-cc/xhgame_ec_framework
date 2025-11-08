@@ -69,12 +69,23 @@ export interface IComponentInfo {
     category: string;
     /** 标签 */
     tags: string[];
-    /** 依赖 */
-    dependencies: string[];
+    /** 依赖（项目文件依赖）。支持两种写法：
+     *  - 字符串：表示相对 `assets` 根目录的文件或目录路径，仅校验存在；
+     *  - 对象：{ path, requireUuid? }，当提供 requireUuid 时，会读取同路径的 `.meta` 文件并校验 uuid 一致。
+     */
+    dependencies: Array<string | IFileDependency>;
     /** 安装文件 */
     files: string[];
     /** 评分 */
     stars?: number;
+}
+
+/** 项目文件依赖描述 */
+export interface IFileDependency {
+    /** 相对项目 `assets` 根目录的文件或目录路径 */
+    path: string;
+    /** 要求该路径同名 `.meta` 文件中的 uuid 必须与此一致（可选） */
+    requireUuid?: string;
 }
 /**
  * 组件信息 With 安装状态

@@ -1,5 +1,7 @@
 import { assert, describe, test } from "poku";
 import { LocalInstallManager } from "../../../packages/builder/src/Builder/LocalInstallManager";
+import * as fs from 'fs';
+import { join } from 'path';
 
 
 const test_01 = () => {
@@ -49,7 +51,75 @@ const test_02 = () => {
 
 let functions = [
     test_01,
-    test_02
+    test_02,
+    // 依赖校验：存在性与 .meta uuid 一致性
+    () => new Promise((resolve) => {
+        test('依赖校验-存在与UUID一致性', async () => {
+            const pluginName = 'localhandles_test_02';
+            const group = 'uiItems';
+            const componentCode = 'ui_item_01';
+
+            const groupPath = join(process.cwd(), 'extensions', pluginName, 'packages', group);
+            const setupPath = join(groupPath, `${componentCode}.setup.json`);
+
+            // 备份原始 setup 内容
+            const original = await fs.promises.readFile(setupPath, 'utf-8');
+            const setupJson = JSON.parse(original);
+
+            // 读取一个已存在的 .meta 文件，获取 uuid
+            const depMetaPath = join(process.cwd(), 'assets', 'bundle_factory', 'item_views', 'textUiItems', 'toast_item.meta');
+            const depMetaContent = await fs.promises.readFile(depMetaPath, 'utf-8');
+            const depMetaJson = JSON.parse(depMetaContent);
+            const uuid = depMetaJson.uuid;
+
+            try {
+                // 1) 依赖存在且 uuid 一致，应该安装成功
+                const okSetup = {
+                    ...setupJson,
+                    dependencies: [{
+                        path: 'bundle_factory/item_views/textUiItems/toast_item',
+                        requireUuid: uuid
+                    }]
+                };
+                await fs.promises.writeFile(setupPath, JSON.stringify(okSetup, null, 2), 'utf-8');
+
+                const resOk = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                assert.equal(resOk.success, true, '依赖存在且uuid一致-安装成功');
+
+                // 卸载，清理安装产物，避免后续冲突
+                const resUn = await LocalInstallManager.uninstallComponent(pluginName, componentCode);
+                assert.equal(resUn.success, true, '卸载成功');
+
+                // 2) uuid 不一致，应当安装失败并提示
+                const badUuidSetup = {
+                    ...setupJson,
+                    dependencies: [{
+                        path: 'bundle_factory/item_views/textUiItems/toast_item',
+                        requireUuid: '00000000-0000-0000-0000-000000000000'
+                    }]
+                };
+                await fs.promises.writeFile(setupPath, JSON.stringify(badUuidSetup, null, 2), 'utf-8');
+
+                const resBadUuid = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                assert.equal(resBadUuid.success, false, 'uuid不一致-安装失败');
+
+                // 3) 依赖路径不存在，应当安装失败并提示
+                const missingDepSetup = {
+                    ...setupJson,
+                    dependencies: ['bundle_factory/item_views/not_exist_dir/not_exist_file']
+                };
+                await fs.promises.writeFile(setupPath, JSON.stringify(missingDepSetup, null, 2), 'utf-8');
+
+                const resMissing = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                assert.equal(resMissing.success, false, '依赖缺失-安装失败');
+            } finally {
+                // 还原原始 setup 内容，避免影响其他用例
+                await fs.promises.writeFile(setupPath, JSON.stringify(setupJson, null, 2), 'utf-8');
+            }
+
+            resolve(true);
+        })
+    })
 ]
 
 describe('LocalInstallManager功能', async () => {
