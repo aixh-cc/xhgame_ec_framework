@@ -224,9 +224,12 @@ export class LocalInstallManager {
                         const actualUuid = metaJson?.uuid;
                         if (!actualUuid || actualUuid !== expectedUuid) {
                             const replaceUuid: string | undefined = typeof dep === 'object' ? dep.replaceUuid : undefined;
-                            if (replaceUuid && actualUuid && replaceUuid === actualUuid) {
-                                // 可通过替换解决：记录替换映射
+                            if (replaceUuid) {
+                                // 始终信任用户提供的 replaceUuid，在安装包中进行替换，不修改项目 .meta
                                 uuidReplacements.push({ from: expectedUuid, to: replaceUuid });
+                                if (actualUuid && replaceUuid !== actualUuid) {
+                                    console.warn(`[xhgame_builder] 提示：依赖 ${depPath} 的项目UUID=${actualUuid} 与 replaceUuid=${replaceUuid} 不一致，将以 replaceUuid 进行安装包替换。`);
+                                }
                             } else {
                                 unresolvedUuidMismatchDeps.push({ depPath: depPath.endsWith('.meta') ? depPath : `${depPath}.meta`, expected: expectedUuid, actual: actualUuid });
                             }
@@ -249,7 +252,7 @@ export class LocalInstallManager {
                     messages.push(`缺少依赖文件：\n${missingDeps.map(p => `- ${p}`).join('\n')}`);
                 }
                 if (unresolvedUuidMismatchDeps.length > 0) {
-                    messages.push(`UUID 不匹配且未提供有效 replaceUuid：\n${unresolvedUuidMismatchDeps.map(m => `- ${m.depPath} 期望=${m.expected} 实际=${m.actual ?? '未知'}`).join('\n')}`);
+                    messages.push(`UUID 不匹配且未提供 replaceUuid：\n${unresolvedUuidMismatchDeps.map(m => `- ${m.depPath} 期望=${m.expected} 实际=${m.actual ?? '未知'}`).join('\n')}`);
                 }
                 return {
                     success: false,
