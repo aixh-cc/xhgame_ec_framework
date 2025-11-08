@@ -86,6 +86,11 @@ export interface IFileDependency {
     path: string;
     /** 要求该路径同名 `.meta` 文件中的 uuid 必须与此一致（可选） */
     requireUuid?: string;
+    /** 
+     * 替换uuid值,如果项目中存在相同的path值，但是requireUuid已经被修改,则将安装包中所有meta文件中包含requireUuid的替换为replaceUuid
+     * 默认情况该值为空,如果按照时有冲突,提示用户修改replaceUuid为项目中的实际值可完成安装
+     */
+    replaceUuid?: string;
 }
 /**
  * 组件信息 With 安装状态
