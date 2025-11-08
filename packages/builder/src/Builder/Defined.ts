@@ -69,9 +69,11 @@ export interface IComponentInfo {
     category: string;
     /** 标签 */
     tags: string[];
-    /** 依赖（项目文件依赖）。支持两种写法：
+    /** 
+     *  依赖（项目文件依赖）。支持三种写法：
      *  - 字符串：表示相对 `assets` 根目录的文件或目录路径，仅校验存在；
      *  - 对象：{ path, requireUuid? }，当提供 requireUuid 时，会读取同路径的 `.meta` 文件并校验 uuid 一致。
+     *  - 对象：{ componentCode }
      */
     dependencies: Array<string | IFileDependency>;
     /** 安装文件 */

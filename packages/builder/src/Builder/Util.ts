@@ -92,7 +92,7 @@ export const getGroupPath = (pluginName: string, group: string) => {
 };
 
 
-// 先检查是否有同名文件冲突
+// 先检查是否有同名文件冲突,去除.DS_Store的检测
 export async function checkConflicts(conflictFiles: string[], srcDir: string, destDir: string, relativePath: string = '') {
     const items = await fs.promises.readdir(srcDir, { withFileTypes: true });
 
@@ -100,8 +100,8 @@ export async function checkConflicts(conflictFiles: string[], srcDir: string, de
         const destPath = join(destDir, item.name);
         const relPath = join(relativePath, item.name);
 
-        // 跳过所有 .meta 文件和文件夹
-        if (item.name.endsWith('.meta')) {
+        // 跳过所有 .meta 文件和文件夹,以及.DS_Store文件
+        if (item.name.endsWith('.meta') || item.name === '.DS_Store') {
             continue;
         }
 
