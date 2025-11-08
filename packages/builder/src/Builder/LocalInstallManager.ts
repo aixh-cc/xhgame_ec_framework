@@ -107,6 +107,12 @@ export class LocalInstallManager {
     static async installComponent(pluginName: string, group: string, componentCode: string): Promise<IInstallRes> {
         let extractTempDir = '';
         try {
+            if (!componentCode || !pluginName || !group) {
+                return {
+                    success: false,
+                    error: 'Component code, plugin name, and group are required'
+                };
+            }
             let groupPath = getGroupPath(pluginName, group)
             console.log(`[xhgame_builder] 组件安装目录: ${groupPath}`);
 
@@ -219,6 +225,12 @@ export class LocalInstallManager {
         }
     }
     static async uninstallComponent(pluginName: string, componentCode: string): Promise<IUninstallRes> {
+        if (!componentCode || !pluginName) {
+            return {
+                success: false,
+                error: 'Component code, plugin name are required'
+            };
+        }
         try {
             // 获取项目路径
             const projectPath = getProjectPath()

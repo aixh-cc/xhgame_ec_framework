@@ -130,7 +130,6 @@ export class Pack {
                 author: 'auto',
                 category: group,
                 tags: [],
-                path: join('bundle_factory', 'item_views', group, itemName),
                 dependencies: [],
                 files: files,
             };

@@ -77,7 +77,6 @@ const test_03 = () => {
                 author: '测试作者',
                 category: 'UI',
                 tags: ['提示', '文本'],
-                path: join('bundle_factory', 'item_views', 'textUiItems', componentCode),
                 dependencies: [],
                 files: [
                     join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')

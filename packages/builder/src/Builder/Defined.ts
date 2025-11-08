@@ -69,8 +69,6 @@ export interface IComponentInfo {
     category: string;
     /** 标签 */
     tags: string[];
-    /** 包所在路径 */
-    path: string;
     /** 依赖 */
     dependencies: string[];
     /** 安装文件 */
