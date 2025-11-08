@@ -73,8 +73,11 @@ export class LocalInstallManager {
                         const info: IComponentInfoWithStatus = {
                             ...json,
                             // 状态字段
-                            installStatus: installedLists.indexOf(json.componentCode || basename(item, '.setup.json')) > -1 ? 'has' : 'none',
-                            backupStatus: 'none'
+                            isInstalled: installedLists.indexOf(json.componentCode || basename(item, '.setup.json')) > -1,
+                            // 是否备份，todo
+                            isBackedUp: false, // todo
+                            // 版本对比，是否可更新(当前为最简单的版本不一致作为判断)
+                            isUpdatable: json.componentVersion != installInfo?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.componentVersion
                         };
                         list.push(info);
                     }

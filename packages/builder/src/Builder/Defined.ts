@@ -83,7 +83,9 @@ export interface IComponentInfo {
  */
 export interface IComponentInfoWithStatus extends IComponentInfo {
     /** 安装状态 */
-    installStatus: string
+    isInstalled: boolean
     /** 备份状态 */
-    backupStatus: string
+    isBackedUp: boolean
+    /** 可更新状态 */
+    isUpdatable: boolean
 }
