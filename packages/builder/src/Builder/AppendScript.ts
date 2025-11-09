@@ -60,6 +60,11 @@ export class AppendScript {
                 moduleSpecifier: config.importPath
             });
 
+            sourceFile.addImportDeclaration({
+                namedImports: [config.factoryClassName],
+                moduleSpecifier: './factorys/' + config.factoryClassName
+            });
+
             // 2. 获取类声明
             const myClass = sourceFile.getClass('MyCocosFactoryConfig');
             if (!myClass) throw new Error('MyCocosFactoryConfig class not found');

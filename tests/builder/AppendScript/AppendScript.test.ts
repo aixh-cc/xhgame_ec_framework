@@ -14,7 +14,7 @@ const test_00 = () => {
                 sourceFilePath,
                 {
                     factoryType: 'effectItem',
-                    importPath: 'effectItem',
+                    importPath: 'db://assets/script/managers/myFactory/itemTemplates/CocosEffectItem',
                     itemClassName: 'CocosEffectItem',
                     driveClassName: 'CocosEffectItemFactoryDrive',
                     factoryClassName: 'EffectItemFactory',
