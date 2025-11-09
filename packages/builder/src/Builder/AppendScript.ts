@@ -1,12 +1,13 @@
 import { Project } from 'ts-morph';
 import * as fs from 'fs';
-import { basename } from 'path';
+import { basename, join } from 'path';
 import { getProjectPath } from './Util';
 
 export class AppendScript {
 
     static async addFactoryType(factoryType: string) {
-        const sourceFilePath = 'assets/script/managers/MyFactoryManager.ts';
+        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', 'MyFactoryManager.ts');
+
         // 检测sourceFilePath是否存在
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
@@ -36,7 +37,7 @@ export class AppendScript {
     }
 
     static async removeFactoryType(factoryType: string): Promise<{ success: boolean, error?: string }> {
-        const sourceFilePath = 'assets/script/managers/MyFactoryManager.ts';
+        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', 'MyFactoryManager.ts');
 
         let processed = false;
 
