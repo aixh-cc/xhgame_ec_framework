@@ -81,6 +81,14 @@ export interface IComponentInfo {
     files: string[];
     /** 评分 */
     stars?: number;
+    appendScripts?: Array<IAppendFactory>;
+}
+export interface IAppendFactory {
+    factoryType: string,
+    importPath: string,
+    itemClassName: string,
+    driveClassName: string,
+    factoryClassName: string,
 }
 
 /** 项目文件依赖描述 */
