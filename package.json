@@ -1,5 +1,5 @@
 {
-  "name": "@aixh-cc/xhgame",
+  "name": "@aixh-cc/xhgame_ec_framework",
   "scripts": {
     "test": "bun ./tests/run.test.mjs"
   },

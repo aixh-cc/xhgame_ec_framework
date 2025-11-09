@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "db://assets/*": [
+                "assets/*"
+            ],
+            "@aixh-cc/xhgame_ec_framework": [
+                "packages/core/src/index.ts"
+            ],
+            "@aixh-cc/xhgame_ec_framework/*": [
+                "packages/core/src/*"
+            ]
+        },
+        "allowJs": true,
+        "moduleResolution": "node"
+    },
+    "include": [
+        "assets/**/*.ts",
+        "assets/**/*.tsx",
+        "assets/**/*.js",
+        "assets/**/*.jsx",
+        "packages/core/src/**/*.ts"
+    ]
+}
