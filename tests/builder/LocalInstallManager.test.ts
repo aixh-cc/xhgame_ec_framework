@@ -67,7 +67,7 @@ const test_03 = () => {
             const extMetaJson = JSON.parse(extMetaOriginal);
 
             // 读取一个已存在的 .meta 文件，获取 uuid
-            const depMetaPath = join(getProjectPath(), 'assets', 'bundle_factory', 'item_views', 'textUiItems', 'toast_item.meta');
+            const depMetaPath = join(getProjectPath(), 'assets', 'bundle_factory', 'item_views', 'textUiItems', 'toast_item', 'toast_item.prefab.meta');
             const depMetaContent = await fs.promises.readFile(depMetaPath, 'utf-8');
             const depMetaJson = JSON.parse(depMetaContent);
             const uuid = depMetaJson.uuid;
@@ -77,7 +77,7 @@ const test_03 = () => {
                 const okSetup = {
                     ...setupJson,
                     dependencies: [{
-                        path: 'bundle_factory/item_views/textUiItems/toast_item',
+                        path: 'bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab',
                         requireUuid: uuid
                     }]
                 };

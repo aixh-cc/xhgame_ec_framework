@@ -159,6 +159,7 @@ export class LocalInstallManager {
 
             // 获取项目assets/script目录路径
             const projectPath = getProjectPath();
+            const assetsPath = join(projectPath, 'assets');
             const targetPath = join(projectPath, 'assets');
 
             // 确保目标目录存在
@@ -227,7 +228,7 @@ export class LocalInstallManager {
                 }
 
                 if (!depPath) continue;
-                const fullPath = join(projectPath, depPath);
+                const fullPath = join(assetsPath, depPath);
                 if (!fs.existsSync(fullPath)) {
                     console.log(`[xhgame_builder] 丢失依赖文件: ${depPath},fullPath: ${fullPath}`)
                     missingDeps.push(depPath);
