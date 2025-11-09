@@ -38,9 +38,7 @@ export class AppendScript {
 
     static async removeFactoryType(factoryType: string): Promise<{ success: boolean, error?: string }> {
         const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', 'MyFactoryManager.ts');
-
         let processed = false;
-
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
         } catch {
