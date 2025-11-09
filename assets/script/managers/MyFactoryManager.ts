@@ -24,7 +24,10 @@ export class MyFactoryManager<T extends IFactoryConfig> extends FactoryManager<T
 }
 
 export enum FactoryType {
-    effectItem = 'effectItem'
+    // effectItem = 'effectItem'
+    // effectItem = 'effectItem'
+    // effectItem = 'effectItem'
+    // effectItem = 'effectItem'
     // effectItem = 'effectItem'
     // unitItem = "unitItem",
     // uiItem = "uiItem",

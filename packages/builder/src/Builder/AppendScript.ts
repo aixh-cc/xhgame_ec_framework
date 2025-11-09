@@ -35,6 +35,38 @@ export class AppendScript {
         }
     }
 
+    static async removeFactoryType(factoryType: string): Promise<{ success: boolean, error?: string }> {
+        const sourceFilePath = 'assets/script/managers/MyFactoryManager.ts';
+
+        let processed = false;
+
+        try {
+            await fs.promises.access(sourceFilePath, fs.constants.F_OK);
+        } catch {
+            return { success: false, error: sourceFilePath + '文件不存在' };
+        }
+        try {
+            const project = new Project();
+            const sourceFile = project.addSourceFileAtPath(sourceFilePath);
+            const enumDecl = sourceFile.getEnum('FactoryType');
+            const member = enumDecl.getMember(factoryType) || enumDecl.getMembers().find(m => m.getName() === factoryType);
+            if (member) {
+                member.remove();
+                await sourceFile.save();
+                processed = true;
+            } else {
+                // 没有该成员也视为幂等成功
+                processed = true;
+            }
+        } catch (err) {
+            return { success: false, error: '移除 FactoryType 失败: ' + (err as Error)?.message };
+        }
+
+        if (!processed) {
+            return { success: false, error: '未找到包含 FactoryType 的目标文件' };
+        }
+        return { success: true };
+    }
     static async addFactory(config: {
         sourceFilePath: string;
         factoryType: string;
@@ -50,7 +82,6 @@ export class AppendScript {
             return { success: false, error: sourceFilePath + '文件不存在' };
         }
         let sourceFileClassName = basename(sourceFilePath).replace('.ts', '');
-        console.log(sourceFileClassName)
 
         try {
             const project = new Project();
@@ -94,17 +125,21 @@ export class AppendScript {
         if (!sourceFilePath || sourceFilePath.trim().length === 0) {
             return { success: false };
         }
+        // 检测sourceFilePath是否存在
+        sourceFilePath = getProjectPath() + sourceFilePath;
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
         } catch (e) {
             return { success: false, error: sourceFilePath + '文件不存在' };
         }
+        let sourceFileClassName = basename(sourceFilePath).replace('.ts', '');
+
         try {
             const project = new Project();
             const sourceFile = project.addSourceFileAtPath(sourceFilePath);
 
             // 1. 查找并移除类属性
-            const myClass = sourceFile.getClass('MyCocosFactoryConfig');
+            const myClass = sourceFile.getClass(sourceFileClassName);
             const property = myClass?.getProperty(`[FactoryType.${factoryType}]`);
 
             if (property) {

@@ -1,6 +1,5 @@
 import { assert, describe, test } from "poku";
 import { AppendScript } from "../../../packages/builder/src/Builder/AppendScript";
-import { getProjectPath } from "../../../packages/builder/src/Builder/Util";
 import { IComponentInfo } from "../../../packages/builder/src/Builder/Defined";
 
 const test_00 = () => {
@@ -46,16 +45,16 @@ const test_00 = () => {
                 }
             }
 
-
-            // let res_add_type = await AppendScript.addFactoryType(effectItemComponentInfo.appendScript?.factoryType)
-            // assert.equal(res_add_type.success, true, '新增factoryType成功')
-
-
-
-            // // 移除
-            // let res_remove = await AppendScript.removeFactory(sourceFilePath, 'xhgame_plugin_not_exists')
-
-            // console.log(res_remove)
+            // 移除
+            if (effectItemComponentInfo.appendScripts && effectItemComponentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < effectItemComponentInfo.appendScripts.length; i++) {
+                    const element = effectItemComponentInfo.appendScripts[i];
+                    let res_remove = await AppendScript.removeFactory(element.sourceFilePath, element.factoryType)
+                    assert.equal(res_remove.success, true, '移除factory成功')
+                    let res_add_type = await AppendScript.removeFactoryType(element.factoryType)
+                    assert.equal(res_add_type.success, true, '新增factoryType成功')
+                }
+            }
             resolve(true)
         })
     })
