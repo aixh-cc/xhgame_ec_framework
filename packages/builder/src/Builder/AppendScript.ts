@@ -74,7 +74,7 @@ export class AppendScript {
         factoryClassName: string;
     }): Promise<{ success: boolean, error?: string }> {
         // 检测sourceFilePath是否存在
-        let sourceFilePath = getProjectPath() + config.sourceFilePath;
+        let sourceFilePath = join(getProjectPath(), 'assets', config.sourceFilePath);
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
         } catch (e) {
@@ -125,7 +125,7 @@ export class AppendScript {
             return { success: false };
         }
         // 检测sourceFilePath是否存在
-        sourceFilePath = getProjectPath() + sourceFilePath;
+        sourceFilePath = join(getProjectPath(), 'assets', sourceFilePath);
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
         } catch (e) {

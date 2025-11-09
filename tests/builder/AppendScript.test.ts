@@ -13,12 +13,12 @@ const test_00 = () => {
                 author: 'hd',
                 category: 'ItemTemplate',
                 tags: ['ItemTemplate'],
-                dependencies: ['/assets/script/managers/myFactory/MyCocosFactoryConfig.ts'],
+                dependencies: ['script/managers/myFactory/MyCocosFactoryConfig.ts'],
                 files: [],
                 stars: 4,
                 appendScripts: [
                     {
-                        sourceFilePath: '/assets/script/managers/myFactory/MyCocosFactoryConfig.ts',
+                        sourceFilePath: 'script/managers/myFactory/MyCocosFactoryConfig.ts',
                         factoryType: 'effectItem',
                         factoryClassName: 'EffectItemFactory',
                         itemClassName: 'CocosEffectItem',
