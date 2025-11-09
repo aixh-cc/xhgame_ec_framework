@@ -1,10 +1,12 @@
 import { Project } from 'ts-morph';
 import * as fs from 'fs';
+import { basename } from 'path';
+import { getProjectPath } from './Util';
 
 export class AppendScript {
 
     static async addFactoryType(factoryType: string) {
-        const sourceFilePath = 'assets/script/managers/myFactory/MyFactorys.ts';
+        const sourceFilePath = 'assets/script/managers/MyFactoryManager.ts';
         // 检测sourceFilePath是否存在
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
@@ -33,22 +35,22 @@ export class AppendScript {
         }
     }
 
-    static async addFactory(sourceFilePath: string, config: {
+    static async addFactory(config: {
+        sourceFilePath: string;
         factoryType: string;
-        importPath: string;
         itemClassName: string;
         driveClassName: string;
         factoryClassName: string;
     }): Promise<{ success: boolean, error?: string }> {
         // 检测sourceFilePath是否存在
-        if (!sourceFilePath || sourceFilePath.trim().length === 0) {
-            return { success: false };
-        }
+        let sourceFilePath = getProjectPath() + config.sourceFilePath;
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
         } catch (e) {
             return { success: false, error: sourceFilePath + '文件不存在' };
         }
+        let sourceFileClassName = basename(sourceFilePath).replace('.ts', '');
+        console.log(sourceFileClassName)
 
         try {
             const project = new Project();
@@ -57,7 +59,7 @@ export class AppendScript {
             // 1. 添加 import 语句
             sourceFile.addImportDeclaration({
                 namedImports: [config.itemClassName, config.driveClassName],
-                moduleSpecifier: config.importPath
+                moduleSpecifier: 'db://assets/script/managers/myFactory/itemTemplates/' + config.itemClassName
             });
 
             sourceFile.addImportDeclaration({
@@ -66,8 +68,8 @@ export class AppendScript {
             });
 
             // 2. 获取类声明
-            const myClass = sourceFile.getClass('MyCocosFactoryConfig');
-            if (!myClass) throw new Error('MyCocosFactoryConfig class not found');
+            const myClass = sourceFile.getClass(sourceFileClassName);
+            if (!myClass) throw new Error(`${sourceFileClassName} class not found`);
 
             // 3. 添加属性
             myClass.addProperty({

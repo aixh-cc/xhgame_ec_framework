@@ -5,7 +5,7 @@ import { IComponentInfo } from "../../../packages/builder/src/Builder/Defined";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
-        test('测试AppendScript的addFactory', async () => {
+        test('测试添加effectItemComponentInfo', async () => {
             let effectItemComponentInfo: IComponentInfo = {
                 componentCode: 'EffectItemTemplate',
                 componentName: 'EffectItemTemplate',
@@ -17,33 +17,31 @@ const test_00 = () => {
                 dependencies: ['/assets/script/managers/myFactory/MyCocosFactoryConfig.ts'],
                 files: [],
                 stars: 4,
-                appendScripts: [{
-                    factoryType: 'effectItem',
-                    importPath: 'db://assets/script/managers/myFactory/itemTemplates/CocosEffectItem',
-                    itemClassName: 'CocosEffectItem',
-                    driveClassName: 'CocosEffectItemFactoryDrive',
-                    factoryClassName: 'EffectItemFactory',
-                }]
+                appendScripts: [
+                    {
+                        sourceFilePath: '/assets/script/managers/myFactory/MyCocosFactoryConfig.ts',
+                        factoryType: 'effectItem',
+                        itemClassName: 'CocosEffectItem',
+                        driveClassName: 'CocosEffectItemFactoryDrive',
+                        factoryClassName: 'EffectItemFactory',
+                    }
+                ]
             }
             if (effectItemComponentInfo.appendScripts && effectItemComponentInfo.appendScripts?.length > 0) {
-                let sourceFilePath = getProjectPath() + '/assets/script/managers/myFactory/MyCocosFactoryConfig.ts';
                 for (let i = 0; i < effectItemComponentInfo.appendScripts.length; i++) {
                     const element = effectItemComponentInfo.appendScripts[i];
                     if (typeof element.factoryType === 'string') {
                         let res_add_type = await AppendScript.addFactoryType(element.factoryType)
                         assert.equal(res_add_type.success, true, '新增factoryType成功')
-
                         let res_add = await AppendScript.addFactory(
-                            sourceFilePath,
                             {
+                                sourceFilePath: element.sourceFilePath,
                                 factoryType: element.factoryType,
-                                importPath: element.importPath,
                                 itemClassName: element.itemClassName,
                                 driveClassName: element.driveClassName,
                                 factoryClassName: element.factoryClassName,
                             })
                         assert.equal(res_add.success, true, '新增factory成功')
-
                     }
                 }
             }

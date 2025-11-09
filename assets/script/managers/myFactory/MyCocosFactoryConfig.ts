@@ -1,5 +1,5 @@
 import { IFactoryConfig } from "@aixh-cc/xhgame_ec_framework";
-import { FactoryType } from "./MyFactorys";
+import { FactoryType } from "../MyFactoryManager";
 import { CocosEffectItem, CocosEffectItemFactoryDrive } from "db://assets/script/managers/myFactory/itemTemplates/CocosEffectItem";
 import { EffectItemFactory } from "./factorys/EffectItemFactory";
 

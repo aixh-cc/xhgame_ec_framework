@@ -84,8 +84,8 @@ export interface IComponentInfo {
     appendScripts?: Array<IAppendFactory>;
 }
 export interface IAppendFactory {
+    sourceFilePath: string,
     factoryType: string,
-    importPath: string,
     itemClassName: string,
     driveClassName: string,
     factoryClassName: string,

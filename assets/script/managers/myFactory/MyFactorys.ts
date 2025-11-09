@@ -2,16 +2,6 @@ import { BaseFactory, IItem, IItemProduceDrive } from "@aixh-cc/xhgame_ec_framew
 // import { UnitAnimator } from "../../cocos/items/CocosUnitItem";
 // import { IUnitState } from "../../common/unit/State";
 
-export enum FactoryType {
-    unitItem = "unitItem",
-    uiItem = "uiItem",
-    textUiItem = 'textUiItem',
-    unitUiItem = 'unitUiItem',
-    effectItem = 'effectItem',
-    tiledItem = 'tiledItem',
-    xhgame_plugin_not_exists = 'xhgame_plugin_not_exists'
-}
-
 
 
 export interface ITextUiItem extends IItem {
@@ -57,18 +47,18 @@ export interface IUnitUiItem extends IItem {
 }
 
 
-export class TextUiItemFactory<T extends IItemProduceDrive, TT extends IItem & ITextUiItem> extends BaseFactory<T, TT> {
-    name = FactoryType.textUiItem;
-}
-export class TiledItemFactory<T extends IItemProduceDrive, TT extends IItem & ITiledItem> extends BaseFactory<T, TT> {
-    name = FactoryType.tiledItem;
-}
-export class UiItemFactory<T extends IItemProduceDrive, TT extends IItem & IUiItem> extends BaseFactory<T, TT> {
-    name = FactoryType.uiItem;
-}
-export class UnitItemFactory<T extends IItemProduceDrive, TT extends IItem & IUnitItem> extends BaseFactory<T, TT> {
-    name = FactoryType.unitItem;
-}
-export class UnitUiItemFactory<T extends IItemProduceDrive, TT extends IItem & IUnitUiItem> extends BaseFactory<T, TT> {
-    name = FactoryType.unitUiItem;
-}
+// export class TextUiItemFactory<T extends IItemProduceDrive, TT extends IItem & ITextUiItem> extends BaseFactory<T, TT> {
+//     name = FactoryType.textUiItem;
+// }
+// export class TiledItemFactory<T extends IItemProduceDrive, TT extends IItem & ITiledItem> extends BaseFactory<T, TT> {
+//     name = FactoryType.tiledItem;
+// }
+// export class UiItemFactory<T extends IItemProduceDrive, TT extends IItem & IUiItem> extends BaseFactory<T, TT> {
+//     name = FactoryType.uiItem;
+// }
+// export class UnitItemFactory<T extends IItemProduceDrive, TT extends IItem & IUnitItem> extends BaseFactory<T, TT> {
+//     name = FactoryType.unitItem;
+// }
+// export class UnitUiItemFactory<T extends IItemProduceDrive, TT extends IItem & IUnitUiItem> extends BaseFactory<T, TT> {
+//     name = FactoryType.unitUiItem;
+// }

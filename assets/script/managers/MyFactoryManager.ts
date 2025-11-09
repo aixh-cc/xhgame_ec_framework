@@ -17,5 +17,20 @@ export class MyFactoryManager<T extends IFactoryConfig> extends FactoryManager<T
         }
         return this._myFactoryActions
     }
+    get enums() {
+        return FactoryType
+    }
 
+}
+
+export enum FactoryType {
+    effectItem = 'effectItem'
+    // effectItem = 'effectItem'
+    // unitItem = "unitItem",
+    // uiItem = "uiItem",
+    // textUiItem = 'textUiItem',
+    // unitUiItem = 'unitUiItem',
+    // effectItem = 'effectItem',
+    // tiledItem = 'tiledItem',
+    // xhgame_plugin_not_exists = 'xhgame_plugin_not_exists'
 }
