@@ -1,7 +1,7 @@
 import { _decorator, Component, instantiate, Label, Node, Prefab, v3 } from "cc"
 import { Animation } from "cc";
 import { BaseCocosItem } from "./BaseCocosItem";
-import { IItemProduceDrive } from "@aixh-cc/xhgame_ec_framework";
+import { IBundle, IItemProduceDrive } from "@aixh-cc/xhgame_ec_framework";
 import { IEffectItem } from "./consts/Interfaces";
 import { xhgame } from "db://assets/script/xhgame";
 
@@ -44,8 +44,8 @@ export class CocosEffectItem extends BaseCocosItem implements IEffectItem {
         xhgame.factory.actions.removeEffectItem(this)
     }
 }
-export class CocosEffectItemFactoryDrive extends Component implements IItemProduceDrive {
-    name: string = 'CocosEffectItemFactoryDrive'
+export class CocosEffectItemProduceDrive extends Component implements IItemProduceDrive {
+    name: string = 'CocosEffectItemProduceDrive'
     private _prefab: Prefab
     private _modelPrefabsMap: Map<string, Prefab> = new Map();
     // protected onLoad(): void {
@@ -63,7 +63,7 @@ export class CocosEffectItemFactoryDrive extends Component implements IItemProdu
     async preloadItemsResource(): Promise<boolean> {
         console.log('CocosEffectItemFactoryDrive preloadItemsResource 11')
         return new Promise((resolve, reject) => {
-            xhgame.asset.loadBundle('bundle_factory', (err, bundle) => {
+            xhgame.asset.loadBundle('bundle_factory', (err, bundle: IBundle) => {
                 bundle.load<Prefab>('item_templates/cocosEffectItem', (errp, prefab: Prefab) => {
                     if (errp) {
                         console.error(errp)

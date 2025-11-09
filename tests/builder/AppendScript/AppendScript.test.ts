@@ -20,9 +20,9 @@ const test_00 = () => {
                     {
                         sourceFilePath: '/assets/script/managers/myFactory/MyCocosFactoryConfig.ts',
                         factoryType: 'effectItem',
-                        itemClassName: 'CocosEffectItem',
-                        driveClassName: 'CocosEffectItemFactoryDrive',
                         factoryClassName: 'EffectItemFactory',
+                        itemClassName: 'CocosEffectItem',
+                        driveClassName: 'CocosEffectItemProduceDrive',
                     }
                 ]
             }
