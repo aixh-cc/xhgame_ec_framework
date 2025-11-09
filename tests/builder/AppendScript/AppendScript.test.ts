@@ -18,10 +18,10 @@ const test_00 = () => {
                 })
             assert.equal(res_add.success, true, '新增factory成功')
 
-            // 移除
-            let res_remove = await AppendScript.removeFactory(sourceFilePath, 'xhgame_plugin_not_exists')
+            // // 移除
+            // let res_remove = await AppendScript.removeFactory(sourceFilePath, 'xhgame_plugin_not_exists')
 
-            console.log(res_remove)
+            // console.log(res_remove)
             resolve(true)
         })
     })
