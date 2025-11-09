@@ -4,6 +4,7 @@ import AdmZip from 'adm-zip';
 import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta } from './Defined';
 import { checkConflicts, cleanupEmptyDirs, copyDirectory, getGroupPath, getProjectPath } from './Util';
 import { InstallMetaManager } from './InstallMetaManager';
+import { AppendScript } from './AppendScript';
 /**
  * 本地组件安装
  */
@@ -182,19 +183,19 @@ export class LocalInstallManager {
             // 在复制之前，读取 setup 并校验依赖
             const setupFilePath = join(groupPath, `${componentCode}.setup.json`);
             const rawContent = await fs.promises.readFile(setupFilePath, 'utf-8');
-            const rawJson: any = JSON.parse(rawContent);
+            const componentInfo: IComponentInfo = JSON.parse(rawContent);
 
-            // 归一化字段（兼容旧格式：code/displayName/version）
+            // 归一化字段
             const normalized = {
-                componentCode: rawJson.componentCode || componentCode,
-                componentName: rawJson.componentName || componentCode,
-                componentVersion: rawJson.componentVersion || '1.0.0',
-                dependencies: rawJson.dependencies || [],
-                files: rawJson.files || []
+                componentCode: componentInfo.componentCode || componentCode,
+                componentName: componentInfo.componentName || componentCode,
+                componentVersion: componentInfo.componentVersion || '1.0.0',
+                dependencies: componentInfo.dependencies || [],
+                files: componentInfo.files || []
             } as IComponentInfo;
 
             // 校验依赖：存在性 + 可选 uuid 一致性（支持 replaceUuid 解决冲突）+ 组件安装依赖（componentCode）
-            const projectAssetsRoot = join(getProjectPath(), 'assets');
+            // const projectPath = getProjectPath()
             const missingDeps: string[] = [];
             const unresolvedUuidMismatchDeps: { depPath: string; expected: string; actual?: string }[] = [];
             const missingComponentDeps: string[] = [];
@@ -226,8 +227,9 @@ export class LocalInstallManager {
                 }
 
                 if (!depPath) continue;
-                const fullPath = join(projectAssetsRoot, depPath);
+                const fullPath = join(projectPath, depPath);
                 if (!fs.existsSync(fullPath)) {
+                    console.log(`[xhgame_builder] 丢失依赖文件: ${depPath},fullPath: ${fullPath}`)
                     missingDeps.push(depPath);
                     continue;
                 }
@@ -317,6 +319,36 @@ export class LocalInstallManager {
             console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
             await copyDirectory(copiedFiles, assetsSourcePath, targetPath);
             console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
+
+            // 有些组件安装还需要appendScript
+            if (componentInfo.appendScripts && componentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < componentInfo.appendScripts.length; i++) {
+                    const element = componentInfo.appendScripts[i];
+                    if (typeof element.factoryType === 'string') {
+                        let res_add_type = await AppendScript.addFactoryType(element.factoryType)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 新增factoryType成功: ${element.factoryType}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增factoryType失败: ${element.factoryType}`)
+                        }
+                        // assert.equal(res_add_type.success, true, '新增factoryType成功')
+                        let res_add = await AppendScript.addFactory(
+                            {
+                                sourceFilePath: element.sourceFilePath,
+                                factoryType: element.factoryType,
+                                itemClassName: element.itemClassName,
+                                driveClassName: element.driveClassName,
+                                factoryClassName: element.factoryClassName,
+                            })
+                        if (res_add.success) {
+                            console.log(`[xhgame_builder] 新增factory成功: ${element.factoryClassName}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增factory失败: ${element.factoryClassName}`)
+                        }
+                        // assert.equal(res_add.success, true, '新增factory成功')
+                    }
+                }
+            }
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
                 const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
@@ -324,7 +356,8 @@ export class LocalInstallManager {
                     normalized.componentCode,
                     normalized.componentName,
                     normalized.componentVersion,
-                    copiedFiles
+                    copiedFiles,
+                    componentInfo.appendScripts || []
                 );
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
@@ -407,6 +440,17 @@ export class LocalInstallManager {
             }
             // 从assets目录开始清理空目录
             await cleanupEmptyDirs(assetsPath);
+            // 移除appendScript
+            // if (effectItemComponentInfo.appendScripts && effectItemComponentInfo.appendScripts?.length > 0) {
+            //     for (let i = 0; i < effectItemComponentInfo.appendScripts.length; i++) {
+            //         const element = effectItemComponentInfo.appendScripts[i];
+            //         let res_remove = await AppendScript.removeFactory(element.sourceFilePath, element.factoryType)
+            //         assert.equal(res_remove.success, true, '移除factory成功')
+            //         let res_add_type = await AppendScript.removeFactoryType(element.factoryType)
+            //         assert.equal(res_add_type.success, true, '新增factoryType成功')
+            //     }
+            // }
+
 
             // 从配置中移除组件记录 
             try {

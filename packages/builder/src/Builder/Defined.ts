@@ -50,6 +50,7 @@ export interface InstalledComponentMeta {
     componentVersion: string;
     installedAt: string;
     copiedFiles: string[];
+    appendScripts: IAppendFactory[];
 }
 /**
  * 组件信息
@@ -83,6 +84,7 @@ export interface IComponentInfo {
     stars?: number;
     appendScripts?: Array<IAppendFactory>;
 }
+
 export interface IAppendFactory {
     sourceFilePath: string,
     factoryType: string,

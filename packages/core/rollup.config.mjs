@@ -6,7 +6,7 @@ export default [
     {
         // 生成未压缩的 JS 文件
         input: 'src/index.ts',
-        external: ['cc', 'fairygui-cc','reflect-metadata', 'inversify','inversify-inject-decorators'],
+        external: ['cc', 'fairygui-cc', 'reflect-metadata', 'inversify', 'inversify-inject-decorators'],
         output: [
             {
                 file: 'dist/index.mjs',
@@ -39,7 +39,7 @@ export default [
     {
         // 生成压缩的 JS 文件
         input: 'src/index.ts',
-        external: ['cc', 'fairygui-cc','reflect-metadata', 'inversify','inversify-inject-decorators'],
+        external: ['cc', 'fairygui-cc', 'reflect-metadata', 'inversify', 'inversify-inject-decorators'],
         output: [
             {
                 file: 'dist/index.min.mjs',
