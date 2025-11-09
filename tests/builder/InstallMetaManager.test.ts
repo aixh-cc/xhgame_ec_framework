@@ -1,9 +1,9 @@
 import { assert, describe, test } from "poku";
-import { InstallMetaManager } from "../../../packages/builder/src/Builder/InstallMetaManager";
+import { InstallMetaManager } from "../../packages/builder/src/Builder/InstallMetaManager";
 import * as fs from 'fs';
 import { join } from 'path';
-import { getProjectPath } from "../../../packages/builder/src/Builder/Util";
-import { IComponentInfo } from "../../../packages/builder/src/Builder/Defined";
+import { getProjectPath } from "../../packages/builder/src/Builder/Util";
+import { IAppendFactory, IComponentInfo } from "../../packages/builder/src/Builder/Defined";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
@@ -86,9 +86,9 @@ const test_03 = () => {
             const copiedFiles = [
                 join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
             ];
-
+            let appendScripts: Array<IAppendFactory> = []
             // 记录安装信息
-            await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles);
+            await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles, appendScripts);
 
             // 验证 
             const codes = await iim.getInstalledComponentCodes();

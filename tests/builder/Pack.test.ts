@@ -1,8 +1,8 @@
 import { assert, describe, test } from "poku";
 import * as fs from 'fs'
 import { join } from 'path'
-import { Pack } from "../../../packages/builder/src/Pack/Pack";
-import { getProjectPath } from "../../../packages/builder/src/Builder/Util";
+import { Pack } from "../../packages/builder/src/Pack/Pack";
+import { getProjectPath } from "../../packages/builder/src/Builder/Util";
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {

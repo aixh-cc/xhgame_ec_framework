@@ -1,6 +1,6 @@
 import { assert, describe, test } from "poku";
-import { AppendScript } from "../../../packages/builder/src/Builder/AppendScript";
-import { IComponentInfo } from "../../../packages/builder/src/Builder/Defined";
+import { AppendScript } from "../../packages/builder/src/Builder/AppendScript";
+import { IComponentInfo } from "../../packages/builder/src/Builder/Defined";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {

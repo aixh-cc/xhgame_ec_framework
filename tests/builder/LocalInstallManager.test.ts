@@ -1,8 +1,8 @@
 import { assert, describe, test } from "poku";
-import { LocalInstallManager } from "../../../packages/builder/src/Builder/LocalInstallManager";
+import { LocalInstallManager } from "../../packages/builder/src/Builder/LocalInstallManager";
 import * as fs from 'fs';
 import { join } from 'path';
-import { getProjectPath } from "../../../packages/builder/src/Builder/Util";
+import { getProjectPath } from "../../packages/builder/src/Builder/Util";
 
 
 const test_01 = () => {

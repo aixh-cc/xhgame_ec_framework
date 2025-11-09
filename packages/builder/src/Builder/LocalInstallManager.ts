@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta } from './Defined';
+import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta, ILocalInstalledInfo } from './Defined';
 import { checkConflicts, cleanupEmptyDirs, copyDirectory, getGroupPath, getProjectPath } from './Util';
 import { InstallMetaManager } from './InstallMetaManager';
 import { AppendScript } from './AppendScript';
@@ -404,7 +404,7 @@ export class LocalInstallManager {
             const assetsPath = join(projectPath, 'assets');
 
             const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
-            const installInfo = await installInfoManager.readInstallInfo();
+            const installInfo: ILocalInstalledInfo = await installInfoManager.readInstallInfo();
             if (!installInfo) {
                 return {
                     success: false,
@@ -412,8 +412,8 @@ export class LocalInstallManager {
                 };
             }
             // 查找组件信息
-            const component = installInfo.installedComponentMetas?.find((c: { componentCode: any; }) => c.componentCode === componentCode);
-            if (!component) {
+            const componentInfo: InstalledComponentMeta = installInfo.installedComponentMetas?.find((c: { componentCode: any; }) => c.componentCode === componentCode);
+            if (!componentInfo) {
                 return {
                     success: false,
                     error: `未找到组件 ${componentCode} 的安装记录`
@@ -423,7 +423,7 @@ export class LocalInstallManager {
             const deletedFiles: string[] = [];
             const notFoundFiles: string[] = [];
 
-            for (const relativeFilePath of component.copiedFiles) {
+            for (const relativeFilePath of componentInfo.copiedFiles) {
                 const fullFilePath = join(assetsPath, relativeFilePath);
                 try {
                     // 检查文件是否存在
@@ -441,15 +441,23 @@ export class LocalInstallManager {
             // 从assets目录开始清理空目录
             await cleanupEmptyDirs(assetsPath);
             // 移除appendScript
-            // if (effectItemComponentInfo.appendScripts && effectItemComponentInfo.appendScripts?.length > 0) {
-            //     for (let i = 0; i < effectItemComponentInfo.appendScripts.length; i++) {
-            //         const element = effectItemComponentInfo.appendScripts[i];
-            //         let res_remove = await AppendScript.removeFactory(element.sourceFilePath, element.factoryType)
-            //         assert.equal(res_remove.success, true, '移除factory成功')
-            //         let res_add_type = await AppendScript.removeFactoryType(element.factoryType)
-            //         assert.equal(res_add_type.success, true, '新增factoryType成功')
-            //     }
-            // }
+            if (componentInfo.appendScripts && componentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < componentInfo.appendScripts.length; i++) {
+                    const element = componentInfo.appendScripts[i];
+                    let res_remove = await AppendScript.removeFactory(element.sourceFilePath, element.factoryType)
+                    if (res_remove.success) {
+                        console.log(`[xhgame_builder] 移除factory成功: ${element.factoryType}`)
+                    } else {
+                        console.warn(`[xhgame_builder] 移除factory失败: ${element.factoryType}`)
+                    }
+                    let res_add_type = await AppendScript.removeFactoryType(element.factoryType)
+                    if (res_add_type.success) {
+                        console.log(`[xhgame_builder] 移除factoryType成功: ${element.factoryType}`)
+                    } else {
+                        console.warn(`[xhgame_builder] 移除factoryType失败: ${element.factoryType}`)
+                    }
+                }
+            }
 
 
             // 从配置中移除组件记录 
@@ -459,7 +467,7 @@ export class LocalInstallManager {
             } catch (error) {
                 console.warn(`[xhgame_builder] 移除组件记录失败:`, error);
             }
-            console.log(`[xhgame_builder] 组件卸载完成: ${component.componentName}`);
+            console.log(`[xhgame_builder] 组件卸载完成: ${componentInfo.componentName}`);
             return {
                 success: true,
             };

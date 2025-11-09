@@ -1,5 +1,5 @@
 import { assert, describe, test } from "poku";
-import { getPluginPath, getGroupPath, getExtensionsPath, getProjectPath } from "../../../packages/builder/src/Builder/Util";
+import { getPluginPath, getGroupPath, getExtensionsPath, getProjectPath } from "../../packages/builder/src/Builder/Util";
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {
