@@ -9,6 +9,7 @@ export enum FactoryType {
     unitUiItem = 'unitUiItem',
     effectItem = 'effectItem',
     tiledItem = 'tiledItem',
+    xhgame_plugin_not_exists = 'xhgame_plugin_not_exists'
 }
 
 

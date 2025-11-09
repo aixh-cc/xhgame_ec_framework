@@ -7,14 +7,17 @@ const test_00 = () => {
         test('测试AppendScript的addFactory', async () => {
             console.log(1111)
             let sourceFilePath = getProjectPath() + '/assets/script/managers/myFactory/MyCocosFactoryConfig.ts';
+            let res_add_type = await AppendScript.addFactoryType('xhgame_plugin_not_exists')
+            assert.equal(res_add_type.success, true, '新增factoryType成功')
+
             let res_add = await AppendScript.addFactory(
                 sourceFilePath,
                 {
-                    factoryType: 'xhgame_plugin_not_exists',
-                    importPath: 'xhgame_plugin_not_exists',
-                    itemClassName: 'MyItem',
-                    driveClassName: 'MyDrive',
-                    factoryClassName: 'MyFactory',
+                    factoryType: 'effectItem',
+                    importPath: 'effectItem',
+                    itemClassName: 'CocosEffectItem',
+                    driveClassName: 'CocosEffectItemFactoryDrive',
+                    factoryClassName: 'EffectItemFactory',
                 })
             assert.equal(res_add.success, true, '新增factory成功')
 

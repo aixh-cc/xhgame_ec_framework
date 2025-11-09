@@ -3,6 +3,36 @@ import * as fs from 'fs';
 
 export class AppendScript {
 
+    static async addFactoryType(factoryType: string) {
+        const sourceFilePath = 'assets/script/managers/myFactory/MyFactorys.ts';
+        // 检测sourceFilePath是否存在
+        try {
+            await fs.promises.access(sourceFilePath, fs.constants.F_OK);
+        } catch (e) {
+            return { success: false, error: sourceFilePath + '文件不存在' };
+        }
+        // 使用 ts-morph 修改枚举
+        try {
+            const project = new Project();
+            const sourceFile = project.addSourceFileAtPath(sourceFilePath);
+
+            const enumDecl = sourceFile.getEnum('FactoryType');
+            if (!enumDecl) {
+                return { success: false, error: 'FactoryType 枚举未找到' };
+            }
+
+            const alreadyExists = enumDecl.getMembers().some(m => m.getName() === factoryType);
+            if (!alreadyExists) {
+                enumDecl.addMember({ name: factoryType, initializer: `'${factoryType}'` });
+            }
+
+            await sourceFile.save();
+            return { success: true };
+        } catch (err) {
+            return { success: false, error: '添加 FactoryType 失败: ' + (err as Error)?.message };
+        }
+    }
+
     static async addFactory(sourceFilePath: string, config: {
         factoryType: string;
         importPath: string;
