@@ -1,5 +1,5 @@
 import { IItem, BaseFactory, IItemProduceDrive } from "@aixh-cc/xhgame_ec_framework"
-import { FactoryType } from "../MyFactorys"
+import { FactoryType } from "../../MyFactoryManager";
 
 export interface IEffectItem extends IItem {
     effectTime: number
