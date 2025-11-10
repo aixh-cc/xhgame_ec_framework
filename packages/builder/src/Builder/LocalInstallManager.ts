@@ -79,9 +79,12 @@ export class LocalInstallManager {
                             installedAt: installInfo?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.installedAt || '',
                             // 是否备份，todo
                             isBackedUp: false, // todo
-                            // 版本对比，是否可更新(当前为最简单的版本不一致作为判断)
-                            isUpdatable: json.componentVersion != installInfo?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.componentVersion
+                            // 是否可更新，先默认false
+                            isUpdatable: false
                         };
+                        if (info.isInstalled && json.componentVersion != installInfo?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.componentVersion) {
+                            info.isUpdatable = true; // 版本对比，是否可更新(当前为最简单的版本不一致作为判断)
+                        }
                         list.push(info);
                     }
                 } catch (error) {

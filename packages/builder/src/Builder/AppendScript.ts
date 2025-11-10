@@ -6,7 +6,14 @@ import { getProjectPath } from './Util';
 export class AppendScript {
 
     static async addFactoryType(factoryType: string) {
-        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', 'MyFactoryManager.ts');
+        return await this.addBaseType(factoryType, 'FactoryType', 'MyFactoryManager');
+    }
+    static async addTableType(factoryType: string) {
+        return await this.addBaseType(factoryType, 'TableType', 'MyTableManager');
+    }
+
+    private static async addBaseType(type: string, typeKey: string, managerName: string) {
+        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
 
         // 检测sourceFilePath是否存在
         try {
@@ -19,20 +26,20 @@ export class AppendScript {
             const project = new Project();
             const sourceFile = project.addSourceFileAtPath(sourceFilePath);
 
-            const enumDecl = sourceFile.getEnum('FactoryType');
+            const enumDecl = sourceFile.getEnum(typeKey);
             if (!enumDecl) {
-                return { success: false, error: 'FactoryType 枚举未找到' };
+                return { success: false, error: typeKey + ' 枚举未找到' };
             }
 
-            const alreadyExists = enumDecl.getMembers().some(m => m.getName() === factoryType);
+            const alreadyExists = enumDecl.getMembers().some(m => m.getName() === type);
             if (!alreadyExists) {
-                enumDecl.addMember({ name: factoryType, initializer: `'${factoryType}'` });
+                enumDecl.addMember({ name: type, initializer: `'${type}'` });
             }
 
             await sourceFile.save();
             return { success: true };
         } catch (err) {
-            return { success: false, error: '添加 FactoryType 失败: ' + (err as Error)?.message };
+            return { success: false, error: '添加 ' + typeKey + ' 失败: ' + (err as Error)?.message };
         }
     }
 
