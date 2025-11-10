@@ -69,4 +69,4 @@ docs/build/
 /demo_wxgame/
 
 ## 
-*-installInfo.json
+/extensions/*-installInfo.json
