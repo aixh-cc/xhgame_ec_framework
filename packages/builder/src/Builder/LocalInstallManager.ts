@@ -351,6 +351,26 @@ export class LocalInstallManager {
                         }
                         // assert.equal(res_add.success, true, '新增factory成功')
                     }
+                    if (element.type === 'table') {
+                        let res_add_type = await AppendScript.addTableType(element.tableType)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 新增tableType成功: ${element.tableType}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增tableType失败: ${element.tableType}`)
+                        }
+                        let res_add = await AppendScript.addTable(
+                            {
+                                sourceFilePath: element.sourceFilePath,
+                                tableType: element.tableType,
+                                itemIName: element.itemIName,
+                                tableClassName: element.tableClassName,
+                            })
+                        if (res_add.success) {
+                            console.log(`[xhgame_builder] 新增table成功: ${element.tableType}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增table失败: ${element.tableType}`)
+                        }
+                    }
                 }
             }
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
@@ -460,6 +480,20 @@ export class LocalInstallManager {
                             console.log(`[xhgame_builder] 移除factoryType成功: ${element.factoryType}`)
                         } else {
                             console.warn(`[xhgame_builder] 移除factoryType失败: ${element.factoryType}`)
+                        }
+                    }
+                    if (element.type === 'table') {
+                        let res_remove = await AppendScript.removeTable(element.sourceFilePath, element.tableType)
+                        if (res_remove.success) {
+                            console.log(`[xhgame_builder] 移除table成功: ${element.tableType}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除table失败: ${element.tableType}`)
+                        }
+                        let res_add_type = await AppendScript.removeTableType(element.tableType)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 移除tableType成功: ${element.tableType}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除tableType失败: ${element.tableType}`)
                         }
                     }
                 }
