@@ -89,7 +89,8 @@ export interface IAppendTable {
     type: 'table',
     sourceFilePath: string,
     tableType: string,
-    itemName: string,
+    itemIName: string,
+    tableClassName: string,
 }
 
 export interface IAppendFactory {

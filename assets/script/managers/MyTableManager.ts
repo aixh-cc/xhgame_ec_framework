@@ -8,11 +8,13 @@ import { HelpTable, IHelpTableItem } from "./myTable/tables/HelpTable";
 
 
 export enum TableType {
-    skill = "skill",
+    // skill = "skill",
     unit = "unit",
     battle = "battle",
     store = "store",
     config = "config",
+    // skill = 'skill',
+    // skill = 'skill',
     help = 'help',
 }
 

@@ -66,54 +66,56 @@ const test_01 = () => {
     return new Promise((resolve, reject) => {
         test('测试添加tableItemComponentInfo', async () => {
             let tableItemComponentInfo: IComponentInfo = {
-                componentCode: 'TableItemTemplate',
-                componentName: 'TableItemTemplate',
+                componentCode: 'SkillTable',
+                componentName: 'SkillTable',
                 componentVersion: '1.0.0',
-                description: '表格项模板',
+                description: '技能表格项模板',
                 author: 'hd',
-                category: 'ItemTemplate',
-                tags: ['ItemTemplate'],
+                category: 'Table',
+                tags: ['Table'],
                 dependencies: ['script/managers/myFactory/MyCocosFactoryConfig.ts'],
                 files: [],
                 stars: 4,
                 appendScripts: [
                     {
+                        type: 'table',
                         sourceFilePath: 'script/managers/myTable/MyTableConfig.ts',
                         tableType: 'skill',
-                        itemClassName: 'SkillTableItem',
-                        driveClassName: 'SkillTableItemProduceDrive',
+                        itemIName: 'ISkillTableItem',
+                        tableClassName: 'SkillTable',
                     }
                 ]
             }
             if (tableItemComponentInfo.appendScripts && tableItemComponentInfo.appendScripts?.length > 0) {
                 for (let i = 0; i < tableItemComponentInfo.appendScripts.length; i++) {
                     const element = tableItemComponentInfo.appendScripts[i];
-                    if (typeof element.factoryType === 'string') {
-                        let res_add_type = await AppendScript.addTableType(element.factoryType)
+                    if (element.type === 'table') {
+                        let res_add_type = await AppendScript.addTableType(element.tableType)
                         assert.equal(res_add_type.success, true, '新增tableType成功')
                         let res_add = await AppendScript.addTable(
                             {
                                 sourceFilePath: element.sourceFilePath,
-                                tableType: element.factoryType,
-                                itemClassName: element.itemClassName,
-                                driveClassName: element.driveClassName,
-                                factoryClassName: element.factoryClassName,
+                                tableType: element.tableType,
+                                itemIName: element.itemIName,
+                                tableClassName: element.tableClassName,
                             })
-                        assert.equal(res_add.success, true, '新增factory成功')
+                        assert.equal(res_add.success, true, '新增table成功')
                     }
                 }
             }
 
             // // 移除
-            // if (tableItemComponentInfo.appendScripts && tableItemComponentInfo.appendScripts?.length > 0) {
-            //     for (let i = 0; i < tableItemComponentInfo.appendScripts.length; i++) {
-            //         const element = tableItemComponentInfo.appendScripts[i];
-            //         let res_remove = await AppendScript.removeTable(element.sourceFilePath, element.factoryType)
-            //         assert.equal(res_remove.success, true, '移除table成功')
-            //         let res_add_type = await AppendScript.removeTableType(element.factoryType)
-            //         assert.equal(res_add_type.success, true, '移除tableType成功')
-            //     }
-            // }
+            if (tableItemComponentInfo.appendScripts && tableItemComponentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < tableItemComponentInfo.appendScripts.length; i++) {
+                    const element = tableItemComponentInfo.appendScripts[i];
+                    if (element.type == 'table') {
+                        let res_remove = await AppendScript.removeTable(element.sourceFilePath, element.tableType)
+                        assert.equal(res_remove.success, true, '移除table成功')
+                        let res_add_type = await AppendScript.removeTableType(element.tableType)
+                        assert.equal(res_add_type.success, true, '移除tableType成功')
+                    }
+                }
+            }
             resolve(true)
         })
     })

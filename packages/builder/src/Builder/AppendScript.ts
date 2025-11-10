@@ -82,9 +82,8 @@ export class AppendScript {
     static async addTable(config: {
         sourceFilePath: string;
         tableType: string;
-        itemClassName: string;
-        driveClassName: string;
-        factoryClassName: string;
+        itemIName: string;
+        tableClassName: string;
     }): Promise<{ success: boolean, error?: string }> {
         // 检测sourceFilePath是否存在
         let sourceFilePath = join(getProjectPath(), 'assets', config.sourceFilePath);
@@ -101,13 +100,8 @@ export class AppendScript {
 
             // 1. 添加 import 语句
             sourceFile.addImportDeclaration({
-                namedImports: [config.itemClassName, config.driveClassName],
-                moduleSpecifier: 'db://assets/script/managers/myFactory/itemTemplates/' + config.itemClassName
-            });
-
-            sourceFile.addImportDeclaration({
-                namedImports: [config.factoryClassName],
-                moduleSpecifier: './factorys/' + config.factoryClassName
+                namedImports: [config.itemIName, config.tableClassName],
+                moduleSpecifier: './tables/' + config.tableClassName
             });
 
             // 2. 获取类声明
@@ -117,8 +111,8 @@ export class AppendScript {
             // 3. 添加属性
             myClass.addProperty({
                 name: `[TableType.${config.tableType}]`,
-                type: `${config.factoryClassName}<${config.driveClassName}, ${config.itemClassName}>`,
-                initializer: `(new ${config.factoryClassName}<${config.driveClassName}, ${config.itemClassName}>()).setItemProduceDrive(new ${config.driveClassName}())`
+                type: `${config.tableClassName}<${config.itemIName}>`,
+                initializer: `(new ${config.tableClassName}<${config.itemIName}>())`
             });
 
             await sourceFile.save();
@@ -186,7 +180,84 @@ export class AppendScript {
         if (!sourceFilePath || sourceFilePath.trim().length === 0) {
             return { success: false };
         }
-        // todo
+        // 检测sourceFilePath是否存在
+        sourceFilePath = join(getProjectPath(), 'assets', sourceFilePath);
+        try {
+            await fs.promises.access(sourceFilePath, fs.constants.F_OK);
+        } catch (e) {
+            return { success: false, error: sourceFilePath + '文件不存在' };
+        }
+        let sourceFileClassName = basename(sourceFilePath).replace('.ts', '');
+
+        try {
+            const project = new Project();
+            const sourceFile = project.addSourceFileAtPath(sourceFilePath);
+
+            // 1. 查找并移除类属性
+            const myClass = sourceFile.getClass(sourceFileClassName);
+            const property = myClass?.getProperty(`[TableType.${factoryType}]`);
+
+            // 在移除前解析引用到的类名，便于清理 import
+            let tableClassName: string | undefined;
+            let itemIName: string | undefined;
+            if (property) {
+                const typeText = property.getTypeNode()?.getText() ?? '';
+                const initText = property.getInitializer()?.getText() ?? '';
+
+                // 尝试通过类型解析: TableClass<ItemIName>
+                const typeMatch = typeText.match(/([A-Za-z0-9_$.]+)\s*<\s*([A-Za-z0-9_$.]+)\s*>/);
+                if (typeMatch) {
+                    tableClassName = typeMatch[1];
+                    itemIName = typeMatch[2];
+                }
+                // 若类型未解析成功，再尝试通过初始化表达式解析: new TableClass<ItemIName>()
+                if (!tableClassName || !itemIName) {
+                    const initMatch = initText.match(/new\s+([A-Za-z0-9_$.]+)\s*<\s*([A-Za-z0-9_$.]+)\s*>/);
+                    if (initMatch) {
+                        tableClassName = tableClassName ?? initMatch[1];
+                        itemIName = itemIName ?? initMatch[2];
+                    }
+                }
+
+                // 先移除属性
+                property.remove();
+
+                // 2. 清理 import 部分（两者都来自 './tables/<TableClass>'）
+                const namesToRemove = new Set<string>();
+                if (tableClassName) namesToRemove.add(tableClassName);
+                if (itemIName) namesToRemove.add(itemIName);
+
+                if (namesToRemove.size > 0) {
+                    const importDeclarations = sourceFile.getImportDeclarations();
+                    for (const imp of importDeclarations) {
+                        const namedImports = imp.getNamedImports();
+                        for (const spec of namedImports) {
+                            const name = spec.getName();
+                            if (namesToRemove.has(name)) {
+                                spec.remove();
+                            }
+                        }
+                        // 如果该 import 已无任何命名/默认导入，则移除整个声明
+                        if (imp.getNamedImports().length === 0 && !imp.getDefaultImport()) {
+                            imp.remove();
+                        }
+                    }
+                }
+            }
+
+            // 尝试进一步组织导入，清除可能的未使用导入
+            try {
+                sourceFile.organizeImports();
+            } catch {
+                // ignore organize errors
+            }
+
+            await sourceFile.save();
+
+            return { success: true }
+        } catch (error) {
+            return { success: false }
+        }
     }
 
     static async removeFactory(
