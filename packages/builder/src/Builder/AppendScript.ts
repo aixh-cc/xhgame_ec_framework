@@ -6,13 +6,13 @@ import { getProjectPath } from './Util';
 export class AppendScript {
 
     static async addFactoryType(factoryType: string) {
-        return await this.addBaseType(factoryType, 'FactoryType', 'MyFactoryManager');
+        return await this._addBaseType(factoryType, 'FactoryType', 'MyFactoryManager');
     }
     static async addTableType(factoryType: string) {
-        return await this.addBaseType(factoryType, 'TableType', 'MyTableManager');
+        return await this._addBaseType(factoryType, 'TableType', 'MyTableManager');
     }
 
-    private static async addBaseType(type: string, typeKey: string, managerName: string) {
+    private static async _addBaseType(type: string, typeKey: string, managerName: string) {
         const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
 
         // 检测sourceFilePath是否存在
@@ -44,7 +44,13 @@ export class AppendScript {
     }
 
     static async removeFactoryType(factoryType: string): Promise<{ success: boolean, error?: string }> {
-        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', 'MyFactoryManager.ts');
+        return await this._removeBaseType(factoryType, 'FactoryType', 'MyFactoryManager');
+    }
+    static async removeTableType(tableType: string): Promise<{ success: boolean, error?: string }> {
+        return await this._removeBaseType(tableType, 'TableType', 'MyTableManager');
+    }
+    private static async _removeBaseType(type: string, typeKey: string, managerName: string): Promise<{ success: boolean, error?: string }> {
+        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
         let processed = false;
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
@@ -54,8 +60,8 @@ export class AppendScript {
         try {
             const project = new Project();
             const sourceFile = project.addSourceFileAtPath(sourceFilePath);
-            const enumDecl = sourceFile.getEnum('FactoryType');
-            const member = enumDecl.getMember(factoryType) || enumDecl.getMembers().find(m => m.getName() === factoryType);
+            const enumDecl = sourceFile.getEnum(typeKey);
+            const member = enumDecl.getMember(type) || enumDecl.getMembers().find(m => m.getName() === type);
             if (member) {
                 member.remove();
                 await sourceFile.save();
@@ -65,11 +71,11 @@ export class AppendScript {
                 processed = true;
             }
         } catch (err) {
-            return { success: false, error: '移除 FactoryType 失败: ' + (err as Error)?.message };
+            return { success: false, error: '移除 ' + typeKey + ' 失败: ' + (err as Error)?.message };
         }
 
         if (!processed) {
-            return { success: false, error: '未找到包含 FactoryType 的目标文件' };
+            return { success: false, error: '未找到包含 ' + typeKey + ' 的目标文件' };
         }
         return { success: true };
     }

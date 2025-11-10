@@ -67,3 +67,6 @@ docs/build/
 /demo/.idea/
 /demo/.vscode/
 /demo_wxgame/
+
+## 
+*-installInfo.json
