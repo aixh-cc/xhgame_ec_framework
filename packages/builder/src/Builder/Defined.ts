@@ -50,7 +50,7 @@ export interface InstalledComponentMeta {
     componentVersion: string;
     installedAt: string;
     copiedFiles: string[];
-    appendScripts: IAppendFactory[];
+    appendScripts: Array<IAppendFactory | IAppendTable>;
 }
 /**
  * 组件信息
@@ -82,10 +82,18 @@ export interface IComponentInfo {
     files: string[];
     /** 评分 */
     stars?: number;
-    appendScripts?: Array<IAppendFactory>;
+    /** 追加脚本 */
+    appendScripts?: Array<IAppendFactory | IAppendTable>;
+}
+export interface IAppendTable {
+    type: 'table',
+    sourceFilePath: string,
+    tableType: string,
+    itemName: string,
 }
 
 export interface IAppendFactory {
+    type: 'factory',
     sourceFilePath: string,
     factoryType: string,
     itemClassName: string,

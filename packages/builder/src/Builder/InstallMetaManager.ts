@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join } from 'path';
 import { getExtensionsPath, getProjectPath } from './Util';
-import { IAppendFactory, ILocalInstalledInfo, InstalledComponentMeta } from './Defined';
+import { IAppendFactory, IAppendTable, ILocalInstalledInfo, InstalledComponentMeta } from './Defined';
 
 export class InstallMetaManager {
     private pluginName: string;
@@ -99,7 +99,7 @@ export class InstallMetaManager {
         componentName: string,
         componentVersion: string,
         copiedFiles: string[],
-        appendScripts: Array<IAppendFactory>
+        appendScripts: Array<IAppendFactory | IAppendTable>
     ): Promise<void> {
         try {
             const installInfo = await this.readInstallInfo();

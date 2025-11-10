@@ -3,7 +3,7 @@ import { InstallMetaManager } from "../../packages/builder/src/Builder/InstallMe
 import * as fs from 'fs';
 import { join } from 'path';
 import { getProjectPath } from "../../packages/builder/src/Builder/Util";
-import { IAppendFactory, IComponentInfo } from "../../packages/builder/src/Builder/Defined";
+import { IAppendFactory, IAppendTable, IComponentInfo } from "../../packages/builder/src/Builder/Defined";
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
@@ -86,7 +86,7 @@ const test_03 = () => {
             const copiedFiles = [
                 join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
             ];
-            let appendScripts: Array<IAppendFactory> = []
+            let appendScripts: Array<IAppendFactory | IAppendTable> = []
             // 记录安装信息
             await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles, appendScripts);
 

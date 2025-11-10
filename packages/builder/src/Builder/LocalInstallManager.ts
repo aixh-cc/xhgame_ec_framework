@@ -328,7 +328,7 @@ export class LocalInstallManager {
             if (componentInfo.appendScripts && componentInfo.appendScripts?.length > 0) {
                 for (let i = 0; i < componentInfo.appendScripts.length; i++) {
                     const element = componentInfo.appendScripts[i];
-                    if (typeof element.factoryType === 'string') {
+                    if (element.type === 'factory') {
                         let res_add_type = await AppendScript.addFactoryType(element.factoryType)
                         if (res_add_type.success) {
                             console.log(`[xhgame_builder] 新增factoryType成功: ${element.factoryType}`)
@@ -448,17 +448,19 @@ export class LocalInstallManager {
             if (componentInfo.appendScripts && componentInfo.appendScripts?.length > 0) {
                 for (let i = 0; i < componentInfo.appendScripts.length; i++) {
                     const element = componentInfo.appendScripts[i];
-                    let res_remove = await AppendScript.removeFactory(element.sourceFilePath, element.factoryType)
-                    if (res_remove.success) {
-                        console.log(`[xhgame_builder] 移除factory成功: ${element.factoryType}`)
-                    } else {
-                        console.warn(`[xhgame_builder] 移除factory失败: ${element.factoryType}`)
-                    }
-                    let res_add_type = await AppendScript.removeFactoryType(element.factoryType)
-                    if (res_add_type.success) {
-                        console.log(`[xhgame_builder] 移除factoryType成功: ${element.factoryType}`)
-                    } else {
-                        console.warn(`[xhgame_builder] 移除factoryType失败: ${element.factoryType}`)
+                    if (element.type === 'factory') {
+                        let res_remove = await AppendScript.removeFactory(element.sourceFilePath, element.factoryType)
+                        if (res_remove.success) {
+                            console.log(`[xhgame_builder] 移除factory成功: ${element.factoryType}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除factory失败: ${element.factoryType}`)
+                        }
+                        let res_add_type = await AppendScript.removeFactoryType(element.factoryType)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 移除factoryType成功: ${element.factoryType}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除factoryType失败: ${element.factoryType}`)
+                        }
                     }
                 }
             }

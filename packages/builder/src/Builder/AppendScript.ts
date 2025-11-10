@@ -79,6 +79,56 @@ export class AppendScript {
         }
         return { success: true };
     }
+    static async addTable(config: {
+        sourceFilePath: string;
+        tableType: string;
+        itemClassName: string;
+        driveClassName: string;
+        factoryClassName: string;
+    }): Promise<{ success: boolean, error?: string }> {
+        // 检测sourceFilePath是否存在
+        let sourceFilePath = join(getProjectPath(), 'assets', config.sourceFilePath);
+        try {
+            await fs.promises.access(sourceFilePath, fs.constants.F_OK);
+        } catch (e) {
+            return { success: false, error: sourceFilePath + '文件不存在' };
+        }
+        let sourceFileClassName = basename(sourceFilePath).replace('.ts', '');
+
+        try {
+            const project = new Project();
+            const sourceFile = project.addSourceFileAtPath(sourceFilePath);
+
+            // 1. 添加 import 语句
+            sourceFile.addImportDeclaration({
+                namedImports: [config.itemClassName, config.driveClassName],
+                moduleSpecifier: 'db://assets/script/managers/myFactory/itemTemplates/' + config.itemClassName
+            });
+
+            sourceFile.addImportDeclaration({
+                namedImports: [config.factoryClassName],
+                moduleSpecifier: './factorys/' + config.factoryClassName
+            });
+
+            // 2. 获取类声明
+            const myClass = sourceFile.getClass(sourceFileClassName);
+            if (!myClass) throw new Error(`${sourceFileClassName} class not found`);
+
+            // 3. 添加属性
+            myClass.addProperty({
+                name: `[TableType.${config.tableType}]`,
+                type: `${config.factoryClassName}<${config.driveClassName}, ${config.itemClassName}>`,
+                initializer: `(new ${config.factoryClassName}<${config.driveClassName}, ${config.itemClassName}>()).setItemProduceDrive(new ${config.driveClassName}())`
+            });
+
+            await sourceFile.save();
+
+            return { success: true }
+        } catch (error) {
+            return { success: false }
+        }
+    }
+
     static async addFactory(config: {
         sourceFilePath: string;
         factoryType: string;
@@ -129,6 +179,16 @@ export class AppendScript {
         }
 
     }
+    static async removeTable(
+        sourceFilePath: string,
+        factoryType: string
+    ): Promise<{ success: boolean, error?: string }> {
+        if (!sourceFilePath || sourceFilePath.trim().length === 0) {
+            return { success: false };
+        }
+        // todo
+    }
+
     static async removeFactory(
         sourceFilePath: string,
         factoryType: string
