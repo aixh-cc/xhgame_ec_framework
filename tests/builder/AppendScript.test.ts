@@ -73,7 +73,7 @@ const test_01 = () => {
                 author: 'hd',
                 category: 'Table',
                 tags: ['Table'],
-                dependencies: ['script/managers/myFactory/MyCocosFactoryConfig.ts'],
+                dependencies: ['script/managers/myTable/MyTableConfig.ts'],
                 files: [],
                 stars: 4,
                 appendScripts: [
