@@ -120,10 +120,56 @@ const test_01 = () => {
         })
     })
 }
+const test_02 = () => {
+    return new Promise((resolve, reject) => {
+        test('测试添加guiItemComponentInfo', async () => {
+            let guiItemComponentInfo: IComponentInfo = {
+                componentCode: 'gate_group_mission',
+                componentName: 'gate_group_mission',
+                componentVersion: '1.0.0',
+                description: '网关组任务模板',
+                author: 'hd',
+                category: 'Gui',
+                tags: ['Gui'],
+                dependencies: ['script/managers/MyUiManager.ts'],
+                files: [],
+                stars: 4,
+                appendScripts: [
+                    {
+                        type: 'gui',
+                        sourceFilePath: 'script/managers/MyUiManager.ts',
+                        guiName: 'gate_group_mission',
+                    }
+                ]
+            }
+            if (guiItemComponentInfo.appendScripts && guiItemComponentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < guiItemComponentInfo.appendScripts.length; i++) {
+                    const element = guiItemComponentInfo.appendScripts[i];
+                    if (element.type === 'gui') {
+                        let res_add_type = await AppendScript.addGuiType(element.guiName)
+                        assert.equal(res_add_type.success, true, '新增guiType成功')
+                    }
+                }
+            }
 
+            // // 移除
+            // if (guiItemComponentInfo.appendScripts && guiItemComponentInfo.appendScripts?.length > 0) {
+            //     for (let i = 0; i < guiItemComponentInfo.appendScripts.length; i++) {
+            //         const element = guiItemComponentInfo.appendScripts[i];
+            //         if (element.type == 'gui') {
+            //             let res_add_type = await AppendScript.removeGuiType(element.guiName)
+            //             assert.equal(res_add_type.success, true, '移除guiType成功')
+            //         }
+            //     }
+            // }
+            resolve(true)
+        })
+    })
+}
 let functions = [
     test_00,
     test_01,
+    test_02
 ]
 
 describe('AppendScript功能', async () => {

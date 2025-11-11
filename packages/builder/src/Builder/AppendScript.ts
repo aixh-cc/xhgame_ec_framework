@@ -11,6 +11,9 @@ export class AppendScript {
     static async addTableType(factoryType: string) {
         return await this._addBaseType(factoryType, 'TableType', 'MyTableManager');
     }
+    static async addGuiType(guiType: string) {
+        return await this._addBaseType(guiType, 'UIEnums', 'MyUiManager');
+    }
 
     private static async _addBaseType(type: string, typeKey: string, managerName: string) {
         const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');

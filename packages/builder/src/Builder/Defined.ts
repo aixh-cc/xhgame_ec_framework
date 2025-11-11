@@ -50,7 +50,7 @@ export interface InstalledComponentMeta {
     componentVersion: string;
     installedAt: string;
     copiedFiles: string[];
-    appendScripts: Array<IAppendFactory | IAppendTable>;
+    appendScripts: Array<IAppendFactory | IAppendTable | IAppendGui>;
 }
 /**
  * 组件信息
@@ -83,7 +83,7 @@ export interface IComponentInfo {
     /** 评分 */
     stars?: number;
     /** 追加脚本 */
-    appendScripts?: Array<IAppendFactory | IAppendTable>;
+    appendScripts?: Array<IAppendFactory | IAppendTable | IAppendGui>;
 }
 export interface IAppendTable {
     type: 'table',
@@ -100,6 +100,11 @@ export interface IAppendFactory {
     itemClassName: string,
     driveClassName: string,
     factoryClassName: string,
+}
+export interface IAppendGui {
+    type: 'gui',
+    sourceFilePath: string,
+    guiName: string
 }
 
 /** 项目文件依赖描述 */
