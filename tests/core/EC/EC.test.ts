@@ -59,27 +59,27 @@ const test_02 = () => {
         })
     })
 }
-const test_03 = () => {
-    return new Promise((resolve, reject) => {
-        test('挂载组件并完成初始化', async () => {
-            let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
-            let arr: number[] = []
-            DI.bindSingleton('TestSenceComp', TestSenceComp)
-            let comp = mygameEntiy.attachComponentByName("TestSenceComp")
-            await comp.setup({ arr: arr, add_value: 10 }).done()
-            assert.equal(JSON.stringify(arr), '[121,232,343,454]', 'attachComponent string类型的Comp正常1')
-            mygameEntiy.detachComponent(TestSenceComp)
-            resolve(true)
-        })
-    })
-}
+// const test_03 = () => {
+//     return new Promise((resolve, reject) => {
+//         test('挂载组件并完成初始化', async () => {
+//             let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
+//             let arr: number[] = []
+//             DI.bindSingleton('TestSenceComp', TestSenceComp)
+//             let comp = mygameEntiy.attachComponentByName("TestSenceComp")
+//             await comp.setup({ arr: arr, add_value: 10 }).done()
+//             assert.equal(JSON.stringify(arr), '[121,232,343,454]', 'attachComponent string类型的Comp正常1')
+//             mygameEntiy.detachComponent(TestSenceComp)
+//             resolve(true)
+//         })
+//     })
+// }
 
 
 let functions = [
     test_00,
     test_01,
     test_02,
-    test_03
+    // test_03
 ]
 
 describe('Entity功能', async () => {

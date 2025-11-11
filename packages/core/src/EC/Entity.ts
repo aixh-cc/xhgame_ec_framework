@@ -1,4 +1,3 @@
-import { DI } from "../DI/DI";
 import { Comp } from "./Comp";
 /** 实体构造器接口 */
 export interface EntityCtor<T> {
@@ -68,25 +67,25 @@ export class Entity {
             return component
         }
     }
-    /**
-     * 单实体上挂载组件
-     * @param componentClass 组件类名
-     * @returns 组件实例
-     */
-    attachComponentByName<T extends Comp>(componentClass: string): T {
-        let component = this.getComponentByName(componentClass) as T
-        if (component) {
-            console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
-            return component;
-        } else {
-            const component = DI.make(componentClass) as T;
-            this._components_class.push(componentClass)
-            this._components_names.push(component.compName)
-            this._components.push(component)
-            this._doAttachComponent(component)
-            return component
-        }
-    }
+    // /**
+    //  * 单实体上挂载组件
+    //  * @param componentClass 组件类名
+    //  * @returns 组件实例
+    //  */
+    // attachComponentByName<T extends Comp>(componentClass: string): T {
+    //     let component = this.getComponentByName(componentClass) as T
+    //     if (component) {
+    //         console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
+    //         return component;
+    //     } else {
+    //         const component = DI.make(componentClass) as T;
+    //         this._components_class.push(componentClass)
+    //         this._components_names.push(component.compName)
+    //         this._components.push(component)
+    //         this._doAttachComponent(component)
+    //         return component
+    //     }
+    // }
     private _doAttachComponent(component: Comp) {
         component.attach(this).then(async () => {
             if (component.initBySystems.length > 0) {
