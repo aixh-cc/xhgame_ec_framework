@@ -379,6 +379,19 @@ export class LocalInstallManager {
                             console.warn(`[xhgame_builder] 新增guiType失败: ${element.guiName}`)
                         }
                     }
+                    if (element.type === 'comp') {
+                        let res_add = await AppendScript.addComp(
+                            {
+                                sourceFilePath: element.sourceFilePath,
+                                compName: element.compName,
+                                compPath: element.compPath,
+                            })
+                        if (res_add.success) {
+                            console.log(`[xhgame_builder] 新增comp成功: ${element.compName}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增comp失败: ${element.compName}`)
+                        }
+                    }
                 }
             }
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
@@ -510,6 +523,14 @@ export class LocalInstallManager {
                             console.log(`[xhgame_builder] 移除guiType成功: ${element.guiName}`)
                         } else {
                             console.warn(`[xhgame_builder] 移除guiType失败: ${element.guiName}`)
+                        }
+                    }
+                    if (element.type === 'comp') {
+                        let res_remove = await AppendScript.removeComp(element.sourceFilePath, element.compName)
+                        if (res_remove.success) {
+                            console.log(`[xhgame_builder] 移除comp成功: ${element.compName}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除comp失败: ${element.compName}`)
                         }
                     }
                 }
