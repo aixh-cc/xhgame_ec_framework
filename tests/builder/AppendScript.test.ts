@@ -139,6 +139,7 @@ const test_02 = () => {
                         type: 'gui',
                         sourceFilePath: 'script/managers/MyUiManager.ts',
                         guiName: 'gate_group_mission',
+                        guiPath: 'bundle_game://gui/battle/dialog/gate_group_mission'
                     }
                 ]
             }
@@ -146,23 +147,26 @@ const test_02 = () => {
                 for (let i = 0; i < guiItemComponentInfo.appendScripts.length; i++) {
                     const element = guiItemComponentInfo.appendScripts[i];
                     if (element.type === 'gui') {
-                        let res_add_type = await AppendScript.addGuiType(element.guiName)
+                        let res_add_type = await AppendScript.addGuiType(element.guiName, element.guiPath)
                         assert.equal(res_add_type.success, true, '新增guiType成功')
                     }
                 }
             }
 
             // // 移除
-            // if (guiItemComponentInfo.appendScripts && guiItemComponentInfo.appendScripts?.length > 0) {
-            //     for (let i = 0; i < guiItemComponentInfo.appendScripts.length; i++) {
-            //         const element = guiItemComponentInfo.appendScripts[i];
-            //         if (element.type == 'gui') {
-            //             let res_add_type = await AppendScript.removeGuiType(element.guiName)
-            //             assert.equal(res_add_type.success, true, '移除guiType成功')
-            //         }
-            //     }
-            // }
-            resolve(true)
+            setTimeout(async () => {
+                if (guiItemComponentInfo.appendScripts && guiItemComponentInfo.appendScripts?.length > 0) {
+                    for (let i = 0; i < guiItemComponentInfo.appendScripts.length; i++) {
+                        const element = guiItemComponentInfo.appendScripts[i];
+                        if (element.type == 'gui') {
+                            let res_add_type = await AppendScript.removeGuiType(element.guiName)
+                            assert.equal(res_add_type.success, true, '移除guiType成功')
+                        }
+                    }
+                }
+                resolve(true)
+            }, 500)
+
         })
     })
 }

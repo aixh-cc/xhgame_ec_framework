@@ -11,11 +11,11 @@ export class AppendScript {
     static async addTableType(factoryType: string) {
         return await this._addBaseType(factoryType, 'TableType', 'MyTableManager');
     }
-    static async addGuiType(guiType: string) {
-        return await this._addBaseType(guiType, 'UIEnums', 'MyUiManager');
+    static async addGuiType(guiType: string, guiPath: string) {
+        return await this._addBaseType(guiType, 'UIEnums', 'MyUiManager', guiPath);
     }
 
-    private static async _addBaseType(type: string, typeKey: string, managerName: string) {
+    private static async _addBaseType(type: string, typeKey: string, managerName: string, initializer?: string) {
         const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
 
         // 检测sourceFilePath是否存在
@@ -36,7 +36,11 @@ export class AppendScript {
 
             const alreadyExists = enumDecl.getMembers().some(m => m.getName() === type);
             if (!alreadyExists) {
-                enumDecl.addMember({ name: type, initializer: `'${type}'` });
+                if (initializer) {
+                    enumDecl.addMember({ name: type, initializer: `'${initializer}'` });
+                } else {
+                    enumDecl.addMember({ name: type, initializer: `'${type}'` });
+                }
             }
 
             await sourceFile.save();
@@ -51,6 +55,9 @@ export class AppendScript {
     }
     static async removeTableType(tableType: string): Promise<{ success: boolean, error?: string }> {
         return await this._removeBaseType(tableType, 'TableType', 'MyTableManager');
+    }
+    static async removeGuiType(guiType: string): Promise<{ success: boolean, error?: string }> {
+        return await this._removeBaseType(guiType, 'UIEnums', 'MyUiManager');
     }
     private static async _removeBaseType(type: string, typeKey: string, managerName: string): Promise<{ success: boolean, error?: string }> {
         const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');

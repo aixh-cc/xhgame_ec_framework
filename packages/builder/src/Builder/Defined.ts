@@ -104,7 +104,8 @@ export interface IAppendFactory {
 export interface IAppendGui {
     type: 'gui',
     sourceFilePath: string,
-    guiName: string
+    guiName: string,
+    guiPath: string
 }
 
 /** 项目文件依赖描述 */
