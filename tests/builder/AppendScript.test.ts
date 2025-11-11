@@ -170,10 +170,70 @@ const test_02 = () => {
         })
     })
 }
+
+const test_03 = () => {
+    return new Promise((resolve, reject) => {
+        test('测试添加compItemComponentInfo', async () => {
+            let compItemComponentInfo: IComponentInfo = {
+                componentCode: 'gate_group_mission',
+                componentName: 'gate_group_mission',
+                componentVersion: '1.0.0',
+                description: '网关组任务模板',
+                author: 'hd',
+                category: 'Comp',
+                tags: ['Comp'],
+                dependencies: ['script/RegisterComps.ts'],
+                files: [],
+                stars: 4,
+                appendScripts: [
+                    {
+                        type: 'comp',
+                        sourceFilePath: 'script/RegisterComps.ts',
+                        compName: 'PlayerModelComp',
+                        compPath: 'script/comps/models/PlayerModelComp'
+                    }
+                ]
+            }
+            if (compItemComponentInfo.appendScripts && compItemComponentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < compItemComponentInfo.appendScripts.length; i++) {
+                    const element = compItemComponentInfo.appendScripts[i];
+                    if (element.type === 'comp') {
+                        let res_add = await AppendScript.addComp(
+                            {
+                                sourceFilePath: element.sourceFilePath,
+                                compName: element.compName,
+                                compPath: element.compPath,
+                            })
+                        assert.equal(res_add.success, true, '新增comp成功')
+                    }
+                }
+            }
+
+            // // 移除
+            setTimeout(async () => {
+                if (compItemComponentInfo.appendScripts && compItemComponentInfo.appendScripts?.length > 0) {
+                    for (let i = 0; i < compItemComponentInfo.appendScripts.length; i++) {
+                        const element = compItemComponentInfo.appendScripts[i];
+                        if (element.type == 'comp') {
+                            let res_add_type = await AppendScript.removeComp(
+                                element.sourceFilePath,
+                                element.compName
+                            )
+                            assert.equal(res_add_type.success, true, '移除comp成功')
+                        }
+                    }
+                }
+                resolve(true)
+            }, 1000)
+
+        })
+    })
+}
 let functions = [
     test_00,
     test_01,
-    test_02
+    test_02,
+    test_03
 ]
 
 describe('AppendScript功能', async () => {

@@ -89,6 +89,49 @@ export class AppendScript {
         }
         return { success: true };
     }
+    static async addComp(config: {
+        sourceFilePath: string;
+        compName: string;
+        compPath: string;
+    }): Promise<{ success: boolean, error?: string }> {
+        // 检测sourceFilePath是否存在
+        let sourceFilePath = join(getProjectPath(), 'assets', config.sourceFilePath);
+        try {
+            await fs.promises.access(sourceFilePath, fs.constants.F_OK);
+        } catch (e) {
+            return { success: false, error: sourceFilePath + '文件不存在' };
+        }
+        let sourceFileClassName = basename(sourceFilePath).replace('.ts', '');
+
+        try {
+            const project = new Project();
+            const sourceFile = project.addSourceFileAtPath(sourceFilePath);
+
+            let compPath = 'db://assets/' + config.compPath;
+            // 1. 添加 import 语句
+            sourceFile.addImportDeclaration({
+                namedImports: [config.compName],
+                moduleSpecifier: compPath
+            });
+
+            // 2. 获取类声明
+            const myClass = sourceFile.getClass(sourceFileClassName);
+            if (!myClass) throw new Error(`${sourceFileClassName} class not found`);
+
+            // 3. 添加属性
+            myClass.addProperty({
+                name: `['${config.compName}']`,
+                type: `typeof ${config.compName}`,
+                initializer: `${config.compName}`
+            });
+
+            await sourceFile.save();
+
+            return { success: true }
+        } catch (error) {
+            return { success: false }
+        }
+    }
     static async addTable(config: {
         sourceFilePath: string;
         tableType: string;
@@ -182,6 +225,64 @@ export class AppendScript {
             return { success: false }
         }
 
+    }
+    static async removeComp(
+        sourceFilePath: string,
+        compName: string
+    ): Promise<{ success: boolean, error?: string }> {
+        // 参数校验
+        if (!sourceFilePath || sourceFilePath.trim().length === 0 || !compName || compName.trim().length === 0) {
+            return { success: false };
+        }
+        // 检测sourceFilePath是否存在
+        sourceFilePath = join(getProjectPath(), 'assets', sourceFilePath);
+        try {
+            await fs.promises.access(sourceFilePath, fs.constants.F_OK);
+        } catch (e) {
+            return { success: false, error: sourceFilePath + '文件不存在' };
+        }
+
+        const sourceFileClassName = basename(sourceFilePath).replace('.ts', '');
+
+        try {
+            const project = new Project();
+            const sourceFile = project.addSourceFileAtPath(sourceFilePath);
+
+            // 1. 查找并移除类属性
+            const myClass = sourceFile.getClass(sourceFileClassName);
+            const property = myClass?.getProperty(`['${compName}']`);
+            if (property) {
+                property.remove();
+            }
+
+            // 2. 清理 import 部分（移除该组件类的命名导入）
+            const importDeclarations = sourceFile.getImportDeclarations();
+            for (const imp of importDeclarations) {
+                const namedImports = imp.getNamedImports();
+                for (const spec of namedImports) {
+                    if (spec.getName() === compName) {
+                        spec.remove();
+                    }
+                }
+                // 如果该 import 已无任何命名/默认导入，则移除整个声明
+                if (imp.getNamedImports().length === 0 && !imp.getDefaultImport()) {
+                    imp.remove();
+                }
+            }
+
+            // 尝试进一步组织导入，清除可能的未使用导入
+            try {
+                sourceFile.organizeImports();
+            } catch {
+                // ignore organize errors
+            }
+
+            await sourceFile.save();
+
+            return { success: true };
+        } catch (error) {
+            return { success: false };
+        }
     }
     static async removeTable(
         sourceFilePath: string,
