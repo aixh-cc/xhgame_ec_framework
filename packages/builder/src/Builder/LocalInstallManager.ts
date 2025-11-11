@@ -371,6 +371,14 @@ export class LocalInstallManager {
                             console.warn(`[xhgame_builder] 新增table失败: ${element.tableType}`)
                         }
                     }
+                    if (element.type === 'gui') {
+                        let res_add_type = await AppendScript.addGuiType(element.guiName, element.guiPath)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 新增guiType成功: ${element.guiName}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增guiType失败: ${element.guiName}`)
+                        }
+                    }
                 }
             }
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
@@ -494,6 +502,14 @@ export class LocalInstallManager {
                             console.log(`[xhgame_builder] 移除tableType成功: ${element.tableType}`)
                         } else {
                             console.warn(`[xhgame_builder] 移除tableType失败: ${element.tableType}`)
+                        }
+                    }
+                    if (element.type === 'gui') {
+                        let res_add_type = await AppendScript.removeGuiType(element.guiName)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 移除guiType成功: ${element.guiName}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除guiType失败: ${element.guiName}`)
                         }
                     }
                 }
