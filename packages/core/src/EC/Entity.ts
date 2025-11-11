@@ -1,3 +1,4 @@
+import { DI } from "../DI/DI";
 import { Comp } from "./Comp";
 /** 实体构造器接口 */
 export interface EntityCtor<T> {
@@ -52,14 +53,15 @@ export class Entity {
     }
 
     /** 单实体上挂载组件 */
-    attachComponent<T extends Comp>(componentClass: new () => T): T {
+    attachComponent<T extends Comp>(componentClass: (new () => T) | string): T {
         let hasIndex = this._components_class.indexOf(componentClass)
         if (hasIndex > -1) {
             const component = this.components[hasIndex] as T;
             console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
             return component;
         } else {
-            const component = Comp.createComp(componentClass);
+            const component = typeof componentClass == 'string' ? DI.make(componentClass) as T : Comp.createComp(componentClass);
+            // const component = Comp.createComp(componentClass);
             this._components_class.push(componentClass)
             this._components_names.push(component.compName)
             this._components.push(component)
