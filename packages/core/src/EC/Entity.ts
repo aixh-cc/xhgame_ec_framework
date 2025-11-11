@@ -68,7 +68,11 @@ export class Entity {
             return component
         }
     }
-    /** 单实体上挂载组件 */
+    /**
+     * 单实体上挂载组件
+     * @param componentClass 组件类名
+     * @returns 组件实例
+     */
     attachComponentByName<T extends Comp>(componentClass: string): T {
         let component = this.getComponentByName(componentClass) as T
         if (component) {

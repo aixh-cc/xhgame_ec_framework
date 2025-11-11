@@ -65,7 +65,7 @@ const test_03 = () => {
             let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
             let arr: number[] = []
             DI.bindSingleton('TestSenceComp', TestSenceComp)
-            let comp = mygameEntiy.attachComponent("TestSenceComp")
+            let comp = mygameEntiy.attachComponentByName("TestSenceComp")
             await comp.setup({ arr: arr, add_value: 10 }).done()
             assert.equal(JSON.stringify(arr), '[121,232,343,454]', 'attachComponent string类型的Comp正常1')
             mygameEntiy.detachComponent(TestSenceComp)
