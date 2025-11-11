@@ -53,15 +53,29 @@ export class Entity {
     }
 
     /** 单实体上挂载组件 */
-    attachComponent<T extends Comp>(componentClass: (new () => T) | string): T {
+    attachComponent<T extends Comp>(componentClass: new () => T): T {
         let hasIndex = this._components_class.indexOf(componentClass)
         if (hasIndex > -1) {
             const component = this.components[hasIndex] as T;
             console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
             return component;
         } else {
-            const component = typeof componentClass == 'string' ? DI.make(componentClass) as T : Comp.createComp(componentClass);
-            // const component = Comp.createComp(componentClass);
+            const component = Comp.createComp(componentClass);
+            this._components_class.push(componentClass)
+            this._components_names.push(component.compName)
+            this._components.push(component)
+            this._doAttachComponent(component)
+            return component
+        }
+    }
+    /** 单实体上挂载组件 */
+    attachComponentByName<T extends Comp>(componentClass: string): T {
+        let component = this.getComponentByName(componentClass) as T
+        if (component) {
+            console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
+            return component;
+        } else {
+            const component = DI.make(componentClass) as T;
             this._components_class.push(componentClass)
             this._components_names.push(component.compName)
             this._components.push(component)
