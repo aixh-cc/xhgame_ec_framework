@@ -51,7 +51,7 @@ export abstract class Comp {
     static isDirtyComp(comp: Comp): boolean {
         return Comp._dirty_comps.indexOf(comp) !== -1
     }
-    static doNotifyAllDirtyComps() {
+    static notifyAllDirtyComps() {
         for (let i = 0; i < Comp._dirty_comps.length; i++) {
             const element = Comp._dirty_comps[i];
             element.notify(true)
