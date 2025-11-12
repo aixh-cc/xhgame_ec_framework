@@ -65,7 +65,7 @@ const test_00 = () => {
 
             assert.equal(Comp.isDirtyComp(testViewComp), true, '赃标记正确')
 
-            Comp.doNotifyAllDirtyComps()
+            Comp.notifyAllDirtyComps()
             assert.equal(testView.tips, 'wwwqq', '(下一帧生效)testViewComp.notify(true)后testView.tips正确')
             assert.equal(testView.personAge, 28, '(下一帧生效)testViewComp.notify(true)后testView.personAge正确')
             assert.equal(testView.personName, '李四ww', '(下一帧生效)testViewComp.notify(true)后testView.personName正确')
