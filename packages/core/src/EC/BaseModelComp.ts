@@ -19,9 +19,7 @@ export abstract class BaseModelComp extends Comp implements ISubject {
     abstract onDetach(): void
     /**
      * 被观察着的视图列表
-     * 设计模式14:观察者模式
-     * 意图:定义对象(modelComp)间的一种一对多的依赖关系，当一个对象（modelComp）的状态发生改变时，所有依赖于它的对象都得到通知并被自动更新。
-     */
+    */
     private _viewObservers: IObserver[] = []
     getObservers() {
         return this._viewObservers
@@ -43,11 +41,13 @@ export abstract class BaseModelComp extends Comp implements ISubject {
         }
         this._viewObservers.splice(observerIndex, 1);
     }
-    // todo 下一帧生效
-    notify(): void {
-        // console.log(this.compName + '，开始notify', this._viewObservers)
-        for (const _viewObserver of this._viewObservers) {
-            _viewObserver.updateBySubject(this);
+    notify(is_update_now: boolean = false): void {
+        if (is_update_now) {
+            for (const _viewObserver of this._viewObservers) {
+                _viewObserver.updateBySubject(this);
+            }
+        } else {
+            this.setDirtyMark()
         }
     }
 }

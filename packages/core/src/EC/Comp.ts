@@ -43,6 +43,28 @@ export abstract class Comp {
             this.compsPool.set(compClass, [comp]);
         }
     }
+
+    private static _dirty_comps: Comp[] = [];
+    static pushDirtyComp(comp: Comp) {
+        Comp._dirty_comps.push(comp)
+    }
+    static isDirtyComp(comp: Comp): boolean {
+        return Comp._dirty_comps.indexOf(comp) !== -1
+    }
+    static doNotifyAllDirtyComps() {
+        for (let i = 0; i < Comp._dirty_comps.length; i++) {
+            const element = Comp._dirty_comps[i];
+            element.notify(true)
+        }
+        Comp._dirty_comps = []
+    }
+    abstract notify(is_update_now: boolean): void
+    /**
+     * 设置脏标记
+     */
+    setDirtyMark() {
+        Comp.pushDirtyComp(this)
+    }
     /**
      * 组件的实体
      */
