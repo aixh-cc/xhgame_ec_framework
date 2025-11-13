@@ -3,7 +3,7 @@ import { join } from 'path';
 import { getExtensionsPath, getProjectPath } from './Util';
 import { IAppendFactory, IAppendTable, IAppendGui, IAppendComp, ILocalInstalledInfo, InstalledComponentMeta } from './Defined';
 
-export class InstallMetaManager {
+export class MetaManager {
     private pluginName: string;
     private installInfoPath: string;
     private logs: string[] = []

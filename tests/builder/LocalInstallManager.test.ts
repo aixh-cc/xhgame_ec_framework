@@ -23,7 +23,7 @@ const test_02 = () => {
         test('测试读取插件安装信息', async () => {
             let pluginName = 'localhandles_test_02'
 
-            const installInfoManager = LocalInstallManager.getInstallMetaManager(pluginName);
+            const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
             let codes = await installInfoManager.getInstalledComponentCodes()
             // assert.equal(codes.length, 0, '安装前组件数量=0正常')
 

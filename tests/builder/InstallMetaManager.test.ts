@@ -1,5 +1,5 @@
 import { assert, describe, test } from "poku";
-import { InstallMetaManager } from "../../packages/builder/src/Builder/InstallMetaManager";
+import { MetaManager } from "../../packages/builder/src/Builder/MetaManager";
 import * as fs from 'fs';
 import { join } from 'path';
 import { getProjectPath } from "../../packages/builder/src/Builder/Util";
@@ -7,8 +7,8 @@ import { IAppendFactory, IAppendTable, IAppendGui, IAppendComp, IComponentInfo }
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
-        test('测试InstallMetaManager的从未安装过', async () => {
-            let notInstalledInfoManager = new InstallMetaManager('xhgame_plugin_not_exists')
+        test('测试MetaManager的从未安装过', async () => {
+            let notInstalledInfoManager = new MetaManager('xhgame_plugin_not_exists')
             let is_exists = notInstalledInfoManager.exists()
             assert.equal(is_exists, false, 'notInstalledInfoManager的exists正常')
             let installInfo = await notInstalledInfoManager.readInstallInfo()
@@ -20,8 +20,8 @@ const test_00 = () => {
 }
 const test_01 = () => {
     return new Promise((resolve, reject) => {
-        test('测试InstallMetaManager的有安装过', async () => {
-            let installedInfoManager = new InstallMetaManager('test_01')
+        test('测试MetaManager的有安装过', async () => {
+            let installedInfoManager = new MetaManager('test_01')
             let is_exists = installedInfoManager.exists()
             assert.equal(is_exists, true, 'installedInfoManager的exists正常')
             let installInfo = await installedInfoManager.readInstallInfo()
@@ -33,8 +33,8 @@ const test_01 = () => {
 }
 const test_02 = () => {
     return new Promise((resolve, reject) => {
-        test('测试InstallMetaManager的写入', async () => {
-            let installedInfoManager = new InstallMetaManager('test_02')
+        test('测试MetaManager的写入', async () => {
+            let installedInfoManager = new MetaManager('test_02')
             let is_write_success = await installedInfoManager.writeInstallInfo({
                 version: '1.0.2',
                 installedComponentMetas: [],
@@ -57,9 +57,9 @@ const test_02 = () => {
 
 const test_03 = () => {
     return new Promise((resolve, reject) => {
-        test('测试InstallMetaManager的安装记录与查询', async () => {
+        test('测试MetaManager的安装记录与查询', async () => {
             const pluginName = 'test_03';
-            const iim = new InstallMetaManager(pluginName);
+            const iim = new MetaManager(pluginName);
             const projectPath = getProjectPath();
 
             // 准备一个伪造
@@ -128,7 +128,7 @@ let functions = [
     test_03
 ]
 
-describe('InstallMetaManager功能', async () => {
+describe('MetaManager功能', async () => {
     while (functions.length > 0) {
         let func = functions.shift()
         if (func) {
