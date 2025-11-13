@@ -1,32 +1,34 @@
 import * as fs from 'fs';
 import { join } from 'path';
-import { getExtensionsPath, getProjectPath } from './Util';
 import { IAppendFactory, IAppendTable, IAppendGui, IAppendComp, ILocalInstalledInfo, InstalledComponentMeta } from './Defined';
+
+export enum MetaType {
+    install = 'installInfo',
+    backup = 'backupInfo'
+}
 
 export class MetaManager {
     private pluginName: string;
-    private installInfoPath: string;
+    private metaPath: string;
     private logs: string[] = []
-    private extensionPath: string = ''
     private projectPath: string = ''
 
-    constructor(pluginName: string) {
+    constructor(projectPath: string, pluginName: string, metaType: MetaType) {
+        this.projectPath = projectPath;//getProjectPath();
         this.pluginName = pluginName;
-        this.extensionPath = getExtensionsPath();
-        this.projectPath = getProjectPath();
-        this.installInfoPath = join(this.extensionPath, pluginName + '-installInfo.json');
+        this.metaPath = join(projectPath, 'extensions', pluginName + '-' + metaType + '.json');
     }
     /**
      * 检查安装信息文件是否存在
      */
     exists(): boolean {
-        return fs.existsSync(this.installInfoPath);
+        return fs.existsSync(this.metaPath);
     }
 
     /**
      * 读取安装信息文件
      */
-    async readInstallInfo(): Promise<ILocalInstalledInfo> {
+    async readMateInfo(): Promise<ILocalInstalledInfo> {
         const defaultInstallInfo: ILocalInstalledInfo = {
             version: '1.0.0',
             lastUpdated: '',
@@ -34,8 +36,8 @@ export class MetaManager {
         };
 
         try {
-            if (fs.existsSync(this.installInfoPath)) {
-                const content = await fs.promises.readFile(this.installInfoPath, 'utf-8');
+            if (fs.existsSync(this.metaPath)) {
+                const content = await fs.promises.readFile(this.metaPath, 'utf-8');
                 const parsed = JSON.parse(content);
                 return Object.assign(defaultInstallInfo, parsed);
             }
@@ -52,9 +54,9 @@ export class MetaManager {
     async writeInstallInfo(installInfo: ILocalInstalledInfo): Promise<boolean> {
         try {
             installInfo.lastUpdated = new Date().toISOString();
-            await fs.promises.writeFile(this.installInfoPath, JSON.stringify(installInfo, null, 2), 'utf-8');
-            this.logs.push(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath.replace(this.projectPath, '')}`)
-            // console.log(`[${this.pluginName}] 安装信息已写入: ${this.installInfoPath.replace(this.projectPath, '')}`)
+            await fs.promises.writeFile(this.metaPath, JSON.stringify(installInfo, null, 2), 'utf-8');
+            this.logs.push(`[${this.pluginName}] 安装信息已写入: ${this.metaPath.replace(this.projectPath, '')}`)
+            // console.log(`[${this.pluginName}] 安装信息已写入: ${this.metaPath.replace(this.projectPath, '')}`)
             return true;
         } catch (error) {
             this.logs.push(`[${this.pluginName}] 写入安装信息失败: ${error}`)
@@ -73,7 +75,7 @@ export class MetaManager {
      * 获取已安装组件列表
      */
     async getInstalledComponentCodes(): Promise<string[]> {
-        const installInfo = await this.readInstallInfo();
+        const installInfo = await this.readMateInfo();
         return installInfo.installedComponentMetas.map(comp => comp.componentCode);
     }
     /**
@@ -88,7 +90,7 @@ export class MetaManager {
      * 获取组件的安装信息
      */
     async getInstalledComponentInfo(componentCode: string): Promise<InstalledComponentMeta | null> {
-        const installInfo = await this.readInstallInfo();
+        const installInfo = await this.readMateInfo();
         return installInfo.installedComponentMetas.find(comp => comp.componentCode === componentCode) || null;
     }
     /**
@@ -102,7 +104,7 @@ export class MetaManager {
         appendScripts: Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp>
     ): Promise<void> {
         try {
-            const installInfo = await this.readInstallInfo();
+            const installInfo = await this.readMateInfo();
             // 更新 installedComponents 列表（去重后追加）
             installInfo.installedComponentMetas = installInfo.installedComponentMetas.filter(
                 (c: any) => c.componentCode !== componentCode
@@ -128,7 +130,7 @@ export class MetaManager {
      */
     async removeComponentRecord(componentCode: string): Promise<void> {
         try {
-            const installInfo = await this.readInstallInfo();
+            const installInfo = await this.readMateInfo();
             // 从 installedComponents 中移除组件记录
             if (installInfo.installedComponentMetas && Array.isArray(installInfo.installedComponentMetas)) {
                 const originalLength = installInfo.installedComponentMetas.length;

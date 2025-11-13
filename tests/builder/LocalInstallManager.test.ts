@@ -4,15 +4,16 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { getProjectPath } from "../../packages/builder/src/Builder/Util";
 
+const projectPath = getProjectPath();
 
 const test_01 = () => {
     return new Promise((resolve, reject) => {
         test('测试读取插件安装信息', async () => {
             let pluginName = 'localhandles_test_01'
-            let installInfo = await LocalInstallManager.readInstallInfo(pluginName)
-            assert.equal(installInfo.localInstalledInfo?.version, '1.0.0', '获取版本号正常')
-
-            let componentList = await LocalInstallManager.getGroupComponentList(pluginName, 'uiItems')
+            let localInstallManager = new LocalInstallManager(pluginName)
+            let installMeta = await localInstallManager.readMateInfo()
+            assert.equal(installMeta.localInstalledInfo?.version, '1.0.0', '获取版本号正常')
+            let componentList = await localInstallManager.getGroupComponentList('uiItems')
             assert.equal(componentList.list.length, 1, '获取组件列表正常')
             resolve(true)
         })
@@ -22,28 +23,28 @@ const test_02 = () => {
     return new Promise((resolve, reject) => {
         test('测试读取插件安装信息', async () => {
             let pluginName = 'localhandles_test_02'
-
-            const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
-            let codes = await installInfoManager.getInstalledComponentCodes()
+            let localInstallManager = new LocalInstallManager(pluginName)
+            const metaManager = localInstallManager.getMetaManager();
+            let codes = await metaManager.getInstalledComponentCodes()
             // assert.equal(codes.length, 0, '安装前组件数量=0正常')
 
-            let installRes = await LocalInstallManager.installComponent(pluginName, 'uiItems', 'not_exist')
+            let installRes = await localInstallManager.installComponent('uiItems', 'not_exist')
             console.log(installRes)
             assert.equal(installRes.success, false, '安装不存在的组件-断言成功')
-            let installRes2 = await LocalInstallManager.installComponent(pluginName, 'uiItems', 'ui_item_01')
+            let installRes2 = await localInstallManager.installComponent('uiItems', 'ui_item_01')
             console.log(installRes2)
             assert.equal(installRes2.success, true, '安装存在的组件-断言成功')
 
-            let componentList = await LocalInstallManager.getGroupComponentList(pluginName, 'uiItems')
+            let componentList = await localInstallManager.getGroupComponentList('uiItems')
             assert.equal(componentList.list.length, 1, '获取组件列表正常')
 
             // 移除
-            let uninstallRes = await LocalInstallManager.uninstallComponent(pluginName, 'ui_item_01')
+            let uninstallRes = await localInstallManager.uninstallComponent('ui_item_01')
             console.log(uninstallRes)
             assert.equal(uninstallRes.success, true, '移除组件-断言成功')
 
 
-            let rmain_codes = await installInfoManager.getInstalledComponentCodes()
+            let rmain_codes = await metaManager.getInstalledComponentCodes()
             assert.equal(rmain_codes.length, 0, '卸载后组件数量=0正常')
             resolve(true)
         })
@@ -55,7 +56,7 @@ const test_03 = () => {
             const pluginName = 'localhandles_test_03';
             const group = 'uiItems';
             const componentCode = 'ui_item_01';
-
+            let localInstallManager = new LocalInstallManager(pluginName)
             const groupPath = join(getProjectPath(), 'extensions', pluginName, 'packages', group);
             const setupPath = join(groupPath, `${componentCode}.setup.json`);
             const extMetaPath = join(groupPath, componentCode, 'bundle_factory', 'item_views', 'uiItems', 'ui_item_01.meta');
@@ -83,11 +84,11 @@ const test_03 = () => {
                 };
                 await fs.promises.writeFile(setupPath, JSON.stringify(okSetup, null, 2), 'utf-8');
 
-                const resOk = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                const resOk = await localInstallManager.installComponent(group, componentCode);
                 assert.equal(resOk.success, true, '依赖存在且uuid一致-安装成功');
 
                 // 卸载，清理安装产物，避免后续冲突
-                const resUn = await LocalInstallManager.uninstallComponent(pluginName, componentCode);
+                const resUn = await localInstallManager.uninstallComponent(componentCode);
                 assert.equal(resUn.success, true, '卸载成功');
 
                 // 2) uuid 不一致，应当安装失败并提示
@@ -100,7 +101,7 @@ const test_03 = () => {
                 };
                 await fs.promises.writeFile(setupPath, JSON.stringify(badUuidSetup, null, 2), 'utf-8');
 
-                const resBadUuid = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                const resBadUuid = await localInstallManager.installComponent(group, componentCode);
                 assert.equal(resBadUuid.success, false, 'uuid不一致-安装失败');
 
                 // 3) 依赖路径不存在，应当安装失败并提示
@@ -110,7 +111,7 @@ const test_03 = () => {
                 };
                 await fs.promises.writeFile(setupPath, JSON.stringify(missingDepSetup, null, 2), 'utf-8');
 
-                const resMissing = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                const resMissing = await localInstallManager.installComponent(group, componentCode);
                 assert.equal(resMissing.success, false, '依赖缺失-安装失败');
 
                 // 4) uuid 不一致但提供正确 replaceUuid，应当安装成功且安装包内 uuid 被替换
@@ -129,7 +130,7 @@ const test_03 = () => {
                 };
                 await fs.promises.writeFile(setupPath, JSON.stringify(replaceSetup, null, 2), 'utf-8');
 
-                const resReplace = await LocalInstallManager.installComponent(pluginName, group, componentCode);
+                const resReplace = await localInstallManager.installComponent(group, componentCode);
                 assert.equal(resReplace.success, true, '提供replaceUuid-安装成功');
 
                 // 验证安装到项目后的 meta uuid 已经替换为项目实际值
@@ -139,7 +140,7 @@ const test_03 = () => {
                 assert.equal(installedMetaJson.uuid, uuid, '安装包内uuid已替换为项目实际值');
 
                 // 卸载，清理安装产物
-                const resUn2 = await LocalInstallManager.uninstallComponent(pluginName, componentCode);
+                const resUn2 = await localInstallManager.uninstallComponent(componentCode);
                 assert.equal(resUn2.success, true, '卸载成功');
             } finally {
                 // 还原原始 setup 内容，避免影响其他用例
@@ -159,7 +160,7 @@ const test_04 = () => {
             const group = 'uiItems';
             const depCode = 'ui_item_dep';
             const targetCode = 'ui_item_01';
-
+            let localInstallManager = new LocalInstallManager(pluginName)
             const groupPath = join(process.cwd(), 'extensions', pluginName, 'packages', group);
             const targetSetupPath = join(groupPath, `${targetCode}.setup.json`);
 
@@ -176,22 +177,22 @@ const test_04 = () => {
                 await fs.promises.writeFile(targetSetupPath, JSON.stringify(depSetup, null, 2), 'utf-8');
 
                 // 2) 未安装依赖时，安装目标组件应失败
-                const resFail = await LocalInstallManager.installComponent(pluginName, group, targetCode);
+                const resFail = await localInstallManager.installComponent(group, targetCode);
                 assert.equal(resFail.success, false, '未安装依赖组件-安装失败');
 
                 // 3) 安装依赖组件
-                const resDep = await LocalInstallManager.installComponent(pluginName, group, depCode);
+                const resDep = await localInstallManager.installComponent(group, depCode);
                 assert.equal(resDep.success, true, '安装依赖组件-成功');
 
                 // 4) 再次安装目标组件，应成功
-                const resOk = await LocalInstallManager.installComponent(pluginName, group, targetCode);
+                const resOk = await localInstallManager.installComponent(group, targetCode);
                 assert.equal(resOk.success, true, '依赖已安装-目标安装成功');
 
                 // 清理：卸载目标与依赖
-                const resUnTarget = await LocalInstallManager.uninstallComponent(pluginName, targetCode);
+                const resUnTarget = await localInstallManager.uninstallComponent(targetCode);
                 assert.equal(resUnTarget.success, true, '卸载目标组件-成功');
 
-                const resUnDep = await LocalInstallManager.uninstallComponent(pluginName, depCode);
+                const resUnDep = await localInstallManager.uninstallComponent(depCode);
                 assert.equal(resUnDep.success, true, '卸载依赖组件-成功');
             } finally {
                 // 还原目标 setup 内容

@@ -3,37 +3,54 @@ import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta, ILocalInstalledInfo } from './Defined';
 import { checkConflicts, cleanupEmptyDirs, copyDirectory, getGroupPath, getProjectPath } from './Util';
-import { MetaManager } from './MetaManager';
+import { MetaManager, MetaType } from './MetaManager';
 import { AppendScript } from './AppendScript';
 /**
  * 本地组件安装
  */
 export class LocalInstallManager {
 
-    static managerMap: Map<string, MetaManager> = new Map();
+    // static managerMap: Map<string, MetaManager> = new Map();
 
-    static getMetaManager(pluginName: string): MetaManager {
-        if (!LocalInstallManager.managerMap.has(pluginName)) {
-            LocalInstallManager.managerMap.set(pluginName, new MetaManager(pluginName));
-        }
-        return LocalInstallManager.managerMap.get(pluginName)!;
+    // static getMetaManager(projectPath: string, pluginName: string, metaType: MetaType): MetaManager {
+    //     if (!LocalInstallManager.managerMap.has(pluginName)) {
+    //         LocalInstallManager.managerMap.set(pluginName, new MetaManager(projectPath, pluginName, metaType));
+    //     }
+    //     return LocalInstallManager.managerMap.get(pluginName)!;
+    // }
+
+    // installMetaManager: MetaManager
+    // backMetaManager: MetaManager
+    // metaManagerMap: Map<MetaType, MetaManager> = new Map()
+    projectPath: string
+    pluginName: string
+    metaManager: MetaManager
+    constructor(pluginName: string) {
+        this.projectPath = getProjectPath()
+        this.pluginName = pluginName
+        this.metaManager = new MetaManager(this.projectPath, pluginName, MetaType.install)
+        // this.metaManagerMap.set(MetaType.install, new MetaManager(projectPath, pluginName, MetaType.install))
+        // this.metaManagerMap.set(MetaType.backup, new MetaManager(projectPath, pluginName, MetaType.backup))
     }
 
+    getMetaManager() {
+        return this.metaManager
+    }
 
     /**
-     * 读取插件安装信息
+     * 读取插件meta信息
      * @param param 包含插件名的参数对象
      * @returns 包含安装信息或错误信息的响应对象
      */
-    static async readInstallInfo(pluginName: string): Promise<ILocalInstalledInfoRes> {
-        const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
-        const installInfo = await installInfoManager.readInstallInfo();
-        if (!installInfoManager.exists()) {
-            installInfoManager.writeInstallInfo(installInfo);
+    async readMateInfo(): Promise<ILocalInstalledInfoRes> {
+        const metaManager = this.getMetaManager();
+        const metaInfo = await metaManager.readMateInfo();
+        if (!metaManager.exists()) {
+            metaManager.writeInstallInfo(metaInfo);
         }
         return {
             success: true,
-            localInstalledInfo: installInfo
+            localInstalledInfo: metaInfo
         };
     }
 
@@ -43,10 +60,9 @@ export class LocalInstallManager {
      * @param group 分组名称
      * @returns 包含组件列表或错误信息的响应对象
      */
-    static async getGroupComponentList(pluginName: string, group: string): Promise<IGetGroupComponentListRes> {
-        console.log('getGroupComponentList', pluginName, group)
+    async getGroupComponentList(group: string): Promise<IGetGroupComponentListRes> {
         try {
-            const groupPath = getGroupPath(pluginName, group);
+            const groupPath = getGroupPath(this.pluginName, group);
             if (!fs.existsSync(groupPath)) {
                 return {
                     success: false,
@@ -56,9 +72,9 @@ export class LocalInstallManager {
                 };
             }
             // 当前组件安装情况
-            const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
-            const installInfo = await installInfoManager.readInstallInfo();
-            const installedLists = installInfo?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
+            const metaManager = this.getMetaManager();
+            const installMeta = await metaManager.readMateInfo();
+            const installedLists = installMeta?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
             const items = fs.readdirSync(groupPath);
             const list: IComponentInfoWithStatus[] = [];
             // 新逻辑：检测并读取 *.setup.json 文件，取消从 .meta 中读取
@@ -76,13 +92,13 @@ export class LocalInstallManager {
                             // 状态字段
                             isInstalled: installedLists.indexOf(json.componentCode || basename(item, '.setup.json')) > -1,
                             // 安装时间
-                            installedAt: installInfo?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.installedAt || '',
+                            installedAt: installMeta?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.installedAt || '',
                             // 是否备份，todo
                             isBackedUp: false, // todo
                             // 是否可更新，先默认false
                             isUpdatable: false
                         };
-                        if (info.isInstalled && json.componentVersion != installInfo?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.componentVersion) {
+                        if (info.isInstalled && json.componentVersion != installMeta?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.componentVersion) {
                             info.isUpdatable = true; // 版本对比，是否可更新(当前为最简单的版本不一致作为判断)
                         }
                         list.push(info);
@@ -110,16 +126,16 @@ export class LocalInstallManager {
      * @param param 包含组件码、插件名和分组的参数对象
      * @returns 包含安装结果或错误信息的响应对象
      */
-    static async installComponent(pluginName: string, group: string, componentCode: string): Promise<IInstallRes> {
+    async installComponent(group: string, componentCode: string): Promise<IInstallRes> {
         let extractTempDir = '';
         try {
-            if (!componentCode || !pluginName || !group) {
+            if (!componentCode || !group) {
                 return {
                     success: false,
                     error: 'Component code, plugin name, and group are required'
                 };
             }
-            let groupPath = getGroupPath(pluginName, group)
+            let groupPath = getGroupPath(this.pluginName, group)
             console.log(`[xhgame_builder] 组件安装目录: ${groupPath}`);
 
             const zipFilePath = join(groupPath, `${componentCode}.zip`);
@@ -206,8 +222,8 @@ export class LocalInstallManager {
             // 需要替换的 uuid 对
             const uuidReplacements: { from: string; to: string }[] = [];
             // 已安装组件列表（同插件）
-            const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
-            const installedCodes = await installInfoManager.getInstalledComponentCodes();
+            const metaManager = this.getMetaManager();
+            const installedCodes = await metaManager.getInstalledComponentCodes();
 
             const deps: any[] = Array.isArray(normalized.dependencies) ? normalized.dependencies : [];
             for (const dep of deps) {
@@ -396,8 +412,8 @@ export class LocalInstallManager {
             }
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
-                const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
-                await installInfoManager.updateInstalledComponentMetas(
+                const metaManager = this.getMetaManager();
+                await metaManager.updateInstalledComponentMetas(
                     normalized.componentCode,
                     normalized.componentName,
                     normalized.componentVersion,
@@ -422,7 +438,7 @@ export class LocalInstallManager {
             if (extractTempDir && fs.existsSync(extractTempDir)) {
                 try {
                     await fs.promises.rm(extractTempDir, { recursive: true, force: true });
-                    const parentExtractDir = join(getGroupPath(pluginName, group), '__extract');
+                    const parentExtractDir = join(getGroupPath(this.pluginName, group), '__extract');
                     // 若父目录为空则清理
                     try {
                         const remain = await fs.promises.readdir(parentExtractDir);
@@ -436,8 +452,8 @@ export class LocalInstallManager {
             }
         }
     }
-    static async uninstallComponent(pluginName: string, componentCode: string): Promise<IUninstallRes> {
-        if (!componentCode || !pluginName) {
+    async uninstallComponent(componentCode: string): Promise<IUninstallRes> {
+        if (!componentCode) {
             return {
                 success: false,
                 error: 'Component code, plugin name are required'
@@ -448,8 +464,8 @@ export class LocalInstallManager {
             const projectPath = getProjectPath()
             const assetsPath = join(projectPath, 'assets');
 
-            const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
-            const installInfo: ILocalInstalledInfo = await installInfoManager.readInstallInfo();
+            const metaManager = this.getMetaManager();
+            const installInfo: ILocalInstalledInfo = await metaManager.readMateInfo();
             if (!installInfo) {
                 return {
                     success: false,
@@ -539,8 +555,8 @@ export class LocalInstallManager {
 
             // 从配置中移除组件记录 
             try {
-                const installInfoManager = LocalInstallManager.getMetaManager(pluginName);
-                await installInfoManager.removeComponentRecord(componentCode);
+                const metaManager = this.getMetaManager();
+                await metaManager.removeComponentRecord(componentCode);
             } catch (error) {
                 console.warn(`[xhgame_builder] 移除组件记录失败:`, error);
             }

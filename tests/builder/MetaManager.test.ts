@@ -1,17 +1,24 @@
 import { assert, describe, test } from "poku";
-import { MetaManager } from "../../packages/builder/src/Builder/MetaManager";
+import { MetaManager, MetaType } from "../../packages/builder/src/Builder/MetaManager";
 import * as fs from 'fs';
 import { join } from 'path';
-import { getProjectPath } from "../../packages/builder/src/Builder/Util";
+import { getProjectPath, getExtensionsPath } from "../../packages/builder/src/Builder/Util";
 import { IAppendFactory, IAppendTable, IAppendGui, IAppendComp, IComponentInfo } from "../../packages/builder/src/Builder/Defined";
+// import { getExtensionsPath, getProjectPath } from './Util';
+
+const projectPath = getProjectPath();
+const extensionPath = getExtensionsPath();
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的从未安装过', async () => {
-            let notInstalledInfoManager = new MetaManager('xhgame_plugin_not_exists')
+            let notInstalledInfoManager = new MetaManager(
+                projectPath,
+                'xhgame_plugin_not_exists',
+                MetaType.install)
             let is_exists = notInstalledInfoManager.exists()
             assert.equal(is_exists, false, 'notInstalledInfoManager的exists正常')
-            let installInfo = await notInstalledInfoManager.readInstallInfo()
+            let installInfo = await notInstalledInfoManager.readMateInfo()
             assert.equal(installInfo.version, '1.0.0', 'notInstalledInfoManager的获取默认版本号正常')
             assert.equal(installInfo.installedComponentMetas.length, 0, 'notInstalledInfoManager的获取已安装组件列表正常')
             resolve(true)
@@ -21,10 +28,13 @@ const test_00 = () => {
 const test_01 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的有安装过', async () => {
-            let installedInfoManager = new MetaManager('test_01')
+            let installedInfoManager = new MetaManager(
+                projectPath,
+                'test_01',
+                MetaType.install)
             let is_exists = installedInfoManager.exists()
             assert.equal(is_exists, true, 'installedInfoManager的exists正常')
-            let installInfo = await installedInfoManager.readInstallInfo()
+            let installInfo = await installedInfoManager.readMateInfo()
             assert.equal(installInfo.version, '1.0.1', 'installedInfoManager的获取默认版本号正常')
             assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
             resolve(true)
@@ -34,7 +44,10 @@ const test_01 = () => {
 const test_02 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的写入', async () => {
-            let installedInfoManager = new MetaManager('test_02')
+            let installedInfoManager = new MetaManager(
+                projectPath,
+                'test_02',
+                MetaType.install)
             let is_write_success = await installedInfoManager.writeInstallInfo({
                 version: '1.0.2',
                 installedComponentMetas: [],
@@ -42,7 +55,7 @@ const test_02 = () => {
             })
             assert.equal(is_write_success, true, 'installedInfoManager的写入正常')
             // 检查写入的文件内容是否正确
-            let installInfo = await installedInfoManager.readInstallInfo()
+            let installInfo = await installedInfoManager.readMateInfo()
             if (installInfo) {
                 assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
                 assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
@@ -59,8 +72,10 @@ const test_03 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的安装记录与查询', async () => {
             const pluginName = 'test_03';
-            const iim = new MetaManager(pluginName);
-            const projectPath = getProjectPath();
+            const iim = new MetaManager(
+                projectPath,
+                pluginName,
+                MetaType.install)
 
             // 准备一个伪造
             const groupPath = join(projectPath, 'extensions', pluginName, 'packages', 'textUiItems');
