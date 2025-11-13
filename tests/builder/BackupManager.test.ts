@@ -8,7 +8,7 @@ import { MetaManager, MetaType } from "../../packages/builder/src/Builder/MetaMa
 
 const projectPath = getProjectPath();
 
-const pluginName = 'localhandles_test_02';
+const pluginName = 'localhandles_test_04';
 const group = 'uiItems';
 const componentCode = 'ui_item_02';
 
@@ -58,6 +58,10 @@ const test_01 = () => {
             const installMeta = new MetaManager(projectPath, pluginName, MetaType.install);
             const isInstalled = await installMeta.isComponentInstalled(componentCode);
             assert.equal(isInstalled, true, '回滚后安装记录存在');
+
+            // 卸载，触发备份
+            const resUninstallend = await localInstallManager.uninstallComponent(componentCode);
+            assert.equal(resUninstallend.success, true, '卸载组件-应成功(清理数据)');
 
             resolve(true);
         });

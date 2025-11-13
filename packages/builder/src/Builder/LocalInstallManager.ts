@@ -506,6 +506,7 @@ export class LocalInstallManager {
                     await fs.promises.unlink(fullFilePath);
                     deletedFiles.push(relativeFilePath);
                     console.log(`[xhgame_builder] 删除文件: ${relativeFilePath}`);
+                    console.log(`[xhgame_builder] 删除文件(full): ${fullFilePath}`);
 
                 } catch (error) {
                     console.warn(`[xhgame_builder] 文件不存在或处理失败: ${relativeFilePath}`, error);
