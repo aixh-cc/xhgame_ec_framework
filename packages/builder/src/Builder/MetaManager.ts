@@ -24,7 +24,14 @@ export class MetaManager {
     exists(): boolean {
         return fs.existsSync(this.metaPath);
     }
-
+    /**
+     * 重置安装信息文件
+     */
+    resetMetaInfo() {
+        if (fs.existsSync(this.metaPath)) {
+            fs.unlinkSync(this.metaPath);
+        }
+    }
     /**
      * 读取安装信息文件
      */

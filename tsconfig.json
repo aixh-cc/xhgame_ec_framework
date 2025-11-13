@@ -20,6 +20,7 @@
         "assets/**/*.tsx",
         "assets/**/*.js",
         "assets/**/*.jsx",
-        "packages/core/src/**/*.ts"
+        "packages/core/src/**/*.ts",
+        "packages/builder/src/**/*.ts"
     ]
 }

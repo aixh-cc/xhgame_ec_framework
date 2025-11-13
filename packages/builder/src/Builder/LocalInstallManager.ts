@@ -4,6 +4,7 @@ import AdmZip from 'adm-zip';
 import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta, ILocalInstalledInfo } from './Defined';
 import { checkConflicts, cleanupEmptyDirs, copyDirectory, getGroupPath, getProjectPath } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
+import { BackupManager } from './BackupManager';
 import { AppendScript } from './AppendScript';
 /**
  * 本地组件安装
@@ -479,6 +480,18 @@ export class LocalInstallManager {
                     success: false,
                     error: `未找到组件 ${componentCode} 的安装记录`
                 };
+            }
+            // 在删除前生成备份
+            try {
+                const backupManager = new BackupManager(this.pluginName);
+                const backupRes = await backupManager.backupInstalledComponent(componentInfo);
+                if (!backupRes.success) {
+                    console.warn(`[xhgame_builder] 生成备份失败:`, backupRes.error);
+                } else {
+                    console.log(`[xhgame_builder] 备份完成: zip=${backupRes.zipPath} json=${backupRes.jsonPath}`);
+                }
+            } catch (e) {
+                console.warn(`[xhgame_builder] 备份过程发生异常但继续卸载:`, e);
             }
             // 删除文件
             const deletedFiles: string[] = [];

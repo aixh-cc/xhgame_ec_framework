@@ -14,7 +14,7 @@ const test_01 = () => {
             let installMeta = await localInstallManager.readMateInfo()
             assert.equal(installMeta.localInstalledInfo?.version, '1.0.0', '获取版本号正常')
             let componentList = await localInstallManager.getGroupComponentList('uiItems')
-            assert.equal(componentList.list.length, 1, '获取组件列表正常')
+            assert.equal(componentList.list.length, 1, '获取组件列表2正常')
             resolve(true)
         })
     })
@@ -25,8 +25,9 @@ const test_02 = () => {
             let pluginName = 'localhandles_test_02'
             let localInstallManager = new LocalInstallManager(pluginName)
             const metaManager = localInstallManager.getMetaManager();
+            metaManager.resetMetaInfo()
             let codes = await metaManager.getInstalledComponentCodes()
-            // assert.equal(codes.length, 0, '安装前组件数量=0正常')
+            assert.equal(codes.length, 0, '安装前组件数量=0正常')
 
             let installRes = await localInstallManager.installComponent('uiItems', 'not_exist')
             console.log(installRes)
@@ -36,7 +37,7 @@ const test_02 = () => {
             assert.equal(installRes2.success, true, '安装存在的组件-断言成功')
 
             let componentList = await localInstallManager.getGroupComponentList('uiItems')
-            assert.equal(componentList.list.length, 1, '获取组件列表正常')
+            assert.equal(componentList.list.length, 2, '获取组件列表1正常')
 
             // 移除
             let uninstallRes = await localInstallManager.uninstallComponent('ui_item_01')
