@@ -70,4 +70,4 @@ docs/build/
 
 ## 
 /extensions/*-installInfo.json
-/extensions/*backup.json
+/extensions/*/*/*.backup.json
