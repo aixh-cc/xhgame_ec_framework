@@ -15,25 +15,24 @@ export class BackupManager {
     projectPath: string;
     pluginName: string;
     backupDir: string;
-    backupMetaManager: MetaManager;
 
     constructor(pluginName: string) {
         this.projectPath = getProjectPath();
         this.pluginName = pluginName;
         this.backupDir = join(this.projectPath, 'extensions', pluginName, 'backups');
-        this.backupMetaManager = new MetaManager(this.projectPath, pluginName, MetaType.backup);
     }
 
     private async ensureDir(): Promise<void> {
         await fs.promises.mkdir(this.backupDir, { recursive: true });
     }
-
+    isExist(componentCode: string): boolean {
+        return fs.existsSync(join(this.backupDir, `${componentCode}.zip`));
+    }
     /**
      * 基于当前安装记录，生成备份包与备份描述文件
      * 在卸载删除文件之前调用
      */
-    async backupInstalledComponent(componentInfo: InstalledComponentMeta): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }>
-    {
+    async backupInstalledComponent(componentInfo: InstalledComponentMeta): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }> {
         try {
             await this.ensureDir();
             const assetsPath = join(this.projectPath, 'assets');
@@ -87,8 +86,7 @@ export class BackupManager {
     /**
      * 回滚指定组件：从备份包恢复文件，并恢复追加脚本与安装信息
      */
-    async rollback(componentCode: string): Promise<{ success: boolean; error?: string; }>
-    {
+    async rollback(componentCode: string): Promise<{ success: boolean; error?: string; }> {
         if (!componentCode) {
             return { success: false, error: '缺少组件标识 componentCode' };
         }

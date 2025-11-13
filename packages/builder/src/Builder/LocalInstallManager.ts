@@ -75,6 +75,7 @@ export class LocalInstallManager {
             // 当前组件安装情况
             const metaManager = this.getMetaManager();
             const installMeta = await metaManager.readMateInfo();
+            const backupManager = new BackupManager(this.pluginName);
             const installedLists = installMeta?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
             const items = fs.readdirSync(groupPath);
             const list: IComponentInfoWithStatus[] = [];
@@ -94,8 +95,8 @@ export class LocalInstallManager {
                             isInstalled: installedLists.indexOf(json.componentCode || basename(item, '.setup.json')) > -1,
                             // 安装时间
                             installedAt: installMeta?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.installedAt || '',
-                            // 是否备份，todo
-                            isBackedUp: false, // todo
+                            // 是否备份
+                            isBackedUp: backupManager.isExist(json.componentCode || basename(item, '.setup.json')),
                             // 是否可更新，先默认false
                             isUpdatable: false
                         };
