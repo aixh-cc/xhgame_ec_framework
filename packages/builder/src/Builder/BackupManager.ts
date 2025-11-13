@@ -40,23 +40,21 @@ export class BackupManager {
             const jsonPath = join(this.backupDir, `${componentInfo.componentCode}.backup.json`);
 
             const zip = new AdmZip();
+            zip.addFile(`${componentInfo.componentCode}/`, Buffer.alloc(0));
             let addedCount = 0;
             for (const rel of componentInfo.copiedFiles || []) {
                 const full = join(assetsPath, rel);
                 try {
                     await fs.promises.access(full, fs.constants.F_OK);
-                    // 将相对路径作为 zip 内的路径，保持层级
-                    zip.addLocalFile(full, '', rel);
+                    zip.addLocalFile(full, componentInfo.componentCode, rel);
                     addedCount++;
                 } catch {
-                    // 文件缺失则跳过
                 }
             }
             // 仅当有文件时才写 zip
             if (addedCount > 0) {
                 zip.writeZip(zipPath);
             } else {
-                // 没有任何文件可备份也仍然写描述文件，方便回滚逻辑知晓 appendScripts
             }
 
             const backupJson = {
@@ -115,9 +113,13 @@ export class BackupManager {
             if (fs.existsSync(zipPath)) {
                 const zip = new AdmZip(zipPath);
                 const entries = zip.getEntries();
+                const prefix = `${componentCode}/`;
                 for (const entry of entries) {
                     if (entry.isDirectory) continue;
-                    const relPath = entry.entryName;
+                    let relPath = entry.entryName;
+                    if (relPath.startsWith(prefix)) {
+                        relPath = relPath.substring(prefix.length);
+                    }
                     const destPath = join(assetsPath, relPath);
                     await fs.promises.mkdir(dirname(destPath), { recursive: true });
                     const data = entry.getData();
@@ -170,5 +172,14 @@ export class BackupManager {
         } catch (e) {
             return { success: false, error: e instanceof Error ? e.message : String(e) };
         }
+    }
+
+    checkZipHasTopFolder(componentCode: string): boolean {
+        const zipPath = join(this.backupDir, `${componentCode}.zip`);
+        if (!fs.existsSync(zipPath)) return false;
+        const zip = new AdmZip(zipPath);
+        const entries = zip.getEntries();
+        const prefix = `${componentCode}/`;
+        return entries.some(e => e.entryName.startsWith(prefix));
     }
 }

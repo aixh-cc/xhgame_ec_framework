@@ -34,7 +34,7 @@ const test_01 = () => {
             assert.equal(fs.existsSync(installedPrefab), true, '安装后的prefab存在');
             assert.equal(fs.existsSync(join(installedMetaRoot, 'ui_item_02.meta')), true, '安装后的meta存在');
 
-            // 卸载，触发备份
+            // 卸载
             const resUninstall = await localInstallManager.uninstallComponent(componentCode);
             assert.equal(resUninstall.success, true, '卸载组件-应成功');
 
@@ -45,6 +45,9 @@ const test_01 = () => {
             assert.equal(fs.existsSync(backupsDir), true, '备份目录存在');
             assert.equal(fs.existsSync(backupZip), true, '备份zip存在');
             assert.equal(fs.existsSync(backupJson), true, '备份json存在');
+
+            const bmCheck = new BackupManager(pluginName);
+            assert.equal(bmCheck.checkZipHasTopFolder(componentCode), true, '备份zip顶级目录为组件码');
 
             // 回滚恢复
             const bm = new BackupManager(pluginName);
