@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta, ILocalInstalledInfo } from './Defined';
-import { checkConflicts, cleanupEmptyDirs, copyDirectory, getGroupPath, getProjectPath } from './Util';
+import { checkConflicts, cleanupEmptyDirs, getGroupPath, getProjectPath, checkConflictsByList, copyFilesByList } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
 import { BackupManager } from './BackupManager';
 import { AppendScript } from './AppendScript';
@@ -195,15 +195,6 @@ export class LocalInstallManager {
             const copiedFiles: string[] = [];
             const conflictFiles: string[] = [];
 
-            // 检测目标路径是否存在冲突文件
-            await checkConflicts(conflictFiles, assetsSourcePath, targetPath);
-            if (conflictFiles.length > 0) {
-                console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
-                return {
-                    success: false,
-                    error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
-                };
-            }
             // 在复制之前，读取 setup 并校验依赖
             const setupFilePath = join(groupPath, `${componentCode}.setup.json`);
             const rawContent = await fs.promises.readFile(setupFilePath, 'utf-8');
@@ -217,6 +208,15 @@ export class LocalInstallManager {
                 dependencies: componentInfo.dependencies || [],
                 files: componentInfo.files || []
             } as IComponentInfo;
+
+            await checkConflictsByList(conflictFiles, assetsSourcePath, targetPath, normalized.files);
+            if (conflictFiles.length > 0) {
+                console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
+                return {
+                    success: false,
+                    error: `安装失败：检测到以下文件已存在，请先删除或备份这些文件：\n${conflictFiles.join('\n')}`,
+                };
+            }
 
             // 校验依赖：存在性 + 可选 uuid 一致性（支持 replaceUuid 解决冲突）+ 组件安装依赖（componentCode）
             // const projectPath = getProjectPath()
@@ -340,8 +340,8 @@ export class LocalInstallManager {
                 }
             }
 
-            console.log(`[xhgame_builder] 没有冲突文件，开始复制整个目录...`);
-            await copyDirectory(copiedFiles, assetsSourcePath, targetPath);
+            console.log(`[xhgame_builder] 没有冲突文件，按清单复制文件...`);
+            await copyFilesByList(copiedFiles, assetsSourcePath, targetPath, normalized.files);
             console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
 
             // 有些组件安装还需要appendScript

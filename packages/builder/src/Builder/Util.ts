@@ -1,4 +1,4 @@
-import { join, resolve } from 'path';
+import { join, resolve, dirname } from 'path';
 import * as fs from 'fs';
 
 /**
@@ -121,32 +121,6 @@ export async function checkConflicts(conflictFiles: string[], srcDir: string, de
     }
 }
 
-
-export async function copyDirectory(copiedFiles: string[], srcDir: string, destDir: string, relativePath: string = '') {
-    const items = await fs.promises.readdir(srcDir, { withFileTypes: true });
-
-    for (const item of items) {
-        const srcPath = join(srcDir, item.name);
-        const destPath = join(destDir, item.name);
-        const relPath = join(relativePath, item.name);
-        if (item.isDirectory()) {
-            // 文件夹的meta可以跳过
-            if (item.name.endsWith('.meta')) {
-                continue;
-            }
-            // 创建目录
-            await fs.promises.mkdir(destPath, { recursive: true });
-            await copyDirectory(copiedFiles, srcPath, destPath, relPath);
-        } else {
-            // 复制文件
-            await fs.promises.copyFile(srcPath, destPath);
-            copiedFiles.push(relPath);
-            console.log(`[xhgame_builder] 复制文件: ${relPath}`);
-        }
-    }
-}
-
-
 // 清理空目录
 export const cleanupEmptyDirs = async (dirPath: string) => {
     try {
@@ -171,3 +145,29 @@ export const cleanupEmptyDirs = async (dirPath: string) => {
         // 忽略清理目录时的错误
     }
 };
+export async function checkConflictsByList(conflictFiles: string[], srcRoot: string, destRoot: string, relPaths: string[]) {
+    for (const rel of relPaths) {
+        if (rel.endsWith('.meta') || rel.endsWith('.DS_Store')) continue;
+        const destPath = join(destRoot, rel);
+        try {
+            await fs.promises.access(destPath);
+            conflictFiles.push(rel);
+        } catch { }
+    }
+}
+
+export async function copyFilesByList(copiedFiles: string[], srcRoot: string, destRoot: string, relPaths: string[]) {
+    for (const rel of relPaths) {
+        const srcPath = join(srcRoot, rel);
+        const destPath = join(destRoot, rel);
+        try {
+            await fs.promises.access(srcPath);
+        } catch {
+            continue;
+        }
+        await fs.promises.mkdir(dirname(destPath), { recursive: true });
+        await fs.promises.copyFile(srcPath, destPath);
+        copiedFiles.push(rel);
+        console.log(`[xhgame_builder] 复制文件: ${rel}`);
+    }
+}
