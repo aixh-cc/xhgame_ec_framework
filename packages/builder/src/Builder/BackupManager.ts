@@ -28,6 +28,20 @@ export class BackupManager {
     isExist(componentCode: string): boolean {
         return fs.existsSync(join(this.backupDir, `${componentCode}.zip`));
     }
+    async listBackupCodes(): Promise<Set<string>> {
+        await this.ensureDir();
+        const set = new Set<string>();
+        try {
+            const entries = await fs.promises.readdir(this.backupDir, { withFileTypes: true });
+            for (const e of entries) {
+                if (e.isFile() && e.name.endsWith('.zip')) {
+                    const code = e.name.slice(0, -4);
+                    if (code) set.add(code);
+                }
+            }
+        } catch {}
+        return set;
+    }
     /**
      * 基于当前安装记录，生成备份包与备份描述文件
      * 在卸载删除文件之前调用
