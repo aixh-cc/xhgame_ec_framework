@@ -456,7 +456,7 @@ export class LocalInstallManager {
             }
         }
     }
-    async uninstallComponent(componentCode: string): Promise<IUninstallRes> {
+    async uninstallComponent(group: string, componentCode: string): Promise<IUninstallRes> {
         if (!componentCode) {
             return {
                 success: false,
@@ -487,7 +487,7 @@ export class LocalInstallManager {
             // 在删除前生成备份
             try {
                 const backupManager = new BackupManager(this.pluginName);
-                const backupRes = await backupManager.backupInstalledComponent(componentInfo);
+                const backupRes = await backupManager.backupInstalledComponent(group, componentInfo);
                 if (!backupRes.success) {
                     console.warn(`[xhgame_builder] 生成备份失败:`, backupRes.error);
                 } else {

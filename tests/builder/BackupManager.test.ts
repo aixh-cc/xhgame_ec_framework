@@ -16,8 +16,8 @@ const installedPrefab = join(projectPath, 'assets', 'bundle_factory', 'item_view
 const installedMetaRoot = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'uiItems');
 
 const backupsDir = join(projectPath, 'extensions', pluginName, 'backups');
-const backupZip = join(backupsDir, `${componentCode}.zip`);
-const backupJson = join(backupsDir, `${componentCode}.backup.json`);
+const backupZip = join(backupsDir, group, `${componentCode}.zip`);
+const backupJson = join(backupsDir, group, `${componentCode}.backup.json`);
 
 const waitXms = (ms: number = 0) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
@@ -35,7 +35,7 @@ const test_01 = () => {
             assert.equal(fs.existsSync(join(installedMetaRoot, 'ui_item_02.meta')), true, '安装后的meta存在');
 
             // 卸载
-            const resUninstall = await localInstallManager.uninstallComponent(componentCode);
+            const resUninstall = await localInstallManager.uninstallComponent(group, componentCode);
             assert.equal(resUninstall.success, true, '卸载组件-应成功');
 
             // 验证文件已被删除
@@ -51,7 +51,7 @@ const test_01 = () => {
 
             // 回滚恢复
             const bm = new BackupManager(pluginName);
-            const resRollback = await bm.rollback(componentCode);
+            const resRollback = await bm.rollback(group, componentCode);
             assert.equal(resRollback.success, true, '回滚-应成功');
 
             // 验证文件已恢复
@@ -63,7 +63,7 @@ const test_01 = () => {
             assert.equal(isInstalled, true, '回滚后安装记录存在');
 
             // 卸载，触发备份
-            const resUninstallend = await localInstallManager.uninstallComponent(componentCode);
+            const resUninstallend = await localInstallManager.uninstallComponent(group, componentCode);
             assert.equal(resUninstallend.success, true, '卸载组件-应成功(清理数据)');
 
             resolve(true);

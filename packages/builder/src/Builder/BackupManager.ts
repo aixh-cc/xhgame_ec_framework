@@ -39,19 +39,19 @@ export class BackupManager {
                     if (code) set.add(code);
                 }
             }
-        } catch {}
+        } catch { }
         return set;
     }
     /**
      * 基于当前安装记录，生成备份包与备份描述文件
      * 在卸载删除文件之前调用
      */
-    async backupInstalledComponent(componentInfo: InstalledComponentMeta): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }> {
+    async backupInstalledComponent(group: string, componentInfo: InstalledComponentMeta): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }> {
         try {
             await this.ensureDir();
             const assetsPath = join(this.projectPath, 'assets');
-            const zipPath = join(this.backupDir, `${componentInfo.componentCode}.zip`);
-            const jsonPath = join(this.backupDir, `${componentInfo.componentCode}.backup.json`);
+            const zipPath = join(this.backupDir, group, `${componentInfo.componentCode}.zip`);
+            const jsonPath = join(this.backupDir, group, `${componentInfo.componentCode}.backup.json`);
 
             const zip = new AdmZip();
             zip.addFile(`${componentInfo.componentCode}/`, Buffer.alloc(0));
@@ -98,15 +98,15 @@ export class BackupManager {
     /**
      * 回滚指定组件：从备份包恢复文件，并恢复追加脚本与安装信息
      */
-    async rollback(componentCode: string): Promise<{ success: boolean; error?: string; }> {
+    async rollback(group: string, componentCode: string): Promise<{ success: boolean; error?: string; }> {
         if (!componentCode) {
             return { success: false, error: '缺少组件标识 componentCode' };
         }
         try {
             await this.ensureDir();
             const assetsPath = join(this.projectPath, 'assets');
-            const zipPath = join(this.backupDir, `${componentCode}.zip`);
-            const jsonPath = join(this.backupDir, `${componentCode}.backup.json`);
+            const zipPath = join(this.backupDir, group, `${componentCode}.zip`);
+            const jsonPath = join(this.backupDir, group, `${componentCode}.backup.json`);
 
             // 读取备份描述
             let backupDescRaw = '';

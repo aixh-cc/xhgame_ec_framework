@@ -40,7 +40,7 @@ const test_02 = () => {
             assert.equal(componentList.list.length, 2, '获取组件列表1正常')
 
             // 移除
-            let uninstallRes = await localInstallManager.uninstallComponent('ui_item_01')
+            let uninstallRes = await localInstallManager.uninstallComponent('uiItems', 'ui_item_01')
             console.log(uninstallRes)
             assert.equal(uninstallRes.success, true, '移除组件-断言成功')
 
@@ -89,7 +89,7 @@ const test_03 = () => {
                 assert.equal(resOk.success, true, '依赖存在且uuid一致-安装成功');
 
                 // 卸载，清理安装产物，避免后续冲突
-                const resUn = await localInstallManager.uninstallComponent(componentCode);
+                const resUn = await localInstallManager.uninstallComponent(group, componentCode);
                 assert.equal(resUn.success, true, '卸载成功');
 
                 // 2) uuid 不一致，应当安装失败并提示
@@ -141,7 +141,7 @@ const test_03 = () => {
                 assert.equal(installedMetaJson.uuid, uuid, '安装包内uuid已替换为项目实际值');
 
                 // 卸载，清理安装产物
-                const resUn2 = await localInstallManager.uninstallComponent(componentCode);
+                const resUn2 = await localInstallManager.uninstallComponent(group, componentCode);
                 assert.equal(resUn2.success, true, '卸载成功');
             } finally {
                 // 还原原始 setup 内容，避免影响其他用例
@@ -190,10 +190,10 @@ const test_04 = () => {
                 assert.equal(resOk.success, true, '依赖已安装-目标安装成功');
 
                 // 清理：卸载目标与依赖
-                const resUnTarget = await localInstallManager.uninstallComponent(targetCode);
+                const resUnTarget = await localInstallManager.uninstallComponent(group, targetCode);
                 assert.equal(resUnTarget.success, true, '卸载目标组件-成功');
 
-                const resUnDep = await localInstallManager.uninstallComponent(depCode);
+                const resUnDep = await localInstallManager.uninstallComponent(group, depCode);
                 assert.equal(resUnDep.success, true, '卸载依赖组件-成功');
             } finally {
                 // 还原目标 setup 内容
