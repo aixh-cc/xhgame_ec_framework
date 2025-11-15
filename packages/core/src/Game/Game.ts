@@ -4,12 +4,19 @@ import { INode } from "../Ui/UiDrive"
 export interface IGame {
     name: string
     node: INode
+    meta: IGameMeta
     init(): Promise<void>
     play(): void
     setGameEntity(gameEntity: Entity): void
     getGameEntity(): Entity
 }
-
+export interface IGameMeta {
+    server_no: string
+    name: string
+    version: string
+    game_code: string
+    account_domain: string
+}
 export enum Platform {
     Weixin = 'weixin',
     Douyin = 'douyin',

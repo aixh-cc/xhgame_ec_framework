@@ -340,7 +340,7 @@ export class LocalInstallManager {
                 }
             }
 
-            console.log(`[xhgame_builder] 没有冲突文件，按清单复制文件...`);
+            console.log(`[xhgame_builder] 没有冲突文件，按清单复制文件...`, normalized.files);
             await copyFilesByList(copiedFiles, assetsSourcePath, targetPath, normalized.files);
             console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
 

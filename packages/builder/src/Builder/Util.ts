@@ -163,6 +163,7 @@ export async function copyFilesByList(copiedFiles: string[], srcRoot: string, de
         try {
             await fs.promises.access(srcPath);
         } catch {
+            console.error('未找到srcPath=' + srcPath)
             continue;
         }
         await fs.promises.mkdir(dirname(destPath), { recursive: true });
