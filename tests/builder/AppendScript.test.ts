@@ -229,11 +229,64 @@ const test_03 = () => {
         })
     })
 }
+const test_04 = () => {
+    return new Promise((resolve, reject) => {
+        test('测试添加audioItemComponentInfo', async () => {
+            let audioItemComponentInfo: IComponentInfo = {
+                componentCode: 'gate_group_mission',
+                componentName: 'gate_group_mission',
+                componentVersion: '1.0.0',
+                description: '网关组任务模板',
+                author: 'hd',
+                category: 'Audio',
+                tags: ['Audio'],
+                dependencies: ['script/RegisterComps.ts'],
+                files: [],
+                stars: 4,
+                appendScripts: [
+                    {
+                        type: 'audio',
+                        sourceFilePath: 'script/managers/MyAudioManager.ts',
+                        audioName: 'bgm3',
+                        audioPath: 'bundle_gate://audio/qingbg'
+                    }
+                ]
+            }
+            if (audioItemComponentInfo.appendScripts && audioItemComponentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < audioItemComponentInfo.appendScripts.length; i++) {
+                    const element = audioItemComponentInfo.appendScripts[i];
+                    if (element.type === 'audio') {
+                        let res_add_type = await AppendScript.addAudioType(element.audioName, element.audioPath)
+                        assert.equal(res_add_type.success, true, '新增audioType成功')
+                    }
+                }
+            }
+
+            // 移除
+            setTimeout(async () => {
+                if (audioItemComponentInfo.appendScripts && audioItemComponentInfo.appendScripts?.length > 0) {
+                    for (let i = 0; i < audioItemComponentInfo.appendScripts.length; i++) {
+                        const element = audioItemComponentInfo.appendScripts[i];
+                        if (element.type == 'audio') {
+                            let res_add_type = await AppendScript.removeAudioType(
+                                element.audioName
+                            )
+                            assert.equal(res_add_type.success, true, '移除audioType成功')
+                        }
+                    }
+                }
+                resolve(true)
+            }, 1000)
+
+        })
+    })
+}
 let functions = [
     test_00,
     test_01,
     test_02,
-    test_03
+    test_03,
+    test_04
 ]
 
 describe('AppendScript功能', async () => {

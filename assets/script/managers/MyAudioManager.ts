@@ -16,6 +16,8 @@ enum AudioEnums {
     Chose = 'bundle_game://audio/shengli',
     ShengLi = 'bundle_game://audio/shengli',
     ShiBai = 'bundle_game://audio/shibai',
+    bgm = 'assets/audio/bgm.mp3',
+    bgm2 = 'bundle_gate://audio/qingbg',
     //
     BingDong = 'bundle_game://audio/skill_wuxing_3',
 }

@@ -14,7 +14,9 @@ export class AppendScript {
     static async addGuiType(guiType: string, guiPath: string) {
         return await this._addBaseType(guiType, 'UIEnums', 'MyUiManager', guiPath);
     }
-
+    static async addAudioType(audioType: string, audioPath: string) {
+        return await this._addBaseType(audioType, 'AudioEnums', 'MyAudioManager', audioPath);
+    }
     private static async _addBaseType(type: string, typeKey: string, managerName: string, initializer?: string) {
         const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
 
@@ -58,6 +60,9 @@ export class AppendScript {
     }
     static async removeGuiType(guiType: string): Promise<{ success: boolean, error?: string }> {
         return await this._removeBaseType(guiType, 'UIEnums', 'MyUiManager');
+    }
+    static async removeAudioType(audioType: string): Promise<{ success: boolean, error?: string }> {
+        return await this._removeBaseType(audioType, 'AudioEnums', 'MyAudioManager');
     }
     private static async _removeBaseType(type: string, typeKey: string, managerName: string): Promise<{ success: boolean, error?: string }> {
         const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
