@@ -415,6 +415,14 @@ export class LocalInstallManager {
                             console.warn(`[xhgame_builder] 新增comp失败: ${element.compName}`)
                         }
                     }
+                    if (element.type === 'audio') {
+                        let res_add_type = await AppendScript.addAudioType(element.audioName, element.audioPath)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 新增audioType成功: ${element.audioName}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增audioType失败: ${element.audioName}`)
+                        }
+                    }
                 }
             }
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
@@ -566,6 +574,14 @@ export class LocalInstallManager {
                             console.log(`[xhgame_builder] 移除comp成功: ${element.compName}`)
                         } else {
                             console.warn(`[xhgame_builder] 移除comp失败: ${element.compName}`)
+                        }
+                    }
+                    if (element.type === 'audio') {
+                        let res_add_type = await AppendScript.removeAudioType(element.audioName)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 移除audioType成功: ${element.audioName}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除audioType失败: ${element.audioName}`)
                         }
                     }
                 }

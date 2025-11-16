@@ -78,7 +78,8 @@ export class BackupManager {
                 componentVersion: componentInfo.componentVersion,
                 backedUpAt: new Date().toISOString(),
                 files: componentInfo.copiedFiles || [],
-                appendScripts: componentInfo.appendScripts || []
+                appendScripts: componentInfo.appendScripts || [],
+                group: componentInfo.group || ''
             } as {
                 componentCode: string;
                 componentName: string;
@@ -86,6 +87,7 @@ export class BackupManager {
                 backedUpAt: string;
                 files: string[];
                 appendScripts: IAppendScripts;
+                group: string;
             };
 
             await fs.promises.writeFile(jsonPath, JSON.stringify(backupJson, null, 2), 'utf-8');
