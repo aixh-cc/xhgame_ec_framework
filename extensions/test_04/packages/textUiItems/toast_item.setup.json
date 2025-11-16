@@ -4,7 +4,7 @@
   "componentVersion": "1.2.3",
   "description": "显示一个简单的文本提示",
   "author": "测试作者",
-  "category": "UI",
+  "group": "UI",
   "tags": [
     "提示",
     "文本"

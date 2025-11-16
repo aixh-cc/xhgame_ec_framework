@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "",
   "author": "auto",
-  "category": "textUiItems",
+  "group": "textUiItems",
   "tags": [],
   "path": "bundle_factory/item_views/textUiItems/toast_item",
   "dependencies": [],

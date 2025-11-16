@@ -58,7 +58,7 @@ const test_03 = () => {
             const group = 'uiItems';
             const componentCode = 'ui_item_01';
             let localInstallManager = new LocalInstallManager(pluginName)
-            const groupPath = join(getProjectPath(), 'extensions', pluginName, 'packages', group);
+            const groupPath = join(projectPath, 'extensions', pluginName, 'packages', group);
             const setupPath = join(groupPath, `${componentCode}.setup.json`);
             const extMetaPath = join(groupPath, componentCode, 'bundle_factory', 'item_views', 'uiItems', 'ui_item_01.meta');
 
@@ -69,7 +69,7 @@ const test_03 = () => {
             const extMetaJson = JSON.parse(extMetaOriginal);
 
             // 读取一个已存在的 .meta 文件，获取 uuid
-            const depMetaPath = join(getProjectPath(), 'assets', 'bundle_factory', 'item_views', 'textUiItems', 'toast_item', 'toast_item.prefab.meta');
+            const depMetaPath = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'textUiItems', 'toast_item', 'toast_item.prefab.meta');
             const depMetaContent = await fs.promises.readFile(depMetaPath, 'utf-8');
             const depMetaJson = JSON.parse(depMetaContent);
             const uuid = depMetaJson.uuid;
@@ -135,7 +135,7 @@ const test_03 = () => {
                 assert.equal(resReplace.success, true, '提供replaceUuid-安装成功');
 
                 // 验证安装到项目后的 meta uuid 已经替换为项目实际值
-                const installedMetaPath = join(getProjectPath(), 'assets', 'bundle_factory', 'item_views', 'uiItems', 'ui_item_01.meta');
+                const installedMetaPath = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'uiItems', 'ui_item_01.meta');
                 const installedMetaContent = await fs.promises.readFile(installedMetaPath, 'utf-8');
                 const installedMetaJson = JSON.parse(installedMetaContent);
                 assert.equal(installedMetaJson.uuid, uuid, '安装包内uuid已替换为项目实际值');

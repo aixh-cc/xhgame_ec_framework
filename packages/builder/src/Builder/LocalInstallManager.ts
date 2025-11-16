@@ -425,7 +425,8 @@ export class LocalInstallManager {
                     normalized.componentName,
                     normalized.componentVersion,
                     copiedFiles,
-                    componentInfo.appendScripts || []
+                    componentInfo.appendScripts || [],
+                    componentInfo.group || ''
                 );
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);

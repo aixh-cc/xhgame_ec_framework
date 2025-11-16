@@ -51,6 +51,7 @@ export interface InstalledComponentMeta {
     installedAt: string;
     copiedFiles: string[];
     appendScripts: IAppendScripts;
+    group: string;
 }
 /**
  * 组件信息
@@ -67,7 +68,7 @@ export interface IComponentInfo {
     /** 作者 */
     author: string;
     /** 分类 */
-    category: string;
+    group: string;
     /** 标签 */
     tags: string[];
     /** 

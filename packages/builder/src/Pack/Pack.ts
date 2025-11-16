@@ -128,7 +128,7 @@ export class Pack {
                 componentVersion: '1.0.0',
                 description: '',
                 author: 'auto',
-                category: group,
+                group: group,
                 tags: [],
                 dependencies: [],
                 files: files,

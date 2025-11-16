@@ -89,7 +89,7 @@ const test_03 = () => {
                 componentVersion: '1.2.3',
                 description: '显示一个简单的文本提示',
                 author: '测试作者',
-                category: 'UI',
+                group: 'UI',
                 tags: ['提示', '文本'],
                 dependencies: [],
                 files: [
@@ -102,7 +102,7 @@ const test_03 = () => {
             ];
             let appendScripts: IAppendScripts = []
             // 记录安装信息
-            await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles, appendScripts);
+            await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles, appendScripts, setupComponentInfo.group);
 
             // 验证 
             const codes = await iim.getInstalledComponentCodes();

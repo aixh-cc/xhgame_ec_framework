@@ -108,7 +108,8 @@ export class MetaManager {
         componentName: string,
         componentVersion: string,
         copiedFiles: string[],
-        appendScripts: IAppendScripts
+        appendScripts: IAppendScripts,
+        group: string
     ): Promise<void> {
         try {
             const installInfo = await this.readMateInfo();
@@ -122,7 +123,8 @@ export class MetaManager {
                 componentVersion: componentVersion,
                 copiedFiles: copiedFiles,
                 appendScripts: appendScripts,
-                installedAt: new Date().toISOString()
+                installedAt: new Date().toISOString(),
+                group: group
             });
             await this.writeInstallInfo(installInfo);
             console.log(`[${this.pluginName}] 组件安装信息已记录: ${componentCode}`);

@@ -122,6 +122,7 @@ export class BackupManager {
                 componentVersion: string;
                 files: string[];
                 appendScripts: IAppendScripts;
+                group: string;
             };
 
             // 优先从 zip 恢复文件；若 zip 不存在，则跳过文件恢复，仅恢复追加脚本与安装信息
@@ -180,7 +181,8 @@ export class BackupManager {
                 backupDesc.componentName,
                 backupDesc.componentVersion,
                 backupDesc.files || [],
-                backupDesc.appendScripts || []
+                backupDesc.appendScripts || [],
+                backupDesc.group || ''
             );
 
             return { success: true };
