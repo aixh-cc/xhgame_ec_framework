@@ -22,17 +22,18 @@ export class BackupManager {
         this.backupDir = join(this.projectPath, 'extensions', pluginName, 'backups');
     }
 
-    private async ensureDir(): Promise<void> {
-        await fs.promises.mkdir(this.backupDir, { recursive: true });
+    private async ensureDir(group: string): Promise<void> {
+        await fs.promises.mkdir(join(this.backupDir, group), { recursive: true });
     }
-    isExist(componentCode: string): boolean {
-        return fs.existsSync(join(this.backupDir, `${componentCode}.zip`));
-    }
-    async listBackupCodes(): Promise<Set<string>> {
-        await this.ensureDir();
+    // isExist(componentCode: string): boolean {
+    //     return fs.existsSync(join(this.backupDir, `${componentCode}.zip`));
+    // }
+    async listBackupCodes(group: string): Promise<Set<string>> {
+        await this.ensureDir(group);
         const set = new Set<string>();
         try {
-            const entries = await fs.promises.readdir(this.backupDir, { withFileTypes: true });
+            let groupDir = join(this.backupDir, group);
+            const entries = await fs.promises.readdir(groupDir, { withFileTypes: true });
             for (const e of entries) {
                 if (e.isFile() && e.name.endsWith('.zip')) {
                     const code = e.name.slice(0, -4);
@@ -48,7 +49,7 @@ export class BackupManager {
      */
     async backupInstalledComponent(group: string, componentInfo: InstalledComponentMeta): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }> {
         try {
-            await this.ensureDir();
+            await this.ensureDir(group);
             const assetsPath = join(this.projectPath, 'assets');
             const zipPath = join(this.backupDir, group, `${componentInfo.componentCode}.zip`);
             const jsonPath = join(this.backupDir, group, `${componentInfo.componentCode}.backup.json`);
@@ -103,7 +104,7 @@ export class BackupManager {
             return { success: false, error: '缺少组件标识 componentCode' };
         }
         try {
-            await this.ensureDir();
+            await this.ensureDir(group);
             const assetsPath = join(this.projectPath, 'assets');
             const zipPath = join(this.backupDir, group, `${componentCode}.zip`);
             const jsonPath = join(this.backupDir, group, `${componentCode}.backup.json`);
@@ -188,8 +189,8 @@ export class BackupManager {
         }
     }
 
-    checkZipHasTopFolder(componentCode: string): boolean {
-        const zipPath = join(this.backupDir, `${componentCode}.zip`);
+    checkZipHasTopFolder(group: string, componentCode: string): boolean {
+        const zipPath = join(this.backupDir, group, `${componentCode}.zip`);
         if (!fs.existsSync(zipPath)) return false;
         const zip = new AdmZip(zipPath);
         const entries = zip.getEntries();

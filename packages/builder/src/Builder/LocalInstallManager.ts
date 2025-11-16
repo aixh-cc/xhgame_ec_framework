@@ -76,7 +76,7 @@ export class LocalInstallManager {
             const metaManager = this.getMetaManager();
             const installMeta = await metaManager.readMateInfo();
             const backupManager = new BackupManager(this.pluginName);
-            const backupCodes = await backupManager.listBackupCodes();
+            const backupCodes = await backupManager.listBackupCodes(group);
             const installedLists = installMeta?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
             const items = fs.readdirSync(groupPath);
             const list: IComponentInfoWithStatus[] = [];
@@ -342,8 +342,11 @@ export class LocalInstallManager {
 
             console.log(`[xhgame_builder] 没有冲突文件，按清单复制文件...`, normalized.files);
             await copyFilesByList(copiedFiles, assetsSourcePath, targetPath, normalized.files);
-            console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
-
+            if (copiedFiles.length != normalized.files.length) {
+                console.warn(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件，与清单文件 ${normalized.files.length} 个文件不一致`)
+            } else {
+                console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
+            }
             // 有些组件安装还需要appendScript
             if (componentInfo.appendScripts && componentInfo.appendScripts?.length > 0) {
                 for (let i = 0; i < componentInfo.appendScripts.length; i++) {

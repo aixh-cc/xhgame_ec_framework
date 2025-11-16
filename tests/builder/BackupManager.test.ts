@@ -47,7 +47,7 @@ const test_01 = () => {
             assert.equal(fs.existsSync(backupJson), true, '备份json存在');
 
             const bmCheck = new BackupManager(pluginName);
-            assert.equal(bmCheck.checkZipHasTopFolder(componentCode), true, '备份zip顶级目录为组件码');
+            assert.equal(bmCheck.checkZipHasTopFolder(group, componentCode), true, '备份zip顶级目录为组件码');
 
             // 回滚恢复
             const bm = new BackupManager(pluginName);
