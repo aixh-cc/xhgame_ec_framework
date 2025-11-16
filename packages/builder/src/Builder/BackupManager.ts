@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { join, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { AppendScript } from './AppendScript';
-import { IAppendFactory, IAppendTable, IAppendGui, IAppendComp, InstalledComponentMeta } from './Defined';
+import { InstalledComponentMeta, IAppendScripts } from './Defined';
 import { getProjectPath } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
 
@@ -84,7 +84,7 @@ export class BackupManager {
                 componentVersion: string;
                 backedUpAt: string;
                 files: string[];
-                appendScripts: Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp>;
+                appendScripts: IAppendScripts;
             };
 
             await fs.promises.writeFile(jsonPath, JSON.stringify(backupJson, null, 2), 'utf-8');
@@ -120,7 +120,7 @@ export class BackupManager {
                 componentName: string;
                 componentVersion: string;
                 files: string[];
-                appendScripts: Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp>;
+                appendScripts: IAppendScripts;
             };
 
             // 优先从 zip 恢复文件；若 zip 不存在，则跳过文件恢复，仅恢复追加脚本与安装信息

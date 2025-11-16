@@ -3,8 +3,7 @@ import { MetaManager, MetaType } from "../../packages/builder/src/Builder/MetaMa
 import * as fs from 'fs';
 import { join } from 'path';
 import { getProjectPath, getExtensionsPath } from "../../packages/builder/src/Builder/Util";
-import { IAppendFactory, IAppendTable, IAppendGui, IAppendComp, IComponentInfo } from "../../packages/builder/src/Builder/Defined";
-// import { getExtensionsPath, getProjectPath } from './Util';
+import { IComponentInfo, IAppendScripts } from "../../packages/builder/src/Builder/Defined";
 
 const projectPath = getProjectPath();
 const extensionPath = getExtensionsPath();
@@ -101,7 +100,7 @@ const test_03 = () => {
             const copiedFiles = [
                 join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
             ];
-            let appendScripts: Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp> = []
+            let appendScripts: IAppendScripts = []
             // 记录安装信息
             await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles, appendScripts);
 

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { join } from 'path';
-import { IAppendFactory, IAppendTable, IAppendGui, IAppendComp, ILocalInstalledInfo, InstalledComponentMeta } from './Defined';
+import { ILocalInstalledInfo, InstalledComponentMeta, IAppendScripts } from './Defined';
 
 export enum MetaType {
     install = 'installInfo',
@@ -108,7 +108,7 @@ export class MetaManager {
         componentName: string,
         componentVersion: string,
         copiedFiles: string[],
-        appendScripts: Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp>
+        appendScripts: IAppendScripts
     ): Promise<void> {
         try {
             const installInfo = await this.readMateInfo();
