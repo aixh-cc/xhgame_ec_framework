@@ -26,8 +26,10 @@ export const getProjectPath = (): string => {
     if (typeof Editor != 'undefined' && Editor.Project) {
         return Editor.Project.path;
     } else {
-        // 基于当前工作目录向上查找存在的“extensions”目录
-        let current = resolve('./');
+        // 使用 PWD 环境变量获取软链接路径，如果不存在则使用当前工作目录
+        const startDir = process.env.PWD || process.cwd();
+        let current = resolve(startDir);
+
         while (true) {
             const extensionsDir = join(current, 'extensions');
             try {
