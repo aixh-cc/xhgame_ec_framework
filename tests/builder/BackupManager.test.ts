@@ -18,7 +18,7 @@ const installedMetaRoot = join(projectPath, 'assets', 'bundle_factory', 'item_vi
 
 const backupsDir = join(projectPath, 'extensions', pluginName, 'backups', projectName);
 const backupZip = join(backupsDir, group, `${componentCode}.zip`);
-const backupJson = join(backupsDir, group, `${componentCode}.backup.json`);
+const backupJson = join(backupsDir, group, `${componentCode}.setup.json`);
 
 const waitXms = (ms: number = 0) => new Promise<void>(resolve => setTimeout(resolve, ms));
 

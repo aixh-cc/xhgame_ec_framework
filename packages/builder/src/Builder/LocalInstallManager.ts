@@ -202,16 +202,16 @@ export class LocalInstallManager {
             const rawContent = await fs.promises.readFile(setupFilePath, 'utf-8');
             const componentInfo: IComponentInfo = JSON.parse(rawContent);
 
-            // 归一化字段
-            const normalized = {
-                componentCode: componentInfo.componentCode || componentCode,
-                componentName: componentInfo.componentName || componentCode,
-                componentVersion: componentInfo.componentVersion || '1.0.0',
-                dependencies: componentInfo.dependencies || [],
-                files: componentInfo.files || []
-            } as IComponentInfo;
+            // // 归一化字段
+            // const normalized = {
+            //     componentCode: componentInfo.componentCode || componentCode,
+            //     componentName: componentInfo.componentName || componentCode,
+            //     componentVersion: componentInfo.componentVersion || '1.0.0',
+            //     dependencies: componentInfo.dependencies || [],
+            //     files: componentInfo.files || []
+            // } as IComponentInfo;
 
-            await checkConflictsByList(conflictFiles, assetsSourcePath, targetPath, normalized.files);
+            await checkConflictsByList(conflictFiles, assetsSourcePath, targetPath, componentInfo.files);
             if (conflictFiles.length > 0) {
                 console.log(`[xhgame_builder] 检测到冲突文件: ${conflictFiles.join('\n')}`);
                 return {
@@ -231,7 +231,7 @@ export class LocalInstallManager {
             const metaManager = this.getMetaManager();
             const installedCodes = await metaManager.getInstalledComponentCodes();
 
-            const deps: any[] = Array.isArray(normalized.dependencies) ? normalized.dependencies : [];
+            const deps: any[] = Array.isArray(componentInfo.dependencies) ? componentInfo.dependencies : [];
             for (const dep of deps) {
                 let depPath: string = '';
                 let expectedUuid: string | undefined;
@@ -342,10 +342,10 @@ export class LocalInstallManager {
                 }
             }
 
-            console.log(`[xhgame_builder] 没有冲突文件，按清单复制文件...`, normalized.files);
-            await copyFilesByList(copiedFiles, assetsSourcePath, targetPath, normalized.files);
-            if (copiedFiles.length != normalized.files.length) {
-                console.warn(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件，与清单文件 ${normalized.files.length} 个文件不一致`)
+            console.log(`[xhgame_builder] 没有冲突文件，按清单复制文件...`, componentInfo.files);
+            await copyFilesByList(copiedFiles, assetsSourcePath, targetPath, componentInfo.files);
+            if (copiedFiles.length != componentInfo.files.length) {
+                console.warn(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件，与清单文件 ${componentInfo.files.length} 个文件不一致`)
             } else {
                 console.log(`[xhgame_builder] 组件安装完成，共复制 ${copiedFiles.length} 个文件`);
             }
@@ -430,7 +430,7 @@ export class LocalInstallManager {
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
                 const metaManager = this.getMetaManager();
-                await metaManager.updateInstalledComponentMetas(normalized);
+                await metaManager.updateInstalledComponentMetas(componentInfo);
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
             }
@@ -582,9 +582,7 @@ export class LocalInstallManager {
                     }
                 }
             }
-
-
-            // 从配置中移除组件记录 
+            // 从配置中移除组件记录
             try {
                 const metaManager = this.getMetaManager();
                 await metaManager.removeComponentRecord(componentCode);

@@ -9,7 +9,7 @@ import { MetaManager, MetaType } from './MetaManager';
 /**
  * 备份管理：在组件卸载前打包备份，并支持回滚恢复
  * 备份目录：extensions/<pluginName>/backups
- * 产物：<componentCode>.zip、<componentCode>.backup.json
+ * 产物：<componentCode>.zip、<componentCode>.setup.json
  */
 export class BackupManager {
     projectPath: string;
@@ -54,7 +54,7 @@ export class BackupManager {
             await this.ensureDir(group);
             const assetsPath = join(this.projectPath, 'assets');
             const zipPath = join(this.backupDir, group, `${componentInfo.componentCode}.zip`);
-            const jsonPath = join(this.backupDir, group, `${componentInfo.componentCode}.backup.json`);
+            const jsonPath = join(this.backupDir, group, `${componentInfo.componentCode}.setup.json`);
 
             const zip = new AdmZip();
             zip.addFile(`${componentInfo.componentCode}/`, Buffer.alloc(0));
@@ -95,7 +95,7 @@ export class BackupManager {
             await this.ensureDir(group);
             const assetsPath = join(this.projectPath, 'assets');
             const zipPath = join(this.backupDir, group, `${componentCode}.zip`);
-            const jsonPath = join(this.backupDir, group, `${componentCode}.backup.json`);
+            const jsonPath = join(this.backupDir, group, `${componentCode}.setup.json`);
 
             // 读取备份描述
             let backupDescRaw = '';

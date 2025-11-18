@@ -130,7 +130,7 @@ export interface IAppendAudio {
     audioPath: string
 }
 
-/** 项目文件依赖描述 */
+/** 项目文件依赖描述(todo未完成) */
 export interface IFileDependency {
     /** 相对项目 `assets` 根目录的文件或目录路径 */
     path: string;

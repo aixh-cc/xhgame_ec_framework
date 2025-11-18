@@ -1,0 +1,29 @@
+{
+  "componentCode": "mission_item",
+  "componentName": "uiItem的body组件",
+  "componentVersion": "1.0.1",
+  "cocosVersions": [
+    "3"
+  ],
+  "images": [],
+  "description": "关卡显示的简单ui组件，适合水墨风的关卡选择",
+  "author": "xhgame",
+  "group": "uiItems",
+  "tags": [
+    "UI组件",
+    "关卡"
+  ],
+  "files": [
+    "script/itemViews/MissionItemView.ts",
+    "script/itemViews/MissionItemView.ts.meta",
+    "bundle_factory/item_views/uiItems/mission_item.meta",
+    "bundle_factory/item_views/uiItems/mission_item/mission_item.prefab",
+    "bundle_factory/item_views/uiItems/mission_item/mission_item.prefab.meta",
+    "bundle_factory/item_views/uiItems/mission_item/mission_item_plist.plist",
+    "bundle_factory/item_views/uiItems/mission_item/mission_item_plist.plist.meta",
+    "bundle_factory/item_views/uiItems/mission_item/mission_item_plist.png",
+    "bundle_factory/item_views/uiItems/mission_item/mission_item_plist.png.meta"
+  ],
+  "dependencies": [],
+  "stars": 4
+}
