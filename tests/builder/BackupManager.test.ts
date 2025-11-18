@@ -28,6 +28,7 @@ const test_01 = () => {
             const localInstallManager = new LocalInstallManager(pluginName);
             const metaManager = localInstallManager.getMetaManager();
             metaManager.resetMetaInfo()
+            await waitXms(1000)
             // 安装组件
             const resInstall = await localInstallManager.installComponent(group, componentCode);
             assert.equal(resInstall.success, true, '安装组件-应成功');
