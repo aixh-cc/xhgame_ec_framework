@@ -154,9 +154,9 @@ const test_04 = () => {
         test('componentCode 依赖-安装前后状态校验', async () => {
             const pluginName = 'xhgame_plugin';
             const group = 'uiItems';
-            const dep_group = 'textUiItems';
-            const depCode = 'toast_item';
             const targetCode = 'mission_item';
+            const dep_group = 'unitItems';
+            const depCode = 'aula';
             let localInstallManager = new LocalInstallManager(pluginName)
             const groupPath = join(process.cwd(), 'extensions', pluginName, 'packages', group);
             const targetSetupPath = join(groupPath, `${targetCode}.setup.json`);

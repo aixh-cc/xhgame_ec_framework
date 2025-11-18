@@ -1,0 +1,25 @@
+{
+  "componentCode": "aula",
+  "componentName": "3d卡通蜘蛛",
+  "componentVersion": "1.0.1",
+  "cocosVersions": ["3"],
+  "images": [],
+  "description": "3d卡通蜘蛛",
+  "author": "cocos",
+  "group": "unitItems",
+  "tags": ["3d单位", "卡通"],
+  "files": [
+    "bundle_factory/item_views/unitItems/aula/aula.prefab.meta",
+    "bundle_factory/item_views/unitItems/aula/aula.prefab",
+    "bundle_factory/item_views/unitItems/aula/_meshes/aula.jpg.meta",
+    "bundle_factory/item_views/unitItems/aula/_meshes/aula.mtl",
+    "bundle_factory/item_views/unitItems/aula/_meshes/aula.mtl.meta",
+    "bundle_factory/item_views/unitItems/aula/_meshes/aula.jpg",
+    "bundle_factory/item_views/unitItems/aula/_meshes/aula.FBX",
+    "bundle_factory/item_views/unitItems/aula/_meshes/aula.FBX.meta",
+    "bundle_factory/item_views/unitItems/aula/_meshes.meta",
+    "bundle_factory/item_views/unitItems/aula.meta"
+  ],
+  "dependencies": [],
+  "stars": 4
+}
