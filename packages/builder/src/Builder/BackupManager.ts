@@ -3,7 +3,7 @@ import { join, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { AppendScript } from './AppendScript';
 import { InstalledComponentMeta, IAppendScripts } from './Defined';
-import { getProjectPath } from './Util';
+import { getCocosProjectName, getProjectPath } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
 
 /**
@@ -15,11 +15,13 @@ export class BackupManager {
     projectPath: string;
     pluginName: string;
     backupDir: string;
+    projectName: string;
 
-    constructor(pluginName: string) {
+    constructor(pluginName: string, projectName: string) {
         this.projectPath = getProjectPath();
+        this.projectName = projectName
         this.pluginName = pluginName;
-        this.backupDir = join(this.projectPath, 'extensions', pluginName, 'backups');
+        this.backupDir = join(this.projectPath, 'extensions', pluginName, 'backups', projectName);
     }
 
     private async ensureDir(group: string): Promise<void> {

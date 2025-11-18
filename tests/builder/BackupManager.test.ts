@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { LocalInstallManager } from "../../packages/builder/src/Builder/LocalInstallManager";
 import { BackupManager } from "../../packages/builder/src/Builder/BackupManager";
-import { getProjectPath } from "../../packages/builder/src/Builder/Util";
+import { getCocosProjectName, getProjectPath } from "../../packages/builder/src/Builder/Util";
 import { MetaManager, MetaType } from "../../packages/builder/src/Builder/MetaManager";
 
 const projectPath = getProjectPath();
@@ -45,12 +45,12 @@ const test_01 = () => {
             assert.equal(fs.existsSync(backupsDir), true, '备份目录存在');
             assert.equal(fs.existsSync(backupZip), true, '备份zip存在');
             assert.equal(fs.existsSync(backupJson), true, '备份json存在');
-
-            const bmCheck = new BackupManager(pluginName);
+            const projectName = await getCocosProjectName()
+            const bmCheck = new BackupManager(pluginName, projectName);
             assert.equal(bmCheck.checkZipHasTopFolder(group, componentCode), true, '备份zip顶级目录为组件码');
 
             // 回滚恢复
-            const bm = new BackupManager(pluginName);
+            const bm = new BackupManager(pluginName, projectName);
             const resRollback = await bm.rollback(group, componentCode);
             assert.equal(resRollback.success, true, '回滚-应成功');
 

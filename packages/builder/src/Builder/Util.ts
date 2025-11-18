@@ -18,6 +18,18 @@ export async function getCocosVersion(): Promise<string> {
     return 'unknown'
 }
 
+export async function getCocosProjectName(): Promise<string> {
+    const projectPath = getProjectPath();
+    const packagePath = join(projectPath, 'package.json');
+    const hasFile = fs.existsSync(packagePath);
+    if (hasFile) {
+        const packageInfo = JSON.parse(await fs.promises.readFile(packagePath, 'utf-8'));
+        if (typeof packageInfo.name != 'undefined') {
+            return packageInfo.name
+        }
+    }
+    return 'unknown'
+}
 /**
  * 获取项目路径
  * @returns 项目路径

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta, ILocalInstalledInfo } from './Defined';
-import { checkConflicts, cleanupEmptyDirs, getGroupPath, getProjectPath, checkConflictsByList, copyFilesByList } from './Util';
+import { checkConflicts, cleanupEmptyDirs, getGroupPath, getProjectPath, checkConflictsByList, copyFilesByList, getCocosProjectName } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
 import { BackupManager } from './BackupManager';
 import { AppendScript } from './AppendScript';
@@ -75,7 +75,8 @@ export class LocalInstallManager {
             // 当前组件安装情况
             const metaManager = this.getMetaManager();
             const installMeta = await metaManager.readMateInfo();
-            const backupManager = new BackupManager(this.pluginName);
+            const projectName = await getCocosProjectName()
+            const backupManager = new BackupManager(this.pluginName, projectName);
             const backupCodes = await backupManager.listBackupCodes(group);
             const installedLists = installMeta?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
             const items = fs.readdirSync(groupPath);
@@ -496,9 +497,10 @@ export class LocalInstallManager {
                     error: `未找到组件 ${componentCode} 的安装记录`
                 };
             }
+            const projectName = await getCocosProjectName()
             // 在删除前生成备份
             try {
-                const backupManager = new BackupManager(this.pluginName);
+                const backupManager = new BackupManager(this.pluginName, projectName);
                 const backupRes = await backupManager.backupInstalledComponent(group, componentInfo);
                 if (!backupRes.success) {
                     console.warn(`[xhgame_builder] 生成备份失败:`, backupRes.error);
