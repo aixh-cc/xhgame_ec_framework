@@ -38,21 +38,22 @@ export interface ILocalInstalledInfoRes {
  */
 export interface ILocalInstalledInfo {
     version: string;
-    installedComponentMetas: InstalledComponentMeta[];
+    installedComponentMetas: IComponentInfoWithStatus[];
     lastUpdated: string;
 }
 /**
  * 已安装组件元数据
+ * 取消，备份数据和安装数据都需要保存完整的信息
  */
-export interface InstalledComponentMeta {
-    componentCode: string;
-    componentName: string;
-    componentVersion: string;
-    installedAt: string;
-    copiedFiles: string[];
-    appendScripts: IAppendScripts;
-    group: string;
-}
+// export interface InstalledComponentMeta {
+//     componentCode: string;
+//     componentName: string;
+//     componentVersion: string;
+//     installedAt: string;
+//     copiedFiles: string[];
+//     appendScripts: IAppendScripts;
+//     group: string;
+// }
 /**
  * 组件信息
  */
@@ -88,7 +89,7 @@ export interface IComponentInfo {
     /** 评分 */
     stars?: number;
     /** 追加脚本 */
-    appendScripts?: IAppendScripts;
+    appendScripts: IAppendScripts;
 }
 export interface IAppendScripts extends Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp | IAppendAudio> {
 
@@ -157,6 +158,8 @@ export interface IComponentInfoWithStatus extends IComponentInfo {
     installedAt: string
     /** 备份状态 */
     isBackedUp: boolean
+    /** 备份时间 */
+    backedUpAt: string
     /** 可更新状态 */
     isUpdatable: boolean
 }

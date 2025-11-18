@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { join, basename, dirname } from 'path';
 import AdmZip from 'adm-zip';
-import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, InstalledComponentMeta, ILocalInstalledInfo } from './Defined';
+import { IComponentInfo, IComponentInfoWithStatus, IGetGroupComponentListRes, ILocalInstalledInfoRes, IInstallRes, IUninstallRes, ILocalInstalledInfo } from './Defined';
 import { checkConflicts, cleanupEmptyDirs, getGroupPath, getProjectPath, checkConflictsByList, copyFilesByList, getCocosProjectName } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
 import { BackupManager } from './BackupManager';
@@ -78,7 +78,7 @@ export class LocalInstallManager {
             const projectName = await getCocosProjectName()
             const backupManager = new BackupManager(this.pluginName, projectName);
             const backupCodes = await backupManager.listBackupCodes(group);
-            const installedLists = installMeta?.installedComponentMetas?.map((item: InstalledComponentMeta) => item.componentCode) || []
+            const installedLists = installMeta?.installedComponentMetas?.map((item: IComponentInfoWithStatus) => item.componentCode) || []
             const items = fs.readdirSync(groupPath);
             const list: IComponentInfoWithStatus[] = [];
             // 新逻辑：检测并读取 *.setup.json 文件，取消从 .meta 中读取
@@ -97,13 +97,14 @@ export class LocalInstallManager {
                             // 状态字段
                             isInstalled: installedLists.indexOf(code) > -1,
                             // 安装时间
-                            installedAt: installMeta?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.installedAt || '',
+                            installedAt: installMeta?.installedComponentMetas?.find((item: IComponentInfoWithStatus) => item.componentCode === json.componentCode)?.installedAt || '',
                             // 是否备份
                             isBackedUp: backupCodes.has(code),
+                            backedUpAt: '',// 先为空
                             // 是否可更新，先默认false
                             isUpdatable: false
                         };
-                        if (info.isInstalled && json.componentVersion != installMeta?.installedComponentMetas?.find((item: InstalledComponentMeta) => item.componentCode === json.componentCode)?.componentVersion) {
+                        if (info.isInstalled && json.componentVersion != installMeta?.installedComponentMetas?.find((item: IComponentInfoWithStatus) => item.componentCode === json.componentCode)?.componentVersion) {
                             info.isUpdatable = true; // 版本对比，是否可更新(当前为最简单的版本不一致作为判断)
                         }
                         list.push(info);
@@ -429,14 +430,7 @@ export class LocalInstallManager {
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
             try {
                 const metaManager = this.getMetaManager();
-                await metaManager.updateInstalledComponentMetas(
-                    normalized.componentCode,
-                    normalized.componentName,
-                    normalized.componentVersion,
-                    copiedFiles,
-                    componentInfo.appendScripts || [],
-                    componentInfo.group || ''
-                );
+                await metaManager.updateInstalledComponentMetas(normalized);
             } catch (writeErr) {
                 console.warn(`[xhgame_builder] 写入安装信息失败，但组件安装已完成:`, writeErr);
             }
@@ -490,7 +484,7 @@ export class LocalInstallManager {
                 };
             }
             // 查找组件信息
-            const componentInfo: InstalledComponentMeta = installInfo.installedComponentMetas?.find((c: { componentCode: any; }) => c.componentCode === componentCode);
+            const componentInfo: IComponentInfoWithStatus = installInfo.installedComponentMetas?.find((c: { componentCode: any; }) => c.componentCode === componentCode);
             if (!componentInfo) {
                 return {
                     success: false,
@@ -514,7 +508,7 @@ export class LocalInstallManager {
             const deletedFiles: string[] = [];
             const notFoundFiles: string[] = [];
 
-            for (const relativeFilePath of componentInfo.copiedFiles) {
+            for (const relativeFilePath of componentInfo.files) {
                 const fullFilePath = join(assetsPath, relativeFilePath);
                 try {
                     // 检查文件是否存在

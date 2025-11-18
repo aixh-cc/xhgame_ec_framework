@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import { join, dirname } from 'path';
 import AdmZip from 'adm-zip';
 import { AppendScript } from './AppendScript';
-import { InstalledComponentMeta, IAppendScripts } from './Defined';
-import { getCocosProjectName, getProjectPath } from './Util';
+import { IAppendScripts, IComponentInfoWithStatus } from './Defined';
+import { getProjectPath } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
 
 /**
@@ -49,7 +49,7 @@ export class BackupManager {
      * 基于当前安装记录，生成备份包与备份描述文件
      * 在卸载删除文件之前调用
      */
-    async backupInstalledComponent(group: string, componentInfo: InstalledComponentMeta): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }> {
+    async backupInstalledComponent(group: string, componentInfo: IComponentInfoWithStatus): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }> {
         try {
             await this.ensureDir(group);
             const assetsPath = join(this.projectPath, 'assets');
@@ -59,7 +59,7 @@ export class BackupManager {
             const zip = new AdmZip();
             zip.addFile(`${componentInfo.componentCode}/`, Buffer.alloc(0));
             let addedCount = 0;
-            for (const rel of componentInfo.copiedFiles || []) {
+            for (const rel of componentInfo.files || []) {
                 const full = join(assetsPath, rel);
                 try {
                     await fs.promises.access(full, fs.constants.F_OK);
@@ -73,24 +73,8 @@ export class BackupManager {
                 zip.writeZip(zipPath);
             } else {
             }
-
-            const backupJson = {
-                componentCode: componentInfo.componentCode,
-                componentName: componentInfo.componentName,
-                componentVersion: componentInfo.componentVersion,
-                backedUpAt: new Date().toISOString(),
-                files: componentInfo.copiedFiles || [],
-                appendScripts: componentInfo.appendScripts || [],
-                group: componentInfo.group || ''
-            } as {
-                componentCode: string;
-                componentName: string;
-                componentVersion: string;
-                backedUpAt: string;
-                files: string[];
-                appendScripts: IAppendScripts;
-                group: string;
-            };
+            const backupJson = componentInfo
+            backupJson.backedUpAt = new Date().toISOString()
 
             await fs.promises.writeFile(jsonPath, JSON.stringify(backupJson, null, 2), 'utf-8');
 
@@ -120,14 +104,7 @@ export class BackupManager {
             } catch {
                 return { success: false, error: `未找到备份描述文件: ${jsonPath}` };
             }
-            const backupDesc = JSON.parse(backupDescRaw) as {
-                componentCode: string;
-                componentName: string;
-                componentVersion: string;
-                files: string[];
-                appendScripts: IAppendScripts;
-                group: string;
-            };
+            const backupDesc = JSON.parse(backupDescRaw) as IComponentInfoWithStatus
 
             // 优先从 zip 恢复文件；若 zip 不存在，则跳过文件恢复，仅恢复追加脚本与安装信息
             if (fs.existsSync(zipPath)) {
@@ -180,14 +157,7 @@ export class BackupManager {
 
             // 恢复安装信息
             const installMeta = new MetaManager(this.projectPath, this.pluginName, MetaType.install);
-            await installMeta.updateInstalledComponentMetas(
-                backupDesc.componentCode,
-                backupDesc.componentName,
-                backupDesc.componentVersion,
-                backupDesc.files || [],
-                backupDesc.appendScripts || [],
-                backupDesc.group || ''
-            );
+            await installMeta.updateInstalledComponentMetas(backupDesc);
 
             return { success: true };
         } catch (e) {

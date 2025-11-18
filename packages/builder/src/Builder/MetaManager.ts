@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { join } from 'path';
-import { ILocalInstalledInfo, InstalledComponentMeta, IAppendScripts } from './Defined';
+import { ILocalInstalledInfo, IAppendScripts, IComponentInfoWithStatus, IComponentInfo } from './Defined';
 
 export enum MetaType {
     install = 'installInfo',
@@ -97,38 +97,32 @@ export class MetaManager {
     /**
      * 获取组件的安装信息
      */
-    async getInstalledComponentInfo(componentCode: string): Promise<InstalledComponentMeta | null> {
+    async getInstalledComponentInfo(componentCode: string): Promise<IComponentInfoWithStatus | null> {
         const installInfo = await this.readMateInfo();
         return installInfo.installedComponentMetas.find(comp => comp.componentCode === componentCode) || null;
     }
     /**
      * 更新组件安装信息
      */
-    async updateInstalledComponentMetas(
-        componentCode: string,
-        componentName: string,
-        componentVersion: string,
-        copiedFiles: string[],
-        appendScripts: IAppendScripts,
-        group: string
+    async updateInstalledComponentMetas(componentInfo: IComponentInfo
     ): Promise<void> {
         try {
             const installInfo = await this.readMateInfo();
             // 更新 installedComponents 列表（去重后追加）
             installInfo.installedComponentMetas = installInfo.installedComponentMetas.filter(
-                (c: any) => c.componentCode !== componentCode
+                (c: any) => c.componentCode !== componentInfo.componentCode
             );
-            installInfo.installedComponentMetas.push({
-                componentName: componentName,
-                componentCode: componentCode,
-                componentVersion: componentVersion,
-                copiedFiles: copiedFiles,
-                appendScripts: appendScripts,
+            let componentInfoWithStatus: IComponentInfoWithStatus = {
+                ...componentInfo,
                 installedAt: new Date().toISOString(),
-                group: group
-            });
+                isUpdatable: false,
+                isInstalled: true,
+                backedUpAt: '',
+                isBackedUp: false
+            }
+            installInfo.installedComponentMetas.push(componentInfoWithStatus);
             await this.writeInstallInfo(installInfo);
-            console.log(`[${this.pluginName}] 组件安装信息已记录: ${componentCode}`);
+            console.log(`[${this.pluginName}] 组件安装信息已记录: ${componentInfoWithStatus.componentCode}`);
         } catch (error) {
             console.warn(`[${this.pluginName}] 记录安装信息失败，但组件安装已完成:`, error);
             throw error;

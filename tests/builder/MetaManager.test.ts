@@ -97,14 +97,15 @@ const test_03 = () => {
                 files: [
                     join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
                 ],
+                appendScripts: []
             };
             await fs.promises.writeFile(metaPath, JSON.stringify(setupComponentInfo, null, 2), 'utf-8');
             const copiedFiles = [
                 join('bundle_factory', 'item_views', 'textUiItems', componentCode, 'toast_item.prefab')
             ];
-            let appendScripts: IAppendScripts = []
+            // let appendScripts: IAppendScripts = []
             // 记录安装信息
-            await iim.updateInstalledComponentMetas(componentCode, setupComponentInfo.componentName, setupComponentInfo.componentVersion, copiedFiles, appendScripts, setupComponentInfo.group);
+            await iim.updateInstalledComponentMetas(setupComponentInfo);
 
             // 验证 
             const codes = await iim.getInstalledComponentCodes();
@@ -120,7 +121,7 @@ const test_03 = () => {
                 assert.equal(info.componentName, '吐司提示', '组件显示名正确');
                 assert.equal(info.componentCode, componentCode, '组件code正确');
                 assert.equal(info.componentVersion, '1.2.3', '组件版本正确');
-                assert.equal(JSON.stringify(info.copiedFiles), JSON.stringify(copiedFiles), '已安装文件列表正确');
+                assert.equal(JSON.stringify(info.files), JSON.stringify(copiedFiles), '已安装文件列表正确');
             }
 
             // 验证 removeComponent 后状态

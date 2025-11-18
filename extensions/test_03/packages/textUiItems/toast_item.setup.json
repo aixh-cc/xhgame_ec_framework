@@ -16,5 +16,6 @@
   "dependencies": [],
   "files": [
     "bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab"
-  ]
+  ],
+  "appendScripts": []
 }
