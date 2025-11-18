@@ -126,6 +126,8 @@ export class Pack {
                 componentCode: itemName,
                 componentName: itemName,
                 componentVersion: '1.0.0',
+                cocosVersions: ['3'],
+                images: [],
                 description: '',
                 author: 'auto',
                 group: group,
