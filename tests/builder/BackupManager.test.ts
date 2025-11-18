@@ -7,6 +7,7 @@ import { getCocosProjectName, getProjectPath } from "../../packages/builder/src/
 import { MetaManager, MetaType } from "../../packages/builder/src/Builder/MetaManager";
 
 const projectPath = getProjectPath();
+const projectName = await getCocosProjectName()
 
 const pluginName = 'localhandles_test_04';
 const group = 'uiItems';
@@ -15,7 +16,7 @@ const componentCode = 'ui_item_02';
 const installedPrefab = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'uiItems', 'ui_item_02', 'ui_item_02.prefab');
 const installedMetaRoot = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'uiItems');
 
-const backupsDir = join(projectPath, 'extensions', pluginName, 'backups');
+const backupsDir = join(projectPath, 'extensions', pluginName, 'backups', projectName);
 const backupZip = join(backupsDir, group, `${componentCode}.zip`);
 const backupJson = join(backupsDir, group, `${componentCode}.backup.json`);
 
@@ -43,7 +44,9 @@ const test_01 = () => {
 
             // 验证备份产物存在
             assert.equal(fs.existsSync(backupsDir), true, '备份目录存在');
+            console.log('backupZip', backupZip)
             assert.equal(fs.existsSync(backupZip), true, '备份zip存在');
+            console.log('backupJson', backupJson)
             assert.equal(fs.existsSync(backupJson), true, '备份json存在');
             const projectName = await getCocosProjectName()
             const bmCheck = new BackupManager(pluginName, projectName);
