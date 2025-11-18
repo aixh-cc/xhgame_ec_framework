@@ -28,7 +28,7 @@ const test_01 = () => {
             const localInstallManager = new LocalInstallManager(pluginName);
             const metaManager = localInstallManager.getMetaManager();
             metaManager.resetMetaInfo()
-            await waitXms(1000)
+            await waitXms(1000) // 稍微等一下，zip解压有些慢
             // 安装组件
             const resInstall = await localInstallManager.installComponent(group, componentCode);
             assert.equal(resInstall.success, true, '安装组件-应成功');
