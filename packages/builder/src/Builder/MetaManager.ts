@@ -16,12 +16,13 @@ export class MetaManager {
     constructor(projectPath: string, pluginName: string, metaType: MetaType) {
         this.projectPath = projectPath;//getProjectPath();
         this.pluginName = pluginName;
-        this.metaPath = join(projectPath, 'extensions', pluginName + '-' + metaType + '.json');
+        this.metaPath = join(projectPath, 'temp', pluginName + '-' + metaType + '.json');
     }
     /**
      * 检查安装信息文件是否存在
      */
     exists(): boolean {
+        console.log('this.metaPath:' + this.metaPath)
         return fs.existsSync(this.metaPath);
     }
     /**

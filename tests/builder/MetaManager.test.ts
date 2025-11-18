@@ -58,7 +58,7 @@ const test_02 = () => {
             if (installInfo) {
                 assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
                 assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
-                assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[test_02] 安装信息已写入: /extensions/test_02-installInfo.json"]', 'installedInfoManager的logs正常')
+                assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[test_02] 安装信息已写入: /temp/test_02-installInfo.json"]', 'installedInfoManager的logs正常')
             } else {
                 assert.equal(installInfo, '错误', 'installedInfoManager的获取安装信息失败')
             }
@@ -128,7 +128,7 @@ const test_03 = () => {
 
             // 日志包含写入记录（不做严格等值比较，以免受其他测试影响）
             const logs = iim.getLogs();
-            assert.equal(logs.some(l => l.includes(`/extensions/${pluginName}-installInfo.json`)), true, '写入日志包含目标文件');
+            assert.equal(logs.some(l => l.includes(`/temp/${pluginName}-installInfo.json`)), true, '写入日志包含目标文件');
 
             resolve(true);
         });

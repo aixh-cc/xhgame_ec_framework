@@ -179,6 +179,7 @@ const test_04 = () => {
 
                 // 2) 未安装依赖时，安装目标组件应失败
                 const resFail = await localInstallManager.installComponent(group, targetCode);
+                console.log('resFail', resFail)
                 assert.equal(resFail.success, false, '未安装依赖组件-安装失败');
 
                 // 3) 安装依赖组件
