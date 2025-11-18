@@ -63,6 +63,10 @@ export interface IComponentInfo {
     componentName: string;
     /** 版本号 */
     componentVersion: string;
+    /** 支持的cocos版本 */
+    cocosVersions: string[];
+    /** 图片介绍 */
+    images: string[];
     /** 说明 */
     description: string;
     /** 作者 */

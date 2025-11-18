@@ -87,6 +87,8 @@ const test_03 = () => {
                 componentCode: componentCode,
                 componentName: '吐司提示',
                 componentVersion: '1.2.3',
+                cocosVersions: ['3'],
+                images: [],
                 description: '显示一个简单的文本提示',
                 author: '测试作者',
                 group: 'UI',
