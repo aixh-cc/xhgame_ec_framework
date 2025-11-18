@@ -1,22 +1,21 @@
 {
   "componentCode": "toast_item",
-  "componentName": "toast_item",
-  "componentVersion": "1.0.0",
-  "cocosVersions": ["3"],
+  "componentName": "吐司提示",
+  "componentVersion": "1.2.3",
+  "cocosVersions": [
+    "3"
+  ],
   "images": [],
-  "description": "",
-  "author": "auto",
-  "group": "textUiItems",
-  "tags": [],
+  "description": "显示一个简单的文本提示",
+  "author": "测试作者",
+  "group": "UI",
+  "tags": [
+    "提示",
+    "文本"
+  ],
   "dependencies": [],
   "files": [
-    "bundle_factory/item_views/textUiItems/toast_item/toast_item_res.anim.meta",
-    "bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab",
-    "bundle_factory/item_views/textUiItems/toast_item/toast_item_res.png",
-    "bundle_factory/item_views/textUiItems/toast_item/toast_item_res.png.meta",
-    "bundle_factory/item_views/textUiItems/toast_item/toast_item_res.anim",
-    "bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab.meta",
-    "bundle_factory/item_views/textUiItems/toast_item.meta"
+    "bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab"
   ],
-  "stars": 4
+  "appendScripts": []
 }

@@ -9,11 +9,11 @@ import { MetaManager, MetaType } from "../../packages/builder/src/Builder/MetaMa
 const projectPath = getProjectPath();
 const projectName = await getCocosProjectName()
 
-const pluginName = 'localhandles_test_04';
+const pluginName = 'xhgame_plugin';
 const group = 'uiItems';
-const componentCode = 'ui_item_02';
+const componentCode = 'mission_item';
 
-const installedPrefab = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'uiItems', 'ui_item_02', 'ui_item_02.prefab');
+const installedPrefab = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'uiItems', 'mission_item', 'mission_item.prefab');
 const installedMetaRoot = join(projectPath, 'assets', 'bundle_factory', 'item_views', 'uiItems');
 
 const backupsDir = join(projectPath, 'extensions', pluginName, 'backups', projectName);
@@ -26,14 +26,15 @@ const test_01 = () => {
     return new Promise((resolve) => {
         test('卸载时生成备份文件并回滚恢复', async () => {
             const localInstallManager = new LocalInstallManager(pluginName);
-
+            const metaManager = localInstallManager.getMetaManager();
+            metaManager.resetMetaInfo()
             // 安装组件
             const resInstall = await localInstallManager.installComponent(group, componentCode);
             assert.equal(resInstall.success, true, '安装组件-应成功');
 
             // 验证安装产物存在
             assert.equal(fs.existsSync(installedPrefab), true, '安装后的prefab存在');
-            assert.equal(fs.existsSync(join(installedMetaRoot, 'ui_item_02.meta')), true, '安装后的meta存在');
+            assert.equal(fs.existsSync(join(installedMetaRoot, 'mission_item.meta')), true, '安装后的meta存在');
 
             // 卸载
             const resUninstall = await localInstallManager.uninstallComponent(group, componentCode);

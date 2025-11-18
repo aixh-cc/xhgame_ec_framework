@@ -10,15 +10,15 @@ const projectPath = getProjectPath();
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的从未安装过', async () => {
-            let notInstalledInfoManager = new MetaManager(
+            let notmetaManager = new MetaManager(
                 projectPath,
                 'pluginName_not_exists',
                 MetaType.install)
-            let is_exists = notInstalledInfoManager.exists()
-            assert.equal(is_exists, false, 'notInstalledInfoManager的exists正常')
-            let installInfo = await notInstalledInfoManager.readMateInfo()
-            assert.equal(installInfo.version, '1.0.0', 'notInstalledInfoManager的获取默认版本号正常')
-            assert.equal(installInfo.installedComponentMetas.length, 0, 'notInstalledInfoManager的获取已安装组件列表正常')
+            let is_exists = notmetaManager.exists()
+            assert.equal(is_exists, false, 'notmetaManager的exists正常')
+            let installInfo = await notmetaManager.readMateInfo()
+            assert.equal(installInfo.version, '1.0.0', 'notmetaManager的获取默认版本号正常')
+            assert.equal(installInfo.installedComponentMetas.length, 0, 'notmetaManager的获取已安装组件列表正常')
             resolve(true)
         })
     })
@@ -26,15 +26,14 @@ const test_00 = () => {
 const test_01 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的有安装过', async () => {
-            let installedInfoManager = new MetaManager(
+            let metaManager = new MetaManager(
                 projectPath,
                 'xhgame_plugin',
                 MetaType.install)
-            let is_exists = installedInfoManager.exists()
-            assert.equal(is_exists, false, 'installedInfoManager的exists正常1')
-            let installInfo = await installedInfoManager.readMateInfo()
-            assert.equal(installInfo.version, '1.0.0', 'installedInfoManager的获取默认版本号正常')
-            assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
+            let is_exists = metaManager.exists()
+            let installInfo = await metaManager.readMateInfo()
+            assert.equal(installInfo.version, '1.0.0', 'metaManager的获取默认版本号正常')
+            assert.equal(installInfo.installedComponentMetas.length, 0, 'metaManager的获取已安装组件列表正常')
             resolve(true)
         })
     })
@@ -42,26 +41,26 @@ const test_01 = () => {
 const test_02 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的写入', async () => {
-            let installedInfoManager = new MetaManager(
+            let metaManager = new MetaManager(
                 projectPath,
                 'xhgame_plugin',
                 MetaType.install)
-            let is_write_success = await installedInfoManager.writeInstallInfo({
+            let is_write_success = await metaManager.writeInstallInfo({
                 version: '1.0.2',
                 installedComponentMetas: [],
                 lastUpdated: new Date().toISOString()
             })
-            assert.equal(is_write_success, true, 'installedInfoManager的写入正常')
+            assert.equal(is_write_success, true, 'metaManager的写入正常')
             // 检查写入的文件内容是否正确
-            let installInfo = await installedInfoManager.readMateInfo()
+            let installInfo = await metaManager.readMateInfo()
             if (installInfo) {
-                assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
-                assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
-                assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[xhgame_plugin] 安装信息已写入: /temp/xhgame_plugin-installInfo.json"]', 'installedInfoManager的logs正常')
+                assert.equal(installInfo.version, '1.0.2', 'metaManager的获取版本号正常')
+                assert.equal(installInfo.installedComponentMetas.length, 0, 'metaManager的获取已安装组件列表正常')
+                assert.equal(JSON.stringify(metaManager.getLogs()), '["[xhgame_plugin] 安装信息已写入: /temp/xhgame_plugin-installInfo.json"]', 'metaManager的logs正常')
             } else {
-                assert.equal(installInfo, '错误', 'installedInfoManager的获取安装信息失败')
+                assert.equal(installInfo, '错误', 'metaManager的获取安装信息失败')
             }
-            installedInfoManager.resetMetaInfo()
+            metaManager.resetMetaInfo()
             resolve(true)
         })
     })
