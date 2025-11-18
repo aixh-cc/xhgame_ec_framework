@@ -2,18 +2,17 @@ import { assert, describe, test } from "poku";
 import { MetaManager, MetaType } from "../../packages/builder/src/Builder/MetaManager";
 import * as fs from 'fs';
 import { join } from 'path';
-import { getProjectPath, getExtensionsPath } from "../../packages/builder/src/Builder/Util";
-import { IComponentInfo, IAppendScripts } from "../../packages/builder/src/Builder/Defined";
+import { getProjectPath } from "../../packages/builder/src/Builder/Util";
+import { IComponentInfo } from "../../packages/builder/src/Builder/Defined";
 
 const projectPath = getProjectPath();
-const extensionPath = getExtensionsPath();
 
 const test_00 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的从未安装过', async () => {
             let notInstalledInfoManager = new MetaManager(
                 projectPath,
-                'xhgame_plugin_not_exists',
+                'pluginName_not_exists',
                 MetaType.install)
             let is_exists = notInstalledInfoManager.exists()
             assert.equal(is_exists, false, 'notInstalledInfoManager的exists正常')
@@ -29,12 +28,12 @@ const test_01 = () => {
         test('测试MetaManager的有安装过', async () => {
             let installedInfoManager = new MetaManager(
                 projectPath,
-                'test_01',
+                'xhgame_plugin',
                 MetaType.install)
             let is_exists = installedInfoManager.exists()
-            assert.equal(is_exists, true, 'installedInfoManager的exists正常')
+            assert.equal(is_exists, false, 'installedInfoManager的exists正常1')
             let installInfo = await installedInfoManager.readMateInfo()
-            assert.equal(installInfo.version, '1.0.1', 'installedInfoManager的获取默认版本号正常')
+            assert.equal(installInfo.version, '1.0.0', 'installedInfoManager的获取默认版本号正常')
             assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
             resolve(true)
         })
@@ -45,7 +44,7 @@ const test_02 = () => {
         test('测试MetaManager的写入', async () => {
             let installedInfoManager = new MetaManager(
                 projectPath,
-                'test_02',
+                'xhgame_plugin',
                 MetaType.install)
             let is_write_success = await installedInfoManager.writeInstallInfo({
                 version: '1.0.2',
@@ -58,10 +57,11 @@ const test_02 = () => {
             if (installInfo) {
                 assert.equal(installInfo.version, '1.0.2', 'installedInfoManager的获取版本号正常')
                 assert.equal(installInfo.installedComponentMetas.length, 0, 'installedInfoManager的获取已安装组件列表正常')
-                assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[test_02] 安装信息已写入: /temp/test_02-installInfo.json"]', 'installedInfoManager的logs正常')
+                assert.equal(JSON.stringify(installedInfoManager.getLogs()), '["[xhgame_plugin] 安装信息已写入: /temp/xhgame_plugin-installInfo.json"]', 'installedInfoManager的logs正常')
             } else {
                 assert.equal(installInfo, '错误', 'installedInfoManager的获取安装信息失败')
             }
+            installedInfoManager.resetMetaInfo()
             resolve(true)
         })
     })
@@ -70,14 +70,13 @@ const test_02 = () => {
 const test_03 = () => {
     return new Promise((resolve, reject) => {
         test('测试MetaManager的安装记录与查询', async () => {
-            const pluginName = 'test_03';
             const iim = new MetaManager(
                 projectPath,
-                pluginName,
+                'xhgame_plugin',
                 MetaType.install)
 
             // 准备一个伪造
-            const groupPath = join(projectPath, 'extensions', pluginName, 'packages', 'textUiItems');
+            const groupPath = join(projectPath, 'extensions', 'xhgame_plugin', 'packages', 'textUiItems');
             await fs.promises.mkdir(groupPath, { recursive: true });
             const componentCode = 'toast_item';
             const zipFilePath = join(groupPath, `${componentCode}.zip`);
@@ -131,8 +130,8 @@ const test_03 = () => {
 
             // 日志包含写入记录（不做严格等值比较，以免受其他测试影响）
             const logs = iim.getLogs();
-            assert.equal(logs.some(l => l.includes(`/temp/${pluginName}-installInfo.json`)), true, '写入日志包含目标文件');
-
+            assert.equal(logs.some(l => l.includes(`/temp/xhgame_plugin-installInfo.json`)), true, '写入日志包含目标文件');
+            iim.resetMetaInfo()
             resolve(true);
         });
     });

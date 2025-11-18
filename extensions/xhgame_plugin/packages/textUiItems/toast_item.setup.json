@@ -1,0 +1,21 @@
+{
+  "componentCode": "toast_item",
+  "componentName": "吐司提示",
+  "componentVersion": "1.2.3",
+  "cocosVersions": [
+    "3"
+  ],
+  "images": [],
+  "description": "显示一个简单的文本提示",
+  "author": "测试作者",
+  "group": "UI",
+  "tags": [
+    "提示",
+    "文本"
+  ],
+  "dependencies": [],
+  "files": [
+    "bundle_factory/item_views/textUiItems/toast_item/toast_item.prefab"
+  ],
+  "appendScripts": []
+}

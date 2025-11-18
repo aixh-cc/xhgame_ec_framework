@@ -5,7 +5,7 @@ import { join } from 'path';
 import { getProjectPath } from "../../packages/builder/src/Builder/Util";
 
 const projectPath = getProjectPath();
-
+//
 const test_01 = () => {
     return new Promise((resolve, reject) => {
         test('测试读取插件安装信息', async () => {
