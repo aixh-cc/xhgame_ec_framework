@@ -11,7 +11,7 @@ export interface IFactory {
     /** 回收item */
     recycleItem(item: IItem): void
     /** 预加载资源 */
-    preloadItemsResource(): Promise<boolean>
+    preloadItemsResource(itemNos?: string[]): Promise<boolean>
     /** 回收所有item */
     recycleAllItems(): void
     /** 获取item对象池 */
@@ -73,8 +73,8 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         item.reset() // 抹除灵魂记忆
         item.alive = false
     }
-    preloadItemsResource() {
-        return this._itemProduceDrive.preloadItemsResource()
+    preloadItemsResource(itemNos?: string[]) {
+        return this._itemProduceDrive.preloadItemsResource(itemNos)
     }
     private _getNewItemId() {
         return ++this._lastItemId;
