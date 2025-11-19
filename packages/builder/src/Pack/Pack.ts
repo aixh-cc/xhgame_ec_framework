@@ -134,6 +134,7 @@ export class Pack {
                 tags: [],
                 dependencies: [],
                 files: files,
+                appendScripts: []
             };
             setupComponentInfo = defaultInfo;
         }
