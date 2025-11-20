@@ -111,7 +111,7 @@ export class AppendScript {
         try {
             const project = new Project();
             const sourceFile = project.addSourceFileAtPath(sourceFilePath);
-
+            config.compPath = config.compPath.replace('.ts', ''); // 可能用户会不小心加入ts后缀
             let compPath = 'db://assets/' + config.compPath;
             // 1. 添加 import 语句
             sourceFile.addImportDeclaration({
