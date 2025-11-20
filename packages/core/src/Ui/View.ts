@@ -1,6 +1,7 @@
 import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
 import { ViewUtil } from "./ViewUtil";
 
+/** View 抽象接口（观察者） */
 export interface IView extends IObserver {
     setViewComp(modelComp: BaseModelComp, isRebindAttr?: boolean): void
     getViewComp(): BaseModelComp
@@ -10,6 +11,11 @@ export interface IView extends IObserver {
     updateBySubject(modelComp: BaseModelComp): void
 }
 
+/**
+ * 轻量 View 基类
+ * - 支持绑定属性映射与关闭视图
+ * 使用示例：`tests/core/Ui/View.test.ts`
+ */
 export abstract class SimpleBaseView implements IView {
     abstract name: string;
     abstract reset(): void

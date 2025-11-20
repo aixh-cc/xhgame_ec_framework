@@ -17,6 +17,12 @@ function getAllIndices(arr: any[], value: any): any[] {
 }
 // 发布订阅模式
 // 事件管理者
+/**
+ * 事件管理器（发布-订阅）
+ * - 支持按 `name` 绑定/解除，支持按 `tag` 批量清理
+ * - 内部采用并行数组索引结构以提升查找效率
+ * 使用示例：`tests/core/Event/EventManager.test.ts`
+ */
 export class EventManager {
 
     /** _debug模式下可以看到更多的打印数据 */
@@ -35,6 +41,7 @@ export class EventManager {
     private _eventIndex_TagArray: string[] = []
 
     /** 需在on之前使用 */
+    /** 设置 tag（仅对后续 `on` 生效） */
     setTag(tag: string) {
         this._tag = tag
         return this
@@ -77,6 +84,7 @@ export class EventManager {
         this._eventIndex_TagArray.length = this._eventIndex_TagArray.length - 1
     }
 
+    /** 监听事件；在相同 `name+event+context` 时自动去重 */
     on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
         if (this._eventIndex_NameArray.indexOf(name) > -1) {
             let indexs = getAllIndices(this._eventIndex_NameArray, name)
@@ -102,6 +110,7 @@ export class EventManager {
         this._tag = '' // 置空
     }
 
+    /** 取消监听（精确匹配 `name+event+context`） */
     off(name: string, event: Function, context?: unknown) {
         if (this._eventIndex_NameArray.indexOf(name) > -1) {
             let indexs = getAllIndices(this._eventIndex_NameArray, name)
@@ -118,6 +127,7 @@ export class EventManager {
         }
     }
 
+    /** 发送事件（仅投递到同 `context` 的监听） */
     emit(name: string, obj: any = null, context?: unknown) {
         if (this._eventIndex_NameArray.indexOf(name) > -1) {
             let indexs = getAllIndices(this._eventIndex_NameArray, name)
@@ -131,6 +141,11 @@ export class EventManager {
         }
     }
 
+    /**
+     * 清理监听
+     * - `tag=null` 清理全部
+     * - 指定 `tag` 仅清理该标签
+     */
     clearByTag(tag: string | null = null) {
         if (tag == null) {
             this._eventIndex_EventIdArray = []

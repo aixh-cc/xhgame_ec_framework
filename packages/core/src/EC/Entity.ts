@@ -3,6 +3,12 @@ import { Comp } from "./Comp";
 export interface EntityCtor<T> {
     new(): T;
 }
+/**
+ * 实体（ECS）
+ * - 提供实体的创建/移除/查询
+ * - 支持在单实体上挂载/卸载组件，并触发系统初始化回调
+ * 使用示例：`tests/core/EC/EC.test.ts`
+ */
 export class Entity {
     private static _entities: Map<number, Entity> = new Map();
     private static nextEntityId = 0;
@@ -52,6 +58,7 @@ export class Entity {
     }
 
     /** 单实体上挂载组件 */
+    /** 挂载组件（避免重复） */
     attachComponent<T extends Comp>(componentClass: new () => T): T {
         let hasIndex = this._components_class.indexOf(componentClass)
         if (hasIndex > -1) {
@@ -67,25 +74,6 @@ export class Entity {
             return component
         }
     }
-    // /**
-    //  * 单实体上挂载组件
-    //  * @param componentClass 组件类名
-    //  * @returns 组件实例
-    //  */
-    // attachComponentByName<T extends Comp>(componentClass: string): T {
-    //     let component = this.getComponentByName(componentClass) as T
-    //     if (component) {
-    //         console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
-    //         return component;
-    //     } else {
-    //         const component = DI.make(componentClass) as T;
-    //         this._components_class.push(componentClass)
-    //         this._components_names.push(component.compName)
-    //         this._components.push(component)
-    //         this._doAttachComponent(component)
-    //         return component
-    //     }
-    // }
     private _doAttachComponent(component: Comp) {
         component.attach(this).then(async () => {
             if (component.initBySystems.length > 0) {
@@ -99,6 +87,7 @@ export class Entity {
     }
 
     /** 单实体上卸载组件 */
+    /** 卸载组件（按类） */
     detachComponent<T extends Comp>(componentClass: new () => T): void {
         let hasIndex = this._components_class.indexOf(componentClass)
         if (hasIndex > -1) {
@@ -115,6 +104,7 @@ export class Entity {
         Comp.removeComp(component)
     }
     /** 单实体上卸载组件 */
+    /** 卸载组件（按类名） */
     detachComponentByName(className: string): void {
         let hasIndex = this._components_names.indexOf(className)
         if (hasIndex > -1) {
@@ -123,11 +113,13 @@ export class Entity {
             console.error('无className=' + className)
         }
     }
+    /** 获取组件（按类） */
     getComponent<T extends Comp>(componentClass: new () => T): T | undefined {
         let hasIndex = this._components_class.indexOf(componentClass)
         return this.components[hasIndex] as T;
     }
 
+    /** 获取组件（按类名） */
     getComponentByName<T extends Comp>(className: string): T | undefined {
         let hasIndex = this._components_names.indexOf(className)
         return this.components[hasIndex] as T;

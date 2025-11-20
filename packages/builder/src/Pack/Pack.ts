@@ -12,11 +12,22 @@ export interface IPackResult {
     copiedFiles?: string[];
 }
 
+/**
+ * 资源打包工具
+ * - 将项目 `assets/.../<group>/<item>` 复制到 `extensions/<plugin>/packages/<group>/<item>`
+ * - 生成/更新 `<group>/<item>.setup.json` 的 `files` 清单供安装使用
+ * 使用示例：`tests/builder/Pack.test.ts`
+ */
 export class Pack {
     /**
      * 将指定的 assets 路径（例如：assets/bundle_factory/item_views/textUiItems/toast_item）
      * 打包复制到 extensions/pack_demo/packages/<group>/<item>/bundle_factory/item_views/<group>/<item>
      * 并包含同级的 <item>.meta 文件。
+     */
+    /**
+     * 打包指定 `assets` 路径到扩展包目录，并生成 `setup.json`
+     * @param assetItemPath 以 `assets/` 开头的资源目录路径
+     * @param pluginName 目标扩展插件名称
      */
     static async packItem(assetItemPath: string, pluginName: string = 'pack_demo'): Promise<IPackResult> {
         try {

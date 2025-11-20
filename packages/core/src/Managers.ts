@@ -14,6 +14,7 @@ import { TableManager } from "./Table/TableManager"
 import { INode, IUiDrive } from "./Ui/UiDrive"
 import { UiManager } from "./Ui/UiManager"
 
+/** 管理器聚合接口 */
 export interface IManagers {
     // table
     setTableManager(tableManager: TableManager<any>): void

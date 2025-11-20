@@ -2,6 +2,12 @@ import { BaseModelComp } from "../EC/BaseModelComp"
 import { INode, IUiDrive } from "./UiDrive"
 import { IView } from "./View"
 
+/**
+ * UI 管理器
+ * - 提供 UI 根节点访问、打开/移除 UI、状态查询、Toast/Loading 控制
+ * - 依赖具体 UI 驱动实现（`IUiDrive`）
+ * 使用示例：`tests/core/Ui/UiManager.test.ts`
+ */
 export class UiManager<T extends IUiDrive, NT extends INode> {
 
     private _uiDrive: T
@@ -62,6 +68,10 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
     }
 
     /** 打开一个UI */
+    /**
+     * 异步打开 UI
+     * - 避免重复打开：记录 opening/opened 状态
+     */
     async openUIAsync(uiid: string, comp: BaseModelComp): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             if (this.checkOpening(uiid)) {
@@ -82,6 +92,7 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
     }
 
     /** 移除ui */
+    /** 移除已打开的 UI，并更新状态 */
     removeUI(uiid: string) {
         this._uiDrive.removeUI(uiid)
         let _index = this._openedUiids.indexOf(uiid)

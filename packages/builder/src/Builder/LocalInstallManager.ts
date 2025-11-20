@@ -463,6 +463,13 @@ export class LocalInstallManager {
             }
         }
     }
+    /**
+     * 卸载组件
+     * - 在删除文件前生成备份（zip + setup.json）
+     * - 删除安装时复制的文件，清理空目录
+     * - 移除追加脚本并更新安装信息
+     * 测试用例：`tests/builder/BackupManager.test.ts`
+     */
     async uninstallComponent(group: string, componentCode: string): Promise<IUninstallRes> {
         if (!componentCode) {
             return {

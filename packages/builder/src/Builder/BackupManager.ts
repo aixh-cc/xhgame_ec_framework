@@ -7,9 +7,10 @@ import { getProjectPath } from './Util';
 import { MetaManager, MetaType } from './MetaManager';
 
 /**
- * 备份管理：在组件卸载前打包备份，并支持回滚恢复
- * 备份目录：extensions/<pluginName>/backups
- * 产物：<componentCode>.zip、<componentCode>.setup.json
+ * 组件备份与回滚管理
+ * - 备份目录：`extensions/<pluginName>/backups/<projectName>/<group>`
+ * - 产物：`<componentCode>.zip`（顶级目录为组件码）、`<componentCode>.setup.json`
+ * 使用示例：参见 `tests/builder/BackupManager.test.ts`
  */
 export class BackupManager {
     projectPath: string;
@@ -24,12 +25,19 @@ export class BackupManager {
         this.backupDir = join(this.projectPath, 'extensions', pluginName, 'backups', projectName);
     }
 
+    /**
+     * 确保备份分组目录存在
+     * @param group 组件所属分组（如 `uiItems`）
+     */
     private async ensureDir(group: string): Promise<void> {
         await fs.promises.mkdir(join(this.backupDir, group), { recursive: true });
     }
     // isExist(componentCode: string): boolean {
     //     return fs.existsSync(join(this.backupDir, `${componentCode}.zip`));
     // }
+    /**
+     * 列出当前分组下已有的备份组件码集合（根据 `.zip` 文件名）
+     */
     async listBackupCodes(group: string): Promise<Set<string>> {
         await this.ensureDir(group);
         const set = new Set<string>();
@@ -48,6 +56,12 @@ export class BackupManager {
     /**
      * 基于当前安装记录，生成备份包与备份描述文件
      * 在卸载删除文件之前调用
+     */
+    /**
+     * 生成备份包与描述文件
+     * - 打包时在 zip 顶层创建 `<componentCode>/`，解压后仍为同名文件夹
+     * - 仅当有文件时写 `zip`，但总是写 `setup.json`
+     * 使用示例：见 `tests/builder/BackupManager.test.ts`
      */
     async backupInstalledComponent(group: string, componentInfo: IComponentInfoWithStatus): Promise<{ success: boolean; error?: string; zipPath?: string; jsonPath?: string; }> {
         try {
@@ -86,6 +100,12 @@ export class BackupManager {
 
     /**
      * 回滚指定组件：从备份包恢复文件，并恢复追加脚本与安装信息
+     */
+    /**
+     * 回滚指定组件：从备份包恢复文件，并恢复追加脚本与安装信息
+     * - 自动剥离 zip 内顶级前缀 `${componentCode}/`
+     * - 若 zip 不存在，仅恢复追加脚本与安装信息
+     * 使用示例：见 `tests/builder/BackupManager.test.ts`
      */
     async rollback(group: string, componentCode: string): Promise<{ success: boolean; error?: string; }> {
         if (!componentCode) {
@@ -165,6 +185,9 @@ export class BackupManager {
         }
     }
 
+    /**
+     * 检测备份 zip 是否包含以组件码为前缀的顶级目录
+     */
     checkZipHasTopFolder(group: string, componentCode: string): boolean {
         const zipPath = join(this.backupDir, group, `${componentCode}.zip`);
         if (!fs.existsSync(zipPath)) return false;

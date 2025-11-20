@@ -1,6 +1,10 @@
 import { ICrypto } from "./Crypto"
 
-/** 加密管理者 */
+/**
+ * 加密管理器
+ * - 封装具体加密实现（`ICrypto`），统一提供 `md5/encrypt/decrypt`
+ * 使用示例：`tests/core/Crypto/CryptoManager.test.ts`
+ */
 export class CryptoManager<T extends ICrypto> {
 
     _crypto: T

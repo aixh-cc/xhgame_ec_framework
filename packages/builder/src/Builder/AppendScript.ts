@@ -3,17 +3,27 @@ import * as fs from 'fs';
 import { basename, join } from 'path';
 import { getProjectPath } from './Util';
 
+/**
+ * 自动追加/移除脚本片段（基于 ts-morph 修改枚举与类）
+ * - 支持 FactoryType/TableType/UIEnums/AudioEnums 的枚举增删
+ * - 支持向类追加组件引用属性、表类属性、工厂属性等
+ * 使用示例：`tests/builder/AppendScript.test.ts`
+ */
 export class AppendScript {
 
+    /** 向 FactoryType 枚举添加成员（若不存在） */
     static async addFactoryType(factoryType: string) {
         return await this._addBaseType(factoryType, 'FactoryType', 'MyFactoryManager');
     }
+    /** 向 TableType 枚举添加成员（若不存在） */
     static async addTableType(factoryType: string) {
         return await this._addBaseType(factoryType, 'TableType', 'MyTableManager');
     }
+    /** 向 UIEnums 枚举添加成员（若不存在），initializer 为 GUI 路径 */
     static async addGuiType(guiType: string, guiPath: string) {
         return await this._addBaseType(guiType, 'UIEnums', 'MyUiManager', guiPath);
     }
+    /** 向 AudioEnums 枚举添加成员（若不存在），initializer 为音频路径 */
     static async addAudioType(audioType: string, audioPath: string) {
         return await this._addBaseType(audioType, 'AudioEnums', 'MyAudioManager', audioPath);
     }
@@ -52,15 +62,19 @@ export class AppendScript {
         }
     }
 
+    /** 从 FactoryType 枚举移除成员（幂等） */
     static async removeFactoryType(factoryType: string): Promise<{ success: boolean, error?: string }> {
         return await this._removeBaseType(factoryType, 'FactoryType', 'MyFactoryManager');
     }
+    /** 从 TableType 枚举移除成员（幂等） */
     static async removeTableType(tableType: string): Promise<{ success: boolean, error?: string }> {
         return await this._removeBaseType(tableType, 'TableType', 'MyTableManager');
     }
+    /** 从 UIEnums 枚举移除成员（幂等） */
     static async removeGuiType(guiType: string): Promise<{ success: boolean, error?: string }> {
         return await this._removeBaseType(guiType, 'UIEnums', 'MyUiManager');
     }
+    /** 从 AudioEnums 枚举移除成员（幂等） */
     static async removeAudioType(audioType: string): Promise<{ success: boolean, error?: string }> {
         return await this._removeBaseType(audioType, 'AudioEnums', 'MyAudioManager');
     }
@@ -94,6 +108,10 @@ export class AppendScript {
         }
         return { success: true };
     }
+    /**
+     * 向类追加组件引用属性与 import
+     * - config.sourceFilePath 类源文件相对路径（相对于 `assets`）
+     */
     static async addComp(config: {
         sourceFilePath: string;
         compName: string;
@@ -137,6 +155,10 @@ export class AppendScript {
             return { success: false }
         }
     }
+    /**
+     * 向类追加表属性与 import
+     * - `TableType.<type>` 作为属性名，类型为 `TableClass<ItemIName>`
+     */
     static async addTable(config: {
         sourceFilePath: string;
         tableType: string;
@@ -181,6 +203,10 @@ export class AppendScript {
         }
     }
 
+    /**
+     * 向类追加工厂属性与 import，并设置生产驱动
+     * - `FactoryType.<type>` 作为属性名
+     */
     static async addFactory(config: {
         sourceFilePath: string;
         factoryType: string;
@@ -231,6 +257,9 @@ export class AppendScript {
         }
 
     }
+    /**
+     * 从类移除组件引用属性与对应 import（幂等）
+     */
     static async removeComp(
         sourceFilePath: string,
         compName: string
@@ -289,6 +318,9 @@ export class AppendScript {
             return { success: false };
         }
     }
+    /**
+     * 从类移除表属性与相关 import（幂等）
+     */
     static async removeTable(
         sourceFilePath: string,
         factoryType: string
@@ -376,6 +408,9 @@ export class AppendScript {
         }
     }
 
+    /**
+     * 从类移除工厂属性与相关 import（幂等）
+     */
     static async removeFactory(
         sourceFilePath: string,
         factoryType: string

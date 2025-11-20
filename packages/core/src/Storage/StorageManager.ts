@@ -1,3 +1,9 @@
+/**
+ * 本地存储管理
+ * - 可选加密包装：`md5(key)` 与 `encrypt/decrypt(value)`
+ * - 提供基础 `set/get/remove/clear` 与类型化读取
+ * 使用示例：`tests/core/Storage/StorageManager.test.ts`
+ */
 export class StorageManager {
     private _prefix: string
     get prefix() {
@@ -16,6 +22,7 @@ export class StorageManager {
      * @param value 存储值
      * @returns 
      */
+    /** 设置值（对象自动 JSON 序列化，可选加密） */
     set(key: string, value: any) {
         if (null == key) {
             console.error("存储的key不能为空");
@@ -60,6 +67,7 @@ export class StorageManager {
      * @param key 
      * @param value 
      */
+    /** 原始 get（不加密） */
     origin_get(key: string) {
         return this._localStorage.getItem(key)
     }
@@ -68,6 +76,7 @@ export class StorageManager {
      * @param key 
      * @param value 
      */
+    /** 原始 set（不加密） */
     origin_set(key: string, value: string) {
         this._localStorage.setItem(key, value);
     }
@@ -77,6 +86,7 @@ export class StorageManager {
      * @param defaultValue 获取的默认值
      * @returns 
      */
+    /** 获取字符串值（可选解密），不存在返回默认值 */
     get(key: string, defaultValue: any = null): string {
         if (null == key) {
             console.error("存储的key不能为空");
@@ -97,18 +107,21 @@ export class StorageManager {
     }
 
     /** 获取指定关键字的数值 */
+    /** 获取数值 */
     getNumber(key: string, defaultValue: number = 0): number {
         var r = this.get(key);
         return Number(r) || defaultValue;
     }
 
     /** 获取指定关键字的布尔值 */
+    /** 获取布尔值 */
     getBoolean(key: string): boolean {
         var r = this.get(key);
         return r === 'true' || false;
     }
 
     /** 获取指定关键字的JSON对象 */
+    /** 获取 JSON 对象 */
     getJson(key: string, defaultValue?: any): any {
         var r = this.get(key);
         return (r && JSON.parse(r)) || defaultValue;
@@ -119,6 +132,7 @@ export class StorageManager {
      * @param key 需要移除的关键字
      * @returns 
      */
+    /** 删除键 */
     remove(key: string) {
         if (null == key) {
             console.error("存储的key不能为空");
@@ -132,6 +146,7 @@ export class StorageManager {
     }
 
     /** 清空整个本地存储 */
+    /** 清空所有键 */
     clear() {
         this._localStorage.clear();
     }

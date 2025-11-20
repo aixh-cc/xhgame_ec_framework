@@ -7,6 +7,12 @@ export enum MetaType {
     backup = 'backupInfo'
 }
 
+/**
+ * 安装/备份元信息管理
+ * - 存储路径：`temp/<pluginName>-<metaType>.json`
+ * - 记录已安装组件的状态（时间、版本、文件清单、追加脚本等）
+ * 使用示例：`tests/builder/MetaManager.test.ts`
+ */
 export class MetaManager {
     private pluginName: string;
     private metaPath: string;
@@ -21,13 +27,14 @@ export class MetaManager {
     /**
      * 检查安装信息文件是否存在
      */
+    /** 检查元信息文件是否存在 */
     exists(): boolean {
-        console.log('this.metaPath:' + this.metaPath)
         return fs.existsSync(this.metaPath);
     }
     /**
      * 重置安装信息文件
      */
+    /** 重置元信息文件（删除） */
     resetMetaInfo() {
         if (fs.existsSync(this.metaPath)) {
             fs.unlinkSync(this.metaPath);
@@ -36,6 +43,7 @@ export class MetaManager {
     /**
      * 读取安装信息文件
      */
+    /** 读取元信息（不存在时返回默认结构） */
     async readMateInfo(): Promise<ILocalInstalledInfo> {
         const defaultInstallInfo: ILocalInstalledInfo = {
             version: '1.0.0',
@@ -59,6 +67,7 @@ export class MetaManager {
     /**
      * 写入安装信息文件
      */
+    /** 写入安装信息并更新时间戳 */
     async writeInstallInfo(installInfo: ILocalInstalledInfo): Promise<boolean> {
         try {
             installInfo.lastUpdated = new Date().toISOString();
@@ -76,12 +85,14 @@ export class MetaManager {
      * 获取安装信息写入日志
      * @returns 安装信息写入日志数组
      */
+    /** 获取写入日志（用于测试验证输出） */
     getLogs(): string[] {
         return this.logs
     }
     /**
      * 获取已安装组件列表
      */
+    /** 获取已安装组件代码列表 */
     async getInstalledComponentCodes(): Promise<string[]> {
         const installInfo = await this.readMateInfo();
         return installInfo.installedComponentMetas.map(comp => comp.componentCode);
@@ -89,6 +100,7 @@ export class MetaManager {
     /**
      * 检查组件是否已安装
      */
+    /** 判断组件是否已安装 */
     async isComponentInstalled(componentCode: string): Promise<boolean> {
         const installedComponents = await this.getInstalledComponentCodes();
         return installedComponents.indexOf(componentCode) > -1;
@@ -97,6 +109,7 @@ export class MetaManager {
     /**
      * 获取组件的安装信息
      */
+    /** 获取指定组件的安装信息 */
     async getInstalledComponentInfo(componentCode: string): Promise<IComponentInfoWithStatus | null> {
         const installInfo = await this.readMateInfo();
         return installInfo.installedComponentMetas.find(comp => comp.componentCode === componentCode) || null;
@@ -104,8 +117,11 @@ export class MetaManager {
     /**
      * 更新组件安装信息
      */
-    async updateInstalledComponentMetas(componentInfo: IComponentInfo
-    ): Promise<void> {
+    /**
+     * 写入/更新组件安装信息
+     * - 去重后追加，写入时间戳与状态
+     */
+    async updateInstalledComponentMetas(componentInfo: IComponentInfo): Promise<void> {
         try {
             const installInfo = await this.readMateInfo();
             // 更新 installedComponents 列表（去重后追加）
@@ -132,6 +148,7 @@ export class MetaManager {
     /**
      * 移除组件记录
      */
+    /** 从安装信息中移除组件记录 */
     async removeComponentRecord(componentCode: string): Promise<void> {
         try {
             const installInfo = await this.readMateInfo();
