@@ -56,7 +56,7 @@ const test_02 = () => {
             if (installInfo) {
                 assert.equal(installInfo.version, '1.0.2', 'metaManager的获取版本号正常')
                 assert.equal(installInfo.installedComponentMetas.length, 0, 'metaManager的获取已安装组件列表正常')
-                assert.equal(JSON.stringify(metaManager.getLogs()), '["[xhgame_plugin] 安装信息已写入: /temp/xhgame_plugin-installInfo.json"]', 'metaManager的logs正常')
+                assert.equal(JSON.stringify(metaManager.getLogs()), '["[xhgame_plugin] 安装信息已写入: /xhgame_plugin-installInfo.json"]', 'metaManager的logs正常')
             } else {
                 assert.equal(installInfo, '错误', 'metaManager的获取安装信息失败')
             }
@@ -129,7 +129,7 @@ const test_03 = () => {
 
             // 日志包含写入记录（不做严格等值比较，以免受其他测试影响）
             const logs = iim.getLogs();
-            assert.equal(logs.some(l => l.includes(`/temp/xhgame_plugin-installInfo.json`)), true, '写入日志包含目标文件');
+            assert.equal(logs.some(l => l.includes(`/xhgame_plugin-installInfo.json`)), true, '写入日志包含目标文件');
             iim.resetMetaInfo()
             resolve(true);
         });
