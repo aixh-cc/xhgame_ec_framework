@@ -422,6 +422,14 @@ export class LocalInstallManager {
                             console.warn(`[xhgame_builder] 新增audioType失败: ${element.audioName}`)
                         }
                     }
+                    if (element.type === 'enum') {
+                        let res_add_type = await AppendScript.addEnum(element.className, element.enumName, element.enumKey, element.enumValue, element.sourceFilePath)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 新增${element.enumName}成功: ${element.enumKey}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 新增${element.enumName}失败: ${element.enumKey}`)
+                        }
+                    }
                 }
             }
             // 记录安装信息到配置文件 copiedFiles等到xxx-installInfo.json中
@@ -582,6 +590,14 @@ export class LocalInstallManager {
                             console.log(`[xhgame_builder] 移除audioType成功: ${element.audioName}`)
                         } else {
                             console.warn(`[xhgame_builder] 移除audioType失败: ${element.audioName}`)
+                        }
+                    }
+                    if (element.type === 'enum') {
+                        let res_add_type = await AppendScript.removeEnum(element.className, element.enumName, element.enumKey, element.sourceFilePath)
+                        if (res_add_type.success) {
+                            console.log(`[xhgame_builder] 移除${element.enumName}成功: ${element.enumKey}`)
+                        } else {
+                            console.warn(`[xhgame_builder] 移除${element.enumName}失败: ${element.enumKey}`)
                         }
                     }
                 }
