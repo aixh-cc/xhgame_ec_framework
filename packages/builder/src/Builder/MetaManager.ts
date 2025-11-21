@@ -22,7 +22,7 @@ export class MetaManager {
     constructor(projectPath: string, pluginName: string, metaType: MetaType) {
         this.projectPath = projectPath;//getProjectPath();
         this.pluginName = pluginName;
-        this.metaPath = join(projectPath, 'temp', pluginName + '-' + metaType + '.json');
+        this.metaPath = join(projectPath, pluginName + '-' + metaType + '.json'); // 放到项目下面，需进入版本控制
     }
     /**
      * 检查安装信息文件是否存在

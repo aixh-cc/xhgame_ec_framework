@@ -147,6 +147,10 @@ export interface IFileDependency {
 export interface IComponentCodeDependency {
     /** 依赖的组件代码（同插件内） */
     componentCode: string;
+    /** 依赖的组件分组（同插件内） */
+    group: string
+    /** 当前安装状态(可选) */
+    isInstalled?: boolean
 }
 /**
  * 组件信息 With 安装状态

@@ -11,18 +11,6 @@ import { AppendScript } from './AppendScript';
  */
 export class LocalInstallManager {
 
-    // static managerMap: Map<string, MetaManager> = new Map();
-
-    // static getMetaManager(projectPath: string, pluginName: string, metaType: MetaType): MetaManager {
-    //     if (!LocalInstallManager.managerMap.has(pluginName)) {
-    //         LocalInstallManager.managerMap.set(pluginName, new MetaManager(projectPath, pluginName, metaType));
-    //     }
-    //     return LocalInstallManager.managerMap.get(pluginName)!;
-    // }
-
-    // installMetaManager: MetaManager
-    // backMetaManager: MetaManager
-    // metaManagerMap: Map<MetaType, MetaManager> = new Map()
     projectPath: string
     pluginName: string
     metaManager: MetaManager
@@ -30,8 +18,6 @@ export class LocalInstallManager {
         this.projectPath = getProjectPath()
         this.pluginName = pluginName
         this.metaManager = new MetaManager(this.projectPath, pluginName, MetaType.install)
-        // this.metaManagerMap.set(MetaType.install, new MetaManager(projectPath, pluginName, MetaType.install))
-        // this.metaManagerMap.set(MetaType.backup, new MetaManager(projectPath, pluginName, MetaType.backup))
     }
 
     getMetaManager() {
@@ -106,6 +92,17 @@ export class LocalInstallManager {
                         };
                         if (info.isInstalled && json.componentVersion != installMeta?.installedComponentMetas?.find((item: IComponentInfoWithStatus) => item.componentCode === json.componentCode)?.componentVersion) {
                             info.isUpdatable = true; // 版本对比，是否可更新(当前为最简单的版本不一致作为判断)
+                        }
+                        // 插件依赖的组件的安装情况
+                        for (const dep of info.dependencies) {
+                            // 如果dep的数据结构和IComponentCodeDependency的数据类型相似
+                            if (typeof dep === 'object' && dep !== null && 'componentCode' in dep && 'group' in dep) {
+                                if (installedLists.indexOf(dep.componentCode) > -1) {
+                                    dep.isInstalled = true;
+                                } else {
+                                    dep.isInstalled = false;
+                                }
+                            }
                         }
                         list.push(info);
                     }
