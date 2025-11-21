@@ -291,12 +291,72 @@ const test_04 = () => {
         })
     })
 }
+const test_05 = () => {
+    return new Promise((resolve, reject) => {
+        test('测试添加audioItemComponentInfo', async () => {
+            let audioItemComponentInfo: IComponentInfo = {
+                componentCode: 'gate_group_mission',
+                componentName: 'gate_group_mission',
+                componentVersion: '1.0.0',
+                cocosVersions: ['3'],
+                images: [],
+                description: '网关组任务模板',
+                author: 'hd',
+                group: 'Audio',
+                tags: ['Audio'],
+                dependencies: ['script/RegisterComps.ts'],
+                files: [],
+                stars: 4,
+                appendScripts: [
+                    {
+                        type: 'enum',
+                        sourceFilePath: 'script/managers/MyEventManager.ts',
+                        className: 'MyEventManager',
+                        enumName: 'EventEnums',
+                        enumKey: 'bgm5',
+                        enumValue: 'bgm5_value'
+                    }
+                ]
+            }
+            if (audioItemComponentInfo.appendScripts && audioItemComponentInfo.appendScripts?.length > 0) {
+                for (let i = 0; i < audioItemComponentInfo.appendScripts.length; i++) {
+                    const element = audioItemComponentInfo.appendScripts[i];
+                    if (element.type === 'enum') {
+                        let res_add_type = await AppendScript.addEnum(element.className, element.enumName, element.enumKey, element.enumValue, element.sourceFilePath)
+                        assert.equal(res_add_type.success, true, '新增' + element.enumName + '成功')
+                    }
+                }
+            }
+
+            // 移除
+            setTimeout(async () => {
+                if (audioItemComponentInfo.appendScripts && audioItemComponentInfo.appendScripts?.length > 0) {
+                    for (let i = 0; i < audioItemComponentInfo.appendScripts.length; i++) {
+                        const element = audioItemComponentInfo.appendScripts[i];
+                        if (element.type == 'enum') {
+                            let res_add_type = await AppendScript.removeEnum(
+                                element.className,
+                                element.enumName,
+                                element.enumKey,
+                                element.sourceFilePath
+                            )
+                            assert.equal(res_add_type.success, true, '移除' + element.enumName + '成功')
+                        }
+                    }
+                }
+                resolve(true)
+            }, 1000)
+
+        })
+    })
+}
 let functions = [
     test_00,
     test_01,
     test_02,
     test_03,
-    test_04
+    test_04,
+    test_05
 ]
 
 describe('AppendScript功能', async () => {

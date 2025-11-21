@@ -91,7 +91,7 @@ export interface IComponentInfo {
     /** 追加脚本 */
     appendScripts: IAppendScripts;
 }
-export interface IAppendScripts extends Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp | IAppendAudio> {
+export interface IAppendScripts extends Array<IAppendFactory | IAppendTable | IAppendGui | IAppendComp | IAppendAudio | IAppendEnum> {
 
 }
 
@@ -128,6 +128,14 @@ export interface IAppendAudio {
     sourceFilePath: string,
     audioName: string,
     audioPath: string
+}
+export interface IAppendEnum {
+    type: 'enum',
+    sourceFilePath: string,
+    className: string,
+    enumName: string,
+    enumKey: string,
+    enumValue: string
 }
 
 /** 项目文件依赖描述(todo未完成) */

@@ -27,9 +27,18 @@ export class AppendScript {
     static async addAudioType(audioType: string, audioPath: string) {
         return await this._addBaseType(audioType, 'AudioEnums', 'MyAudioManager', audioPath);
     }
-    private static async _addBaseType(type: string, typeKey: string, managerName: string, initializer?: string) {
-        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
 
+    /** 通用的添加enum的方法(以上的) */
+    static async addEnum(className: string, enumName: string, enumKey: string, enumValue: string, sourceFilePath: string) {
+        return await this._addBaseType(enumKey, enumName, className, enumValue, sourceFilePath);
+    }
+
+    private static async _addBaseType(enumKey: string, enumName: string, className: string, enumValue?: string, sourceFilePath?: string) {
+        if (!sourceFilePath) {
+            sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', className + '.ts');
+        } else {
+            sourceFilePath = join(getProjectPath(), 'assets', sourceFilePath)
+        }
         // 检测sourceFilePath是否存在
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
@@ -41,24 +50,24 @@ export class AppendScript {
             const project = new Project();
             const sourceFile = project.addSourceFileAtPath(sourceFilePath);
 
-            const enumDecl = sourceFile.getEnum(typeKey);
+            const enumDecl = sourceFile.getEnum(enumName);
             if (!enumDecl) {
-                return { success: false, error: typeKey + ' 枚举未找到' };
+                return { success: false, error: enumName + ' 枚举未找到' };
             }
 
-            const alreadyExists = enumDecl.getMembers().some(m => m.getName() === type);
+            const alreadyExists = enumDecl.getMembers().some(m => m.getName() === enumKey);
             if (!alreadyExists) {
-                if (initializer) {
-                    enumDecl.addMember({ name: type, initializer: `'${initializer}'` });
+                if (enumValue) {
+                    enumDecl.addMember({ name: enumKey, initializer: `'${enumValue}'` });
                 } else {
-                    enumDecl.addMember({ name: type, initializer: `'${type}'` });
+                    enumDecl.addMember({ name: enumKey, initializer: `'${enumKey}'` });
                 }
             }
 
             await sourceFile.save();
             return { success: true };
         } catch (err) {
-            return { success: false, error: '添加 ' + typeKey + ' 失败: ' + (err as Error)?.message };
+            return { success: false, error: '添加 ' + enumName + ' 失败: ' + (err as Error)?.message };
         }
     }
 
@@ -78,8 +87,17 @@ export class AppendScript {
     static async removeAudioType(audioType: string): Promise<{ success: boolean, error?: string }> {
         return await this._removeBaseType(audioType, 'AudioEnums', 'MyAudioManager');
     }
-    private static async _removeBaseType(type: string, typeKey: string, managerName: string): Promise<{ success: boolean, error?: string }> {
-        const sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', managerName + '.ts');
+    /** 通用的移除enum的方法(以上的) */
+    static async removeEnum(className: string, enumName: string, enumKey: string, sourceFilePath: string) {
+        return await this._removeBaseType(enumKey, enumName, className, sourceFilePath);
+    }
+
+    private static async _removeBaseType(enumKey: string, enumName: string, className: string, sourceFilePath?: string): Promise<{ success: boolean, error?: string }> {
+        if (!sourceFilePath) {
+            sourceFilePath = join(getProjectPath(), 'assets', 'script', 'managers', className + '.ts');
+        } else {
+            sourceFilePath = join(getProjectPath(), 'assets', sourceFilePath)
+        }
         let processed = false;
         try {
             await fs.promises.access(sourceFilePath, fs.constants.F_OK);
@@ -89,8 +107,8 @@ export class AppendScript {
         try {
             const project = new Project();
             const sourceFile = project.addSourceFileAtPath(sourceFilePath);
-            const enumDecl = sourceFile.getEnum(typeKey);
-            const member = enumDecl.getMember(type) || enumDecl.getMembers().find(m => m.getName() === type);
+            const enumDecl = sourceFile.getEnum(enumName);
+            const member = enumDecl.getMember(enumKey) || enumDecl.getMembers().find(m => m.getName() === enumKey);
             if (member) {
                 member.remove();
                 await sourceFile.save();
@@ -100,11 +118,11 @@ export class AppendScript {
                 processed = true;
             }
         } catch (err) {
-            return { success: false, error: '移除 ' + typeKey + ' 失败: ' + (err as Error)?.message };
+            return { success: false, error: '移除 ' + enumName + ' 失败: ' + (err as Error)?.message };
         }
 
         if (!processed) {
-            return { success: false, error: '未找到包含 ' + typeKey + ' 的目标文件' };
+            return { success: false, error: '未找到包含 ' + enumName + ' 的目标文件' };
         }
         return { success: true };
     }
