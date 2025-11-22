@@ -1,7 +1,7 @@
 {
   "name": "@aixh-cc/xhgame_builder",
-  "version": "1.1.5",
-  "description": "xhgame的资源管理简易构建工具",
+  "version": "1.2.0",
+  "description": "xhgame的资源管理构建工具",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
