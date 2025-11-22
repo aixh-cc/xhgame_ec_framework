@@ -9,7 +9,7 @@ export enum MetaType {
 
 /**
  * 安装/备份元信息管理
- * - 存储路径：`temp/<pluginName>-<metaType>.json`
+ * - 存储路径：`<pluginName>-<metaType>.json`
  * - 记录已安装组件的状态（时间、版本、文件清单、追加脚本等）
  * 使用示例：`tests/builder/MetaManager.test.ts`
  */
