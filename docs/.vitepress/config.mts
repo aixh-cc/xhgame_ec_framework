@@ -24,6 +24,8 @@ export default defineConfig({
         items: [
           { text: '组件挂载/卸载的过程', link: '/ec/comp_attach' },
           { text: '一个完整组件的构成', link: '/ec/comp_demo' },
+          { text: '组件分类职责', link: '/ec/comp_cate' },
+          { text: '组件的引用与注册', link: '/ec/comp_reg' },
         ]
       },
       {

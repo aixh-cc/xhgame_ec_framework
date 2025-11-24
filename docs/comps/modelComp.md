@@ -1,3 +1,7 @@
+---
+outline: deep
+---
+
 # modelComp组件
 
 ## 主要职责
@@ -10,14 +14,6 @@
 ### 1、modelComp存储非临时数据
 
 这里以玩家数据为例子，
-
-主要存储了
-1、账号信息`accountInfo`
-2、玩家后端信息`IPlayer`
-3、及玩家当前的选择信息 `selectedBattleId`
-
-已经2个对外的方法：postGetAccount，postPlayerEnter
-
 
 ```ts
 export class PlayerModelComp extends BaseModelComp {
@@ -46,6 +42,16 @@ export class PlayerModelComp extends BaseModelComp {
     }
 }
 ```
+
+主要存储了:
+
+- 1、账号信息`accountInfo`
+- 2、玩家后端信息`IPlayer`
+- 3、及玩家当前的选择信息 `selectedBattleId`
+
+已经2个对外的方法：postGetAccount，postPlayerEnter
+
+
 
 
 ### 2、modelSystem负责与后端接口交互
@@ -107,3 +113,9 @@ export class PlayerModelSystem extends System {
 
 }
 ```
+
+主要处理了:
+
+- 1、检测是否需要向后方发起请求
+- 2、接口请求获取数据
+- 3、将获取的数据加工处理保存

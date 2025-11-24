@@ -1,9 +1,12 @@
+---
+outline: deep
+---
+
 # sceneComp组件
 
 ## 主要职责
 
- - 1、sceneComp处理挂载前、挂载后的数据事务
- - 2、senceSystem处理挂载后的资源调度
+ - 负责特定场景的调度与管理
 
 ## 具体说明
 
@@ -39,8 +42,7 @@ export class BattleSenceComp extends BaseModelComp {
 }
 ```
 
-### 2、senceSystem处理挂载后的资源调度
-主要处理挂载后的具体调用其他组件的顺序
+### 2、senceSystem主要是方法实现
 
 ```ts
 export class BattleSenceSystem extends System {
