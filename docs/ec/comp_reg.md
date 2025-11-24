@@ -18,7 +18,7 @@ import { LoadResourceToGateComp } from "db://assets/script/comps/enter/LoadResou
 await xhgame.gameEntity.attachComponent(LoadResourceToGateComp).done()
 ```
 
-## 2、注册引用模式（组件名必须在RegisterComps注册，不存在触发时提示错误）
+## 2、注册引用模式（组件名必须在RegisterComps注册，运行时不存在触发时提示错误）
 适用场景，去耦合场景（如希望通过在线组件系统，一键安装\替换的）
 ```ts
 // 无头部引用

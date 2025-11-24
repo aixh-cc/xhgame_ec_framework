@@ -2,8 +2,8 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "My Awesome Project",
-  description: "A VitePress Site",
+  title: "xhgame开发文档",
+  description: "",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
@@ -34,8 +34,8 @@ export default defineConfig({
           { text: 'ModelComp(数据组件)', link: '/comps/modelComp' },
           { text: 'sceneComp(场景组件)', link: '/comps/sceneComp' },
           { text: 'ViewComp(Ui组件)', link: '/comps/viewComp' },
-          { text: 'GameboxComp(玩法组件)', link: '/comps/gameBoxComp' },
-          { text: 'Comp(其他组件)', link: '/comps/otherComp' },
+          // { text: 'GameboxComp(玩法组件)', link: '/comps/gameBoxComp' },
+          // { text: 'Comp(其他组件)', link: '/comps/otherComp' },
         ]
       }
     ],
