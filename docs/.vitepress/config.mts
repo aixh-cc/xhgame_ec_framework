@@ -12,16 +12,28 @@ export default defineConfig({
     ],
 
     sidebar: [
-      { text: '架构初衷', link: '/readme' },
-      { text: '架构说明', link: '/mindmap' },
       {
-        text: '组件开发',
+        text: '1、说明',
         items: [
-          { text: 'ModelComp(数据组件)', link: '/modelComp' },
-          { text: 'sceneComp(场景组件)', link: '/sceneComp' },
-          { text: 'ViewComp(Ui组件)', link: '/viewComp' },
-          { text: 'GameboxComp(玩法组件)', link: '/gameBoxComp' },
-          { text: 'Comp(其他组件)', link: '/otherComp' },
+          { text: '初衷', link: '/readme' },
+          { text: '架构说明', link: '/mindmap' }
+        ]
+      },
+      {
+        text: '2、EC',
+        items: [
+          { text: '组件挂载/卸载的过程', link: '/ec/comp_attach' },
+          { text: '一个完整组件的构成', link: '/ec/comp_demo' },
+        ]
+      },
+      {
+        text: '3、组件开发',
+        items: [
+          { text: 'ModelComp(数据组件)', link: '/comps/modelComp' },
+          { text: 'sceneComp(场景组件)', link: '/comps/sceneComp' },
+          { text: 'ViewComp(Ui组件)', link: '/comps/viewComp' },
+          { text: 'GameboxComp(玩法组件)', link: '/comps/gameBoxComp' },
+          { text: 'Comp(其他组件)', link: '/comps/otherComp' },
         ]
       }
     ],
