@@ -44,3 +44,5 @@ export * from './Asset/AssetManager';
 export { IManagers } from './Managers';
 // DI
 export * from './DI/DI';
+// Log
+export * from './Log/Index';
