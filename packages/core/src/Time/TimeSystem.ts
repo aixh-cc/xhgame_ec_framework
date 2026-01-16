@@ -76,7 +76,7 @@ export class TimeSystem {
             this._delayTimers.sort((a, b) => a.lastTime - b.lastTime);
         })
     }
-    /** 循环调度 */
+    /** 循环调度(毫秒) */
     schedule(callback: Function, interval: number) {
         let uuid = `schedule_${this._scheduleCount++}`
         let lastTime = this._pass_time + interval
@@ -84,7 +84,7 @@ export class TimeSystem {
         this._loopTimers.push(timer)
         return uuid;
     }
-    /** 一次性调度 */
+    /** 一次性调度(毫秒) */
     scheduleOnce(callback: Function, delay: number = 0) {
         let uuid = `scheduleOnce_${this._scheduleCount++}`;
         let lastTime = this._pass_time + delay
