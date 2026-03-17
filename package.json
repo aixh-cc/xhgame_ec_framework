@@ -4,14 +4,14 @@
     "test": "bun ./tests/run.test.mjs"
   },
   "dependencies": {
-    "inversify": "^7.10.2",
+    "inversify": "^7.11.0",
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
     "crypto-js": "^4.2.0",
     "node-localstorage": "^3.0.5",
-    "poku": "^3.0.1",
+    "poku": "^3.0.2",
     "typescript": "^5.9.3"
   }
 }

@@ -37,6 +37,14 @@ export default defineConfig({
           // { text: 'GameboxComp(玩法组件)', link: '/comps/gameBoxComp' },
           // { text: 'Comp(其他组件)', link: '/comps/otherComp' },
         ]
+      },
+      {
+        text: '4、开发工具',
+        items: [
+          { text: 'UI 组件生成工具', link: '/tools/README' },
+          { text: '使用指南', link: '/tools/USAGE' },
+          { text: '完整工作流', link: '/tools/WORKFLOW' },
+        ]
       }
     ],
     socialLinks: [
