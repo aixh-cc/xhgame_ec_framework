@@ -159,8 +159,6 @@ node generator.js test-spec.json /path/to/project
 
 - [USAGE.md](./USAGE.md) - 使用指南
 - [WORKFLOW.md](./WORKFLOW.md) - 完整工作流示例
-- [TODO.md](./TODO.md) - 开发任务清单
-- [TOOLS.md](./TOOLS.md) - 项目信息
 
 ## 👥 团队
 

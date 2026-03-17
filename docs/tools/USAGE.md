@@ -332,7 +332,6 @@ A: 使用 `expand` 字段展开子属性（参考 CocosComponentView 的 SKILL.m
 
 - 查看 [WORKFLOW.md](./WORKFLOW.md) 了解完整工作流
 - 查看各 Skill 的 `SKILL.md` 了解详细配置
-- 查看 [TODO.md](./TODO.md) 了解开发计划
 
 ---
 
