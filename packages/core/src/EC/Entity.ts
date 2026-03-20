@@ -21,7 +21,7 @@ export type CompInstances<T> = {
  * 
  * @typeParam TRegistry 组件注册表类型，业务层传入
  */
-export class Entity<TRegistry extends object = Record<string, new () => Comp>> {
+export class Entity<TRegistry extends Record<string, new () => Comp> = Record<string, new () => Comp>> {
     private static _entities: Map<number, Entity> = new Map();
     private static nextEntityId = 0;
     // 添加一个公共的 getter 方法来获取 entities
@@ -98,7 +98,7 @@ export class Entity<TRegistry extends object = Record<string, new () => Comp>> {
         }
     }
     private _doAttachComponent(component: Comp) {
-        component.attach(this as any).then(async () => {
+        component.attach(this).then(async () => {
             if (component.initBySystems.length > 0) {
                 for (let i = 0; i < component.initBySystems.length; i++) {
                     const sys = component.initBySystems[i]
