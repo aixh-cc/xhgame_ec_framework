@@ -1,14 +1,14 @@
 import { Entity } from "../EC/Entity"
 import { INode } from "../Ui/UiDrive"
 
-export interface IGame {
+export interface IGame<TEntity extends Entity = Entity> {
     name: string
     node: INode
     meta: IGameMeta
     init(): Promise<void>
     play(): void
-    setGameEntity(gameEntity: Entity): void
-    getGameEntity(): Entity
+    setGameEntity(gameEntity: TEntity): void
+    getGameEntity(): TEntity
 }
 export interface IGameMeta {
     server_no: string
