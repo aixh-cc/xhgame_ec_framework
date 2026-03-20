@@ -70,6 +70,12 @@ export class Entity {
             if (setupArgs.length > 0) {
                 component.setup(...setupArgs)
             }
+            // 检查组件依赖
+            for (const req of component.requires) {
+                if (!this._components_names.includes(req)) {
+                    console.warn(`[EC] ${component.compName} 依赖 ${req}，但当前实体未挂载`)
+                }
+            }
             this._components_class.push(componentClass)
             this._components_names.push(component.compName)
             this._components.push(component)

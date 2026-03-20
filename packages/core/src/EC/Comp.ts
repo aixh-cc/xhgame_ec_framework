@@ -96,6 +96,8 @@ export abstract class Comp {
     detach() {
         this.entity!.detachComponentByName(this.compName)
     }
+    /** 依赖的组件名列表（可选），attach 时自动检查 */
+    get requires(): string[] { return [] }
     /**
      * 挂载时被以下系统初始化
      */
