@@ -2,6 +2,7 @@
 export * from './Time/TimeSystem';
 // EC
 export * from './EC/BaseModelComp';
+export * from './EC/BaseGameBoxComp';
 export * from './EC/Comp';
 export * from './EC/Entity';
 export * from './EC/System';
