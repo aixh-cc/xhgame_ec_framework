@@ -3,13 +3,25 @@ import { Comp } from "./Comp";
 export interface EntityCtor<T> {
     new(): T;
 }
+
+/**
+ * 注册表实例类型映射工具类型
+ * 将 { name: new () => CompA } 映射为 { name: CompA }
+ */
+export type CompInstances<T> = {
+    [K in keyof T]: T[K] extends new () => infer R ? R : never;
+};
+
 /**
  * 实体（ECS）
  * - 提供实体的创建/移除/查询
  * - 支持在单实体上挂载/卸载组件，并触发系统初始化回调
+ * - 支持泛型注册表，提供按名称操作组件的类型安全方法
  * 使用示例：`tests/core/EC/EC.test.ts`
+ * 
+ * @typeParam TRegistry 组件注册表类型，业务层传入
  */
-export class Entity {
+export class Entity<TRegistry extends Record<string, new () => Comp> = Record<string, new () => Comp>> {
     private static _entities: Map<number, Entity> = new Map();
     private static nextEntityId = 0;
     // 添加一个公共的 getter 方法来获取 entities
@@ -25,7 +37,6 @@ export class Entity {
     }
 
     static removeEntity(entity: Entity): void {
-        // console.log('卸载实体', entity)
         for (let component of entity.components.values()) {
             Comp.removeComp(component)
         }
@@ -49,6 +60,9 @@ export class Entity {
     private _components_class: any[] = [];
     /** 实体id */
     public readonly id: number;
+
+    /** 组件注册表（业务层赋值） */
+    registerComps: TRegistry = {} as TRegistry;
 
     constructor() {
         this.id = Entity.generateEntityId();
@@ -95,14 +109,44 @@ export class Entity {
         })
     }
 
-    /** 单实体上卸载组件 */
+    /** 按注册名挂载组件（类型安全） */
+    attachComponentByRegisterName<K extends keyof TRegistry & string>(compName: K): CompInstances<TRegistry>[K] {
+        let componentClass = this.registerComps[compName];
+        if (!componentClass) {
+            throw new Error(`compName ${compName} 未在注册表中找到`);
+        }
+        return this.attachComponent(componentClass as any) as CompInstances<TRegistry>[K];
+    }
+
+    /** 按注册名卸载组件 */
+    detachComponentByRegisterName<K extends keyof TRegistry & string>(compName: K): void {
+        let componentClass = this.registerComps[compName];
+        if (!componentClass) {
+            throw new Error(`compName ${compName} 未在注册表中找到`);
+        }
+        this.detachComponent(componentClass as any);
+    }
+
+    /** 按注册名获取组件（可能为 undefined） */
+    getComponentByRegisterName<K extends keyof TRegistry & string>(compName: K): CompInstances<TRegistry>[K] | undefined {
+        let component = this.getComponentByName(compName);
+        return component as CompInstances<TRegistry>[K] | undefined;
+    }
+
+    /** 按注册名安全获取组件（不存在则自动挂载） */
+    safeGetComponentByRegisterName<K extends keyof TRegistry & string>(compName: K): CompInstances<TRegistry>[K] {
+        let component = this.getComponentByName(compName);
+        if (component) {
+            return component as CompInstances<TRegistry>[K];
+        }
+        return this.attachComponentByRegisterName(compName);
+    }
+
     /** 卸载组件（按类） */
     detachComponent<T extends Comp>(componentClass: new () => T): void {
         let hasIndex = this._components_class.indexOf(componentClass)
         if (hasIndex > -1) {
             this._removeComponentByIndex(hasIndex)
-        } else {
-            // console.error('无componentClass')
         }
     }
     private _removeComponentByIndex(index: number) {
@@ -112,7 +156,6 @@ export class Entity {
         this._components.splice(index, 1);
         Comp.removeComp(component)
     }
-    /** 单实体上卸载组件 */
     /** 卸载组件（按类名） */
     detachComponentByName(className: string): void {
         let hasIndex = this._components_names.indexOf(className)
@@ -133,5 +176,4 @@ export class Entity {
         let hasIndex = this._components_names.indexOf(className)
         return this.components[hasIndex] as T;
     }
-
 }
