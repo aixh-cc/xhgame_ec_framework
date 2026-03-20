@@ -58,8 +58,8 @@ export class Entity {
     }
 
     /** 单实体上挂载组件 */
-    /** 挂载组件（避免重复） */
-    attachComponent<T extends Comp>(componentClass: new () => T): T {
+    /** 挂载组件（避免重复），可选传入 setupData 自动调用 setup */
+    attachComponent<T extends Comp>(componentClass: new () => T, ...setupArgs: any[]): T {
         let hasIndex = this._components_class.indexOf(componentClass)
         if (hasIndex > -1) {
             const component = this.components[hasIndex] as T;
@@ -67,6 +67,15 @@ export class Entity {
             return component;
         } else {
             const component = Comp.createComp(componentClass);
+            if (setupArgs.length > 0) {
+                component.setup(...setupArgs)
+            }
+            // 检查组件依赖
+            for (const req of component.requires) {
+                if (!this._components_names.includes(req)) {
+                    console.warn(`[EC] ${component.compName} 依赖 ${req}，但当前实体未挂载`)
+                }
+            }
             this._components_class.push(componentClass)
             this._components_names.push(component.compName)
             this._components.push(component)
@@ -78,7 +87,7 @@ export class Entity {
         component.attach(this).then(async () => {
             if (component.initBySystems.length > 0) {
                 for (let i = 0; i < component.initBySystems.length; i++) {
-                    const sys = component.initBySystems[i] as any
+                    const sys = component.initBySystems[i]
                     await sys.initComp(component)
                 }
             }

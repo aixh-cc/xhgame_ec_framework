@@ -1,5 +1,6 @@
 import { Entity } from "./Entity";
-import { System } from "./System";
+import { ISystemCtor } from "./System";
+import { TimeSystem } from "../Time/TimeSystem";
 /**
  * 组件
  */
@@ -28,6 +29,11 @@ export abstract class Comp {
     }
 
     static removeComp(comp: Comp) {
+        // 如果有 onUpdate，先从 TimeSystem 移除
+        if (comp._updateBridge) {
+            TimeSystem.getInstance().removeSystemFromTimeUpdate(comp._updateBridge)
+            comp._updateBridge = null
+        }
         comp.onDetach();
         comp.entity = null
         comp.reset();
@@ -74,12 +80,19 @@ export abstract class Comp {
      */
     abstract onAttach(): void
     protected bindToDI(): void { }
+    /** TimeSystem 更新桥接对象，用于自动注册/移除 */
+    _updateBridge: { update: (dt: number) => void } | null = null
     attach(entity: Entity): Promise<boolean> {
         return new Promise((resolve, reject) => {
             this.entity = entity
             setTimeout(() => {
                 this.bindToDI && this.bindToDI()
                 this.onAttach && this.onAttach()
+                // 如果子类覆盖了 onUpdate，自动注册到 TimeSystem
+                if (this.onUpdate !== Comp.prototype.onUpdate) {
+                    this._updateBridge = { update: (dt: number) => this.onUpdate(dt) }
+                    TimeSystem.getInstance().addSystemToTimeUpdate(this._updateBridge)
+                }
                 resolve(true)
             }, 0)
         })
@@ -89,26 +102,33 @@ export abstract class Comp {
     /** 重置 */
     abstract reset(): void
     /** 准备 */
-    setup(...obj: any): Comp {
+    setup(...obj: any): this {
         return this
     }
     /** 组件自己卸载自己 */
     detach() {
         this.entity!.detachComponentByName(this.compName)
     }
+    /** 依赖的组件名列表（可选），attach 时自动检查 */
+    get requires(): string[] { return [] }
+    /**
+     * 每帧更新钩子（可选），子类覆盖后自动注册到 TimeSystem
+     * @param dt 帧间隔时间（毫秒）
+     */
+    onUpdate(dt: number): void { }
     /**
      * 挂载时被以下系统初始化
      */
-    abstract initBySystems: (typeof System)[]
+    abstract initBySystems: ISystemCtor[]
     /**
      * 初始化完成后的回调通知
      */
-    initedCallback: (comp: Comp) => void = null
+    initedCallback: (comp: this) => void = null
     /**
      * 初始化等待异步操作完成指令函数
      * @returns 
      */
-    async done(): Promise<Comp> {
+    async done(): Promise<this> {
         return new Promise((resolve) => {
             this.initedCallback = resolve;
         });
