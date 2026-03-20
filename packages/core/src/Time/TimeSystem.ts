@@ -66,6 +66,15 @@ export class TimeSystem {
         return this
     }
 
+    /** 移除参与时间更新的系统 */
+    removeSystemFromTimeUpdate(system: IUpdate) {
+        const index = this._needTimeUpdateSystems.indexOf(system)
+        if (index > -1) {
+            this._needTimeUpdateSystems.splice(index, 1)
+        }
+        return this
+    }
+
     /** 等待（基于时间系统的 Promise），单位毫秒 */
     waitTimeSystemXms(ms: number = 0): Promise<void> {
         return new Promise<void>((resolve, reject) => {
