@@ -1,5 +1,5 @@
 import { Entity } from "./Entity";
-import { System } from "./System";
+import { ISystemCtor } from "./System";
 /**
  * 组件
  */
@@ -89,7 +89,7 @@ export abstract class Comp {
     /** 重置 */
     abstract reset(): void
     /** 准备 */
-    setup(...obj: any): Comp {
+    setup(...obj: any): this {
         return this
     }
     /** 组件自己卸载自己 */
@@ -99,16 +99,16 @@ export abstract class Comp {
     /**
      * 挂载时被以下系统初始化
      */
-    abstract initBySystems: (typeof System)[]
+    abstract initBySystems: ISystemCtor[]
     /**
      * 初始化完成后的回调通知
      */
-    initedCallback: (comp: Comp) => void = null
+    initedCallback: (comp: this) => void = null
     /**
      * 初始化等待异步操作完成指令函数
      * @returns 
      */
-    async done(): Promise<Comp> {
+    async done(): Promise<this> {
         return new Promise((resolve) => {
             this.initedCallback = resolve;
         });

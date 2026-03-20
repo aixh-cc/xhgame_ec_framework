@@ -78,7 +78,7 @@ export class Entity {
         component.attach(this).then(async () => {
             if (component.initBySystems.length > 0) {
                 for (let i = 0; i < component.initBySystems.length; i++) {
-                    const sys = component.initBySystems[i] as any
+                    const sys = component.initBySystems[i]
                     await sys.initComp(component)
                 }
             }
