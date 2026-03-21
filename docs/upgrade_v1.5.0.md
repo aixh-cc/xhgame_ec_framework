@@ -104,7 +104,7 @@ setup(obj: { arr: number[] }): this {
 initedCallback: (() => void) | null = null
 
 // 新
-initedCallback: ((comp: Comp) => void) | null = null
+initedCallback: (comp: this) => void = null
 ```
 
 ### 影响
