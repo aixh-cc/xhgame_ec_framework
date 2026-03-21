@@ -2,11 +2,11 @@
 outline: deep
 ---
 
-# System 类型约束（ISystemCtor）
+# System 类型约束（ISystemStatic）
 
 ## 概述
 
-`initBySystems` 现在使用 `ISystemCtor` 接口约束，编译期即可检查 `initComp` 方法签名是否正确。写错方法名或签名不匹配会直接报错。
+`initBySystems` 现在使用 `ISystemStatic` 接口约束，编译期即可检查 `initComp` 方法签名是否正确。写错方法名或签名不匹配会直接报错。
 
 ## 以前的问题
 
@@ -25,7 +25,7 @@ export class ABSystem extends System {
 
 ```ts
 // System 构造器接口
-export interface ISystemCtor {
+export interface ISystemStatic {
     initComp(comp: any): Promise<void>;
 }
 ```
@@ -35,7 +35,7 @@ export interface ISystemCtor {
 ```ts
 export class ABComp extends BaseModelComp {
     compName = 'ABComp'
-    initBySystems: ISystemCtor[] = [ABSystem]  // ✅ 编译期检查
+    initBySystems: ISystemStatic[] = [ABSystem]  // ✅ 编译期检查
     // ...
 }
 ```

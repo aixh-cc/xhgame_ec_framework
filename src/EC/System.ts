@@ -3,7 +3,7 @@
  * 用于 Comp.initBySystems 的类型声明
  * 参数使用 any 以允许子类声明具体 Comp 子类型（类型安全由 initBySystems 绑定保证）
  */
-export interface ISystemCtor {
+export interface ISystemStatic {
     initComp(comp: any): Promise<void>;
 }
 

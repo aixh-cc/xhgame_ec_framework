@@ -1,5 +1,5 @@
 import { Entity } from "./Entity";
-import { ISystemCtor } from "./System";
+import { ISystemStatic } from "./System";
 import { TimeSystem } from "../Time/TimeSystem";
 /**
  * 组件
@@ -119,7 +119,7 @@ export abstract class Comp {
     /**
      * 挂载时被以下系统初始化
      */
-    abstract initBySystems: ISystemCtor[]
+    abstract initBySystems: ISystemStatic[]
     /**
      * 初始化完成后的回调通知
      */

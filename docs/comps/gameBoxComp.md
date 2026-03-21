@@ -40,7 +40,7 @@ class LinkGame {
 // 玩法组件
 class LinkGameBoxComp extends BaseGameBoxComp<LinkGame> {
     compName = 'LinkGameBoxComp'
-    initBySystems: ISystemCtor[] = [LinkGameBoxSystem]
+    initBySystems: ISystemStatic[] = [LinkGameBoxSystem]
 
     setup(config: { rows: number; cols: number }) {
         this.game = new LinkGame(config.rows, config.cols)

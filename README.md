@@ -57,7 +57,7 @@ npm run build
 ### ECS（`src/EC`）
 - `Entity`：创建/移除实体，挂载/卸载组件；支持泛型注册表，按名称操作类型安全
 - `Comp`：组件基类，支持 setup 参数、requires 依赖声明、onUpdate 每帧更新
-- `System`：ISystemCtor 接口约束，编译期检查 initComp 签名
+- `System`：ISystemStatic 接口约束，编译期检查 initComp 签名
 - 参考：`tests/EC/EC.test.ts`
 
 ### UI（`src/Ui`）

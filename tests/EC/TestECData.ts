@@ -1,6 +1,6 @@
 import { Entity } from "../../src/EC/Entity";
 import { BaseModelComp } from "../../src/EC/BaseModelComp";
-import { ISystemCtor, System } from "../../src/EC/System";
+import { ISystemStatic, System } from "../../src/EC/System";
 import { Comp } from "../../src/EC/Comp";
 export class GameEntity extends Entity {
     model: GameModelComp | null = null;
@@ -11,7 +11,7 @@ export class GameEntity extends Entity {
 
 export class GameModelComp extends BaseModelComp {
     compName: string = 'GameModelComp'
-    initBySystems: ISystemCtor[] = []
+    initBySystems: ISystemStatic[] = []
     // 
     platform: string = ''
     reset() {
@@ -41,7 +41,7 @@ export class TestSenceSystem extends System {
 
 export class TestSenceComp extends BaseModelComp {
     compName: string = 'TestSenceComp'
-    initBySystems: ISystemCtor[] = [TestSenceSystem]
+    initBySystems: ISystemStatic[] = [TestSenceSystem]
     arr: number[] = []
     add_value: number = 0
     reset() {
@@ -87,7 +87,7 @@ export class TestViewSystem extends System {
 
 export class TestViewComp extends BaseModelComp {
     compName: string = 'TestViewComp'
-    initBySystems: ISystemCtor[] = [TestViewSystem]
+    initBySystems: ISystemStatic[] = [TestViewSystem]
     arr: number[] = []
     add_value: number = 0
     reset() {

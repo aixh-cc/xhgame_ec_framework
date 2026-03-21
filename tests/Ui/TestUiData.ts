@@ -1,5 +1,5 @@
 import { BaseModelComp } from "../../src/EC/BaseModelComp"
-import { ISystemCtor, System } from "../../src/EC/System"
+import { ISystemStatic, System } from "../../src/EC/System"
 import { SimpleBaseView } from "../../src/Ui/View"
 import { INode, IUiDrive } from "../../src/Ui/UiDrive"
 import { autoBindForDI, DI } from "../../src/DI/DI";
@@ -46,7 +46,7 @@ interface ITestViewVM {
 @autoBindForDI('TestViewComp')
 export class TestViewComp extends BaseModelComp {
     compName: string = 'TestViewComp'
-    initBySystems: ISystemCtor[] = []
+    initBySystems: ISystemStatic[] = []
 
     tips: string = 'tips_TestViewComp'
 

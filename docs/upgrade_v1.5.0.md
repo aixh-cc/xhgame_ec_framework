@@ -16,20 +16,20 @@ builder 已分离为独立项目 [xhgame_builder](https://github.com/aixh-cc/xhg
 
 如果你之前引用 `packages/builder/src` 的内容，需要改为依赖 `@aixh-cc/xhgame_builder`。
 
-## 2. ISystemCtor.initComp 参数类型
+## 2. ISystemStatic.initComp 参数类型
 
 ### 变更
 
-`ISystemCtor` 接口的 `initComp` 参数从 `Comp` 改为 `any`：
+`ISystemStatic` 接口的 `initComp` 参数从 `Comp` 改为 `any`：
 
 ```ts
 // 旧
-export interface ISystemCtor {
+export interface ISystemStatic {
     initComp(comp: Comp): Promise<void>;
 }
 
 // 新
-export interface ISystemCtor {
+export interface ISystemStatic {
     initComp(comp: any): Promise<void>;
 }
 ```
@@ -51,14 +51,14 @@ export interface ISystemCtor {
 
 ### 变更
 
-`initBySystems` 需要显式声明类型为 `ISystemCtor[]`：
+`initBySystems` 需要显式声明类型为 `ISystemStatic[]`：
 
 ```ts
 // 旧（隐式推导，严格模式下可能推导为 any[]）
 initBySystems = [MySystem]
 
 // 新
-initBySystems: ISystemCtor[] = [MySystem]
+initBySystems: ISystemStatic[] = [MySystem]
 ```
 
 ### 影响
@@ -149,7 +149,7 @@ onClickItem: any = null
 
 ## 升级检查清单
 
-- [ ] `initBySystems` 加上 `ISystemCtor[]` 类型注解
+- [ ] `initBySystems` 加上 `ISystemStatic[]` 类型注解
 - [ ] `setup()` 返回类型改为 `this`
 - [ ] `IUiDrive` 实现类添加 `getFirstUIView` 方法
 - [ ] `IItem` 实现类属性加上显式类型声明
