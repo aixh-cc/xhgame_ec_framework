@@ -26,6 +26,11 @@ export default defineConfig({
           { text: '一个完整组件的构成', link: '/ec/comp_demo' },
           { text: '组件分类职责', link: '/ec/comp_cate' },
           { text: '组件的引用与注册', link: '/ec/comp_reg' },
+          { text: '组件初始化参数（setup）', link: '/ec/comp_setup_args' },
+          { text: '组件依赖声明（requires）', link: '/ec/comp_requires' },
+          { text: '组件 onUpdate 生命周期', link: '/ec/comp_on_update' },
+          { text: 'System 类型约束', link: '/ec/system_type_safety' },
+          { text: 'Entity 泛型注册表', link: '/ec/entity_generic_registry' },
         ]
       },
       {
@@ -34,12 +39,18 @@ export default defineConfig({
           { text: 'ModelComp(数据组件)', link: '/comps/modelComp' },
           { text: 'sceneComp(场景组件)', link: '/comps/sceneComp' },
           { text: 'ViewComp(Ui组件)', link: '/comps/viewComp' },
-          // { text: 'GameboxComp(玩法组件)', link: '/comps/gameBoxComp' },
+          { text: 'GameBoxComp(玩法组件)', link: '/comps/gameBoxComp' },
           // { text: 'Comp(其他组件)', link: '/comps/otherComp' },
         ]
       },
       {
-        text: '4、开发工具',
+        text: '4、事件系统',
+        items: [
+          { text: '事件类型安全', link: '/event/event_type_safety' },
+        ]
+      },
+      {
+        text: '5、开发工具',
         items: [
           { text: 'UI 组件生成工具', link: '/tools/README' },
           { text: '使用指南', link: '/tools/USAGE' },
