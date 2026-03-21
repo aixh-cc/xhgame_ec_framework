@@ -21,7 +21,7 @@ export default [
         ],
         plugins: [
             typescript({
-                tsconfig: './tsconfig.json',
+                tsconfig: './tsconfig.build.json',
                 importHelpers: false,
                 compilerOptions: {
                     target: "es6",
@@ -54,7 +54,7 @@ export default [
         ],
         plugins: [
             typescript({
-                tsconfig: './tsconfig.json',
+                tsconfig: './tsconfig.build.json',
                 importHelpers: false,
                 compilerOptions: {
                     target: "es6",

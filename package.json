@@ -27,7 +27,7 @@
     "cocos"
   ],
   "scripts": {
-    "clean": "rimraf bin dist tsconfig.tsbuildinfo",
+    "clean": "rm -rf bin dist tsconfig.tsbuildinfo",
     "build": "npm run clean && rollup -c rollup.config.mjs",
     "test": "bun ./tests/run.test.mjs"
   },
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@cocos/creator-types": "^3.8.0",
-    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/crypto-js": "^4.2.2",
     "@types/lodash": "^4.17.13",
