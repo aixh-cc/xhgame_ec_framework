@@ -1,5 +1,5 @@
 import { BaseModelComp } from "../../src/EC/BaseModelComp"
-import { System } from "../../src/EC/System"
+import { ISystemCtor, System } from "../../src/EC/System"
 import { SimpleBaseView } from "../../src/Ui/View"
 import { INode, IUiDrive } from "../../src/Ui/UiDrive"
 import { autoBindForDI, DI } from "../../src/DI/DI";
@@ -46,7 +46,7 @@ interface ITestViewVM {
 @autoBindForDI('TestViewComp')
 export class TestViewComp extends BaseModelComp {
     compName: string = 'TestViewComp'
-    initBySystems: (typeof System)[] = []
+    initBySystems: ISystemCtor[] = []
 
     tips: string = 'tips_TestViewComp'
 
@@ -72,7 +72,10 @@ export class TestNode implements INode {
 
 
 export class TestUiDrive implements IUiDrive {
-
+    compName: string = 'TestUiDrive'
+    getFirstUIView() {
+        return new TestView()
+    }
     mock_gui_root: INode = new TestNode('gui_root')
     mock_world_root: INode = new TestNode('world_root')
     openUIAsyncByDrive(uiid: string, comp: BaseModelComp) {

@@ -43,7 +43,7 @@ export abstract class BaseTestItem implements IItem {
 }
 export class TestUiItem extends BaseTestItem implements IUiItem {
     static className = 'TestUiItem'
-    onClickItem = null
+    onClickItem: any = null
     reset() {
         this.onClickItem = null
     }
