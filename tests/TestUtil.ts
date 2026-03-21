@@ -1,4 +1,4 @@
-import { TimeSystem } from "../packages/core/src/Time/TimeSystem"
+import { TimeSystem } from "../src/Time/TimeSystem"
 
 export class TestUtil {
     private static _instance: TestUtil = new this()

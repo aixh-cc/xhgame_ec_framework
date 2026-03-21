@@ -1,26 +1,31 @@
 {
     "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "experimentalDecorators": true,
+        "strict": true,
+        "strictNullChecks": false,
+        "moduleResolution": "Node",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "stripInternal": true,
         "baseUrl": ".",
         "paths": {
-            "db://assets/*": [
-                "assets/*"
-            ],
-            "@aixh-cc/xhgame_ec_framework": [
-                "packages/core/src/index.ts"
-            ],
-            "@aixh-cc/xhgame_ec_framework/*": [
-                "packages/core/src/*"
-            ]
+            "@aixh-cc/xhgame_ec_framework": ["./src/index.ts"],
+            "@aixh-cc/xhgame_ec_framework/*": ["./src/*"]
         },
-        "allowJs": true,
-        "moduleResolution": "node"
+        "types": [
+            "@cocos/creator-types/engine",
+            "@cocos/creator-types/editor"
+        ]
     },
     "include": [
-        "assets/**/*.ts",
-        "assets/**/*.tsx",
-        "assets/**/*.js",
-        "assets/**/*.jsx",
-        "packages/core/src/**/*.ts",
-        "packages/builder/src/**/*.ts"
+        "./src/**/*",
+        "./tests/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "build"
     ]
 }
