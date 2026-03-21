@@ -16,7 +16,8 @@ export default defineConfig({
         text: '1、说明',
         items: [
           { text: '初衷', link: '/readme' },
-          { text: '架构说明', link: '/mindmap' }
+          { text: '架构说明', link: '/mindmap' },
+          { text: 'v1.5.0 升级指南', link: '/upgrade_v1.5.0' }
         ]
       },
       {

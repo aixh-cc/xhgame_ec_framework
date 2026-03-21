@@ -26,7 +26,7 @@ export class ABSystem extends System {
 ```ts
 // System 构造器接口
 export interface ISystemCtor {
-    initComp(comp: Comp): Promise<void>;
+    initComp(comp: any): Promise<void>;
 }
 ```
 
