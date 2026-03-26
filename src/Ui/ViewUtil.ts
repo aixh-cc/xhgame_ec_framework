@@ -3,7 +3,7 @@ import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
 import { IView } from "./View";
 
 export class ViewUtil {
-    static bindAttr(observer: IObserver, bindAttrMap: any) {
+    static bindAttr(observer: IObserver, bindAttrMap: Record<string, string>) {
         let keys = Object.keys(bindAttrMap);
         for (let key of keys) {
             let _bindAttrLink: string = bindAttrMap[key]
