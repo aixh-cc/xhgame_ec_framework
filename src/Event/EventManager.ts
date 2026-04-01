@@ -125,7 +125,7 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
     }
 
     /** 取消监听（精确匹配 `name+event+context`） */
-    off<K extends keyof T & string>(name: K, event: Function, context?: unknown): void
+    off<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
     off(name: string, event: Function, context?: unknown): void
     off(name: string, event: Function, context?: unknown) {
         if (this._eventIndex_NameArray.indexOf(name) > -1) {
