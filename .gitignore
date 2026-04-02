@@ -72,3 +72,4 @@ docs/build/
 /extensions/*-installInfo.json
 /extensions/*/backups/*
 /temp/*
+scratch/*

@@ -9,6 +9,8 @@ import { FactoryManager } from "./Factory/FactoryManager"
 import { IHttp } from "./Net/Http"
 import { NetManager } from "./Net/NetManager"
 import { ISocket } from "./Net/Socket"
+import { IRedDotDrive } from "./RedDot/IRedDotDrive"
+import { RedDotManager } from "./RedDot/RedDotManager"
 import { StorageManager } from "./Storage/StorageManager"
 import { TableManager } from "./Table/TableManager"
 import { INode, IUiDrive } from "./Ui/UiDrive"
@@ -43,4 +45,7 @@ export interface IManagers {
     // asset
     setAssetManager(audioManager: AssetManager<IAssetDrive>): void
     getAssetManager(): AssetManager<IAssetDrive>
+    // reddot
+    setRedDotManager(redDotManager: RedDotManager<IRedDotDrive>): void
+    getRedDotManager(): RedDotManager<IRedDotDrive>
 }

@@ -41,6 +41,10 @@ export * from './Audio/AudioManager';
 // Asset
 export * from './Asset/AssetDrive';
 export * from './Asset/AssetManager';
+// RedDot
+export * from './RedDot/RedDotManager';
+export * from './RedDot/IRedDotDrive';
+export * from './RedDot/RedDotEvents';
 // Managers
 export { IManagers } from './Managers';
 // DI
