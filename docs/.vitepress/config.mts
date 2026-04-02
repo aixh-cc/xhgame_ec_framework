@@ -20,6 +20,7 @@ export default defineConfig({
           { text: 'v1.5.0 升级指南', link: '/upgrade_v1.5.0' },
           { text: 'UiItem 使用指南：三层数据结构设计', link: '/luminous-shimmying-treehouse' },
           { text: '红点系统设计', link: '/lively-squishing-flask' },
+          { text: '红点系统', link: '/reddot' },
         ]
       },
       {
