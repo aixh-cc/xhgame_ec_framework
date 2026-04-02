@@ -11,9 +11,16 @@ export abstract class Comp {
      */
     private static compsPool: Map<new () => any, Comp[]> = new Map();
     /**
+     * 清理组件池（用于测试隔离）
+     */
+    public static clearPool(): void {
+        this.compsPool.clear();
+        this._dirty_comps = [];
+    }
+    /**
      * 创建组件
-     * @param compClass 
-     * @returns 
+     * @param compClass
+     * @returns
      */
     public static createComp<T extends Comp>(compClass: new () => T): T {
         // 获取对应组件类的池子

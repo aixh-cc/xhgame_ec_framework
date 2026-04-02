@@ -1,4 +1,4 @@
-import { assert, describe, test } from "poku";
+import { describe, test, expect } from "bun:test";
 import { DI, autoBindForDI } from "../../src/DI/DI";
 
 // 定义测试服务接口
@@ -49,50 +49,49 @@ export class UserController {
     }
 }
 
-test('测试DI', async () => {
-    assert.equal(DI.isBound(EmailService), true, '服务是否已通过装饰器默认类绑定正常')
-    assert.equal(DI.isBound('SmsService'), true, '服务是否已通过装饰器字符串绑定正常')
-    const emailService = DI.make<IEmailService>(EmailService);
-    let res_email = await emailService.sendEmail('direct@example.com', 'Hello from direct call');
-    assert.equal(res_email, 'EmailService: Sending email to direct@example.com: Hello from direct call', '获取EmailService实例正常')
-    const smsService = DI.make<ISmsService>('SmsService');
-    let res_sms = await smsService.sendPhone('13500001111', 'hello');
-    assert.equal(res_sms, 'SmsService: Sending 13500001111: hello', '获取SmsService实例正常')
+describe("DI功能", () => {
+    test("测试DI", async () => {
+        expect(DI.isBound(EmailService)).toBe(true)
+        expect(DI.isBound('SmsService')).toBe(true)
+        const emailService = DI.make<IEmailService>(EmailService);
+        let res_email = await emailService.sendEmail('direct@example.com', 'Hello from direct call');
+        expect(res_email).toBe('EmailService: Sending email to direct@example.com: Hello from direct call')
+        const smsService = DI.make<ISmsService>('SmsService');
+        let res_sms = await smsService.sendPhone('13500001111', 'hello');
+        expect(res_sms).toBe('SmsService: Sending 13500001111: hello')
 
-    // 手动绑定
-    DI.bindTransient<UserController>('UserController', UserController);
-    const controller = DI.make<UserController>('UserController');
-    assert.equal(DI.isBound('UserController'), true, '手动绑定正常')
-    const result = await controller.sendUserSms(11);
-    assert.equal(result, 'SmsService: Sending User 11: Welcome!', '依赖注入正常')
-    // 是否是同一个实例
-    assert.equal(controller.getSmsService() === smsService, true, '是同一个实例正确')
+        // 手动绑定
+        DI.bindTransient<UserController>('UserController', UserController);
+        const controller = DI.make<UserController>('UserController');
+        expect(DI.isBound('UserController')).toBe(true)
+        const result = await controller.sendUserSms(11);
+        expect(result).toBe('SmsService: Sending User 11: Welcome!')
+        // 是否是同一个实例
+        expect(controller.getSmsService() === smsService).toBe(true)
 
-    // 手动重新绑
-    DI.unbind('SmsService')
-    DI.bindTransient<ISmsService>('SmsService', SmsService);
-    const smsServiceTwo = DI.make<ISmsService>('SmsService');
-    // 是否是同一个实例
-    assert.equal(controller.getSmsService() === smsServiceTwo, false, '不是同一个实例正确')
+        // 手动重新绑
+        DI.unbind('SmsService')
+        DI.bindTransient<ISmsService>('SmsService', SmsService);
+        const smsServiceTwo = DI.make<ISmsService>('SmsService');
+        // 是否是同一个实例
+        expect(controller.getSmsService() === smsServiceTwo).toBe(false)
 
-    // 整个应用生命周期内同一实例
-    DI.unbind('SmsService')
-    DI.bindSingleton<ISmsService>('SmsService', SmsService);
-    const smsServiceThree = DI.make<ISmsService>('SmsService');
-    // 重新手动绑定(这次的SmsService,因为上面的绑定时是同一实例,所以相同)
-    DI.bindTransient<UserController>('UserController', UserController);
-    const controllerThree = DI.make<UserController>('UserController');
-    assert.equal(controllerThree.getSmsService() === smsServiceThree, true, 'DI.bindSingleton同一个实例正确')
+        // 整个应用生命周期内同一实例
+        DI.unbind('SmsService')
+        DI.bindSingleton<ISmsService>('SmsService', SmsService);
+        const smsServiceThree = DI.make<ISmsService>('SmsService');
+        // 重新手动绑定(这次的SmsService,因为上面的绑定时是同一实例,所以相同)
+        DI.bindTransient<UserController>('UserController', UserController);
+        const controllerThree = DI.make<UserController>('UserController');
+        expect(controllerThree.getSmsService() === smsServiceThree).toBe(true)
 
-    // 整个应用生命周期内同一实例
-    DI.unbind('SmsService')
-    DI.bindInstance<ISmsService>('SmsService', new SmsService());
-    const smsServiceFour = DI.make<ISmsService>('SmsService');
-    // 重新手动绑定(这次的SmsService,因为上面的绑定时是同一实例,所以相同)
-    DI.bindTransient<UserController>('UserController', UserController);
-    const controllerFour = DI.make<UserController>('UserController');
-    assert.equal(controllerFour.getSmsService() === smsServiceFour, true, 'DI.bindInstance同一个实例正确')
-
-
-
-})
+        // 整个应用生命周期内同一实例
+        DI.unbind('SmsService')
+        DI.bindInstance<ISmsService>('SmsService', new SmsService());
+        const smsServiceFour = DI.make<ISmsService>('SmsService');
+        // 重新手动绑定(这次的SmsService,因为上面的绑定时是同一实例,所以相同)
+        DI.bindTransient<UserController>('UserController', UserController);
+        const controllerFour = DI.make<UserController>('UserController');
+        expect(controllerFour.getSmsService() === smsServiceFour).toBe(true)
+    });
+});

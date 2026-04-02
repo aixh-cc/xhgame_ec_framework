@@ -1,4 +1,4 @@
-import { assert, describe, test } from "poku";
+import { describe, test, expect, beforeEach } from "bun:test";
 import { StorageManager } from "../../src/Storage/StorageManager";
 import { CryptoManager } from "../../src/Crypto/CryptoManager";
 import { CryptoAES } from "../../src/Crypto/Crypto";
@@ -10,77 +10,47 @@ const getLocalStorage = () => {
     return localStorage
 }
 
-const test_01 = () => {
-    return new Promise((resolve, reject) => {
-        test('测试StorageManager', async () => {
-            let factoryManager = new StorageManager('xh', getLocalStorage())
-            factoryManager.origin_set('tt', 'tt001')
-            assert.equal(factoryManager.origin_get('tt'), 'tt001', 'origin_set和origin_get正常')
-            //
-            factoryManager.set('object_json', { name: '张三', age: 12 })
-            assert.equal(factoryManager.getJson('object_json').name, '张三', 'getJson正常')
-            factoryManager.set('test_boolen', true)
-            assert.equal(factoryManager.getBoolean('test_boolen'), true, 'getBoolean正常')
-            //
-            factoryManager.set('test_number', 123444)
-            assert.equal(factoryManager.getNumber('test_number'), 123444, 'getNumber正常')
-            // 
-            factoryManager.remove('test_number')
-            assert.equal(factoryManager.getNumber('test_number'), 0, 'remove正常')
-            //
-            factoryManager.clear()
-            assert.equal(factoryManager.get('test_boolen'), null, 'clear1正常')
-            assert.equal(factoryManager.get('tt'), null, 'clear2正常')
+describe("StorageManager功能", () => {
+    test("测试StorageManager", () => {
+        let storageManager = new StorageManager('xh', getLocalStorage())
+        storageManager.origin_set('tt', 'tt001')
+        expect(storageManager.origin_get('tt')).toBe('tt001')
 
-            resolve(true)
-        })
-    })
-}
-const test_02 = () => {
-    return new Promise((resolve, reject) => {
-        test('测试StorageManager的加密存储', async () => {
-            let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES(CryptoJS))
-            let factoryManager = new StorageManager('xh', getLocalStorage(), cryptoManager)
-            factoryManager.origin_set('tt', 'tt001')
-            assert.equal(factoryManager.origin_get('tt'), 'tt001', 'origin_set和origin_get正常')
-            //
-            factoryManager.set('object_json', { name: '张三', age: 12 })
-            assert.equal(factoryManager.getJson('object_json').name, '张三', 'getJson正常')
-            factoryManager.set('test_boolen', true)
-            assert.equal(factoryManager.getBoolean('test_boolen'), true, 'getBoolean正常')
-            //
-            factoryManager.set('test_number', 123444)
-            assert.equal(factoryManager.getNumber('test_number'), 123444, 'getNumber正常')
-            // 
-            factoryManager.remove('test_number')
-            assert.equal(factoryManager.getNumber('test_number'), 0, 'remove正常')
-            //
-            factoryManager.clear()
-            assert.equal(factoryManager.get('test_boolen'), null, 'clear1正常')
-            assert.equal(factoryManager.get('tt'), null, 'clear2正常')
+        storageManager.set('object_json', { name: '张三', age: 12 })
+        expect(storageManager.getJson('object_json').name).toBe('张三')
+        storageManager.set('test_boolen', true)
+        expect(storageManager.getBoolean('test_boolen')).toBe(true)
 
-            resolve(true)
-        })
-    })
-}
-let functions = [
-    test_01,
-    test_02
-]
+        storageManager.set('test_number', 123444)
+        expect(storageManager.getNumber('test_number')).toBe(123444)
 
-describe('StorageManager功能', async () => {
-    while (functions.length > 0) {
-        let func = functions.shift()
-        if (func) {
-            await func()
-            await waitXms() // 为了输出字幕顺序正常(poku的问题)
-        }
-    }
+        storageManager.remove('test_number')
+        expect(storageManager.getNumber('test_number')).toBe(0)
+
+        storageManager.clear()
+        expect(storageManager.get('test_boolen')).toBe(null)
+        expect(storageManager.get('tt')).toBe(null)
+    });
+
+    test("测试StorageManager的加密存储", () => {
+        let cryptoManager = new CryptoManager('60060fd13c501133d3b94a800c827d95', new CryptoAES(CryptoJS))
+        let storageManager = new StorageManager('xh', getLocalStorage(), cryptoManager)
+        storageManager.origin_set('tt', 'tt001')
+        expect(storageManager.origin_get('tt')).toBe('tt001')
+
+        storageManager.set('object_json', { name: '张三', age: 12 })
+        expect(storageManager.getJson('object_json').name).toBe('张三')
+        storageManager.set('test_boolen', true)
+        expect(storageManager.getBoolean('test_boolen')).toBe(true)
+
+        storageManager.set('test_number', 123444)
+        expect(storageManager.getNumber('test_number')).toBe(123444)
+
+        storageManager.remove('test_number')
+        expect(storageManager.getNumber('test_number')).toBe(0)
+
+        storageManager.clear()
+        expect(storageManager.get('test_boolen')).toBe(null)
+        expect(storageManager.get('tt')).toBe(null)
+    });
 });
-const waitXms = (ms: number = 0) => {
-    return new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-            resolve()
-        }, ms)
-    })
-}

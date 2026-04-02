@@ -29,7 +29,7 @@
   "scripts": {
     "clean": "node -e \"const fs=require('fs');['bin','dist','tsconfig.tsbuildinfo'].forEach(p=>fs.rmSync(p,{recursive:true,force:true}))\"",
     "build": "npm run clean && rollup -c rollup.config.mjs",
-    "test": "bun ./tests/run.test.mjs"
+    "test": "bun test"
   },
   "author": "aixh-cc",
   "license": "MIT",

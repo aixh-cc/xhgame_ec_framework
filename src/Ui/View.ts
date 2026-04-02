@@ -20,6 +20,7 @@ export abstract class SimpleBaseView implements IView {
     abstract name: string;
     abstract reset(): void
     viewModelComp: BaseModelComp = null
+    private _bindAttrMap: Record<string, string> = null
     setViewComp(comp: BaseModelComp, isRebindAttr: boolean = false) {
         this.viewModelComp = comp
         if (isRebindAttr && this._bindAttrMap) {
@@ -37,7 +38,6 @@ export abstract class SimpleBaseView implements IView {
             this.viewModelComp.detach()
         }
     }
-    private _bindAttrMap: Object = null
     getBindAttrMap() {
         return this._bindAttrMap
     }

@@ -70,10 +70,10 @@ export class TestSenceComp extends BaseModelComp {
 
 export class TestViewSystem extends System {
 
-    static async initComp(comp: TestSenceComp) {
+    static async initComp(comp: TestViewComp) {
         await this.doData(comp)
     }
-    static async doData(comp: TestSenceComp) {
+    static async doData(comp: TestViewComp) {
         return new Promise((resolve, reject) => {
             comp.arr.push(...[555, 666, 777, 888])
             for (let i = 0; i < comp.arr.length; i++) {

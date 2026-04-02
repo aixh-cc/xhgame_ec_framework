@@ -1,4 +1,4 @@
-import { assert, describe, test } from "poku";
+import { describe, test, expect, beforeEach } from "bun:test";
 import { RedDotManager, RedDotNode } from "../../src/RedDot/RedDotManager";
 import { IRedDotDrive, IRedDotNode, IRedDotConfig, IRedDotInstance } from "../../src/RedDot/IRedDotDrive";
 import { EventManager } from "../../src/Event/EventManager";
@@ -68,219 +68,142 @@ class MockRedDotDrive implements IRedDotDrive {
     }
 }
 
-const test_00 = () => {
-    return new Promise((resolve) => {
-        test('数据层 - 注册和获取红点', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive);
+describe("RedDot功能", () => {
+    let drive: MockRedDotDrive;
+    let manager: RedDotManager;
 
-            manager.register('shop');
-            manager.register('shop.weapon');
-            manager.register('shop.armor');
-
-            assert.equal(manager.getCount('shop'), 0, '初始计数为0');
-            assert.equal(manager.getShow('shop'), false, '初始不显示');
-
-            resolve(true);
-        });
+    beforeEach(() => {
+        drive = new MockRedDotDrive();
+        manager = new RedDotManager(drive);
     });
-};
 
-const test_01 = () => {
-    return new Promise((resolve) => {
-        test('数据层 - 设置和获取计数', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive);
+    test("数据层 - 注册和获取红点", () => {
+        manager.register('shop');
+        manager.register('shop.weapon');
+        manager.register('shop.armor');
 
-            manager.setCount('shop.weapon', 5);
-            assert.equal(manager.getCount('shop.weapon'), 5, '武器计数为5');
-            assert.equal(manager.getShow('shop.weapon'), true, '武器显示红点');
-
-            // 父节点应该包含子节点计数
-            assert.equal(manager.getCount('shop'), 5, '商店计数包含武器');
-
-            manager.setCount('shop.armor', 3);
-            assert.equal(manager.getCount('shop'), 8, '商店计数包含武器和护甲');
-
-            resolve(true);
-        });
+        expect(manager.getCount('shop')).toBe(0);
+        expect(manager.getShow('shop')).toBe(false);
     });
-};
 
-const test_02 = () => {
-    return new Promise((resolve) => {
-        test('数据层 - 清空计数', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive);
+    test("数据层 - 设置和获取计数", () => {
+        manager.setCount('shop.weapon', 5);
+        expect(manager.getCount('shop.weapon')).toBe(5);
+        expect(manager.getShow('shop.weapon')).toBe(true);
 
-            manager.setCount('shop.weapon', 5);
-            assert.equal(manager.getCount('shop.weapon'), 5, '设置计数为5');
+        // 父节点应该包含子节点计数
+        expect(manager.getCount('shop')).toBe(5);
 
-            manager.clear('shop.weapon');
-            assert.equal(manager.getCount('shop.weapon'), 0, '清空后计数为0');
-            assert.equal(manager.getShow('shop.weapon'), false, '清空后不显示');
-
-            resolve(true);
-        });
+        manager.setCount('shop.armor', 3);
+        expect(manager.getCount('shop')).toBe(8);
     });
-};
 
-const test_03 = () => {
-    return new Promise((resolve) => {
-        test('事件系统 - 红点变化通知', async () => {
-            const drive = new MockRedDotDrive();
-            const eventManager = new EventManager<RedDotEventMap>();
-            const manager = new RedDotManager(drive, eventManager);
+    test("数据层 - 清空计数", () => {
+        manager.setCount('shop.weapon', 5);
+        expect(manager.getCount('shop.weapon')).toBe(5);
 
-            let notifyCount = 0;
-            let lastData: any = null;
-
-            eventManager.on('redDot_shop.weapon', (event, data) => {
-                notifyCount++;
-                lastData = data;
-            });
-
-            manager.setCount('shop.weapon', 5);
-            assert.equal(notifyCount, 1, '触发一次通知');
-            assert.equal(lastData.count, 5, '通知数据正确');
-            assert.equal(lastData.show, true, '显示状态正确');
-
-            manager.clear('shop.weapon');
-            assert.equal(notifyCount, 2, '清空触发通知');
-            assert.equal(lastData.count, 0, '清空后计数为0');
-            assert.equal(lastData.show, false, '清空后不显示');
-
-            resolve(true);
-        });
+        manager.clear('shop.weapon');
+        expect(manager.getCount('shop.weapon')).toBe(0);
+        expect(manager.getShow('shop.weapon')).toBe(false);
     });
-};
 
-const test_04 = () => {
-    return new Promise((resolve) => {
-        test('UI层 - 添加和移除红点', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive);
+    test("事件系统 - 红点变化通知", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
 
-            const targetNode = new MockRedDotNode('Button');
-            const redDot = manager.addRedDot(targetNode);
+        let notifyCount = 0;
+        let lastData: any = null;
 
-            assert.ok(redDot, '成功添加红点');
-            assert.equal(redDot.node.parent, targetNode, '红点附加到目标节点');
-
-            const sameRedDot = manager.addRedDot(targetNode);
-            assert.equal(sameRedDot, redDot, '重复添加返回同一实例');
-
-            manager.removeRedDot(targetNode);
-            assert.equal(redDot.node.parent, null, '红点已分离');
-
-            resolve(true);
+        eventManager.on('redDot_shop.weapon', (event, data) => {
+            notifyCount++;
+            lastData = data;
         });
+
+        managerWithEvent.setCount('shop.weapon', 5);
+        expect(notifyCount).toBe(1);
+        expect(lastData.count).toBe(5);
+        expect(lastData.show).toBe(true);
+
+        managerWithEvent.clear('shop.weapon');
+        expect(notifyCount).toBe(2);
+        expect(lastData.count).toBe(0);
+        expect(lastData.show).toBe(false);
     });
-};
 
-const test_05 = () => {
-    return new Promise((resolve) => {
-        test('UI层 - 设置红点数字', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive);
+    test("UI层 - 添加和移除红点", () => {
+        const targetNode = new MockRedDotNode('Button');
+        const redDot = manager.addRedDot(targetNode);
 
-            const targetNode = new MockRedDotNode('Button');
-            manager.addRedDot(targetNode);
+        expect(redDot).toBeTruthy();
+        expect(redDot.node.parent).toBe(targetNode);
 
-            manager.setRedDotNumber(targetNode, 10);
-            const redDot = manager.getRedDot(targetNode);
-            assert.equal(redDot.currentNumber, 10, '红点数字设置正确');
+        const sameRedDot = manager.addRedDot(targetNode);
+        expect(sameRedDot).toBe(redDot);
 
-            resolve(true);
-        });
+        manager.removeRedDot(targetNode);
+        expect(redDot.node.parent).toBe(null);
     });
-};
 
-const test_06 = () => {
-    return new Promise((resolve) => {
-        test('对象池 - 红点复用', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive);
+    test("UI层 - 设置红点数字", () => {
+        const targetNode = new MockRedDotNode('Button');
+        manager.addRedDot(targetNode);
 
-            const node1 = new MockRedDotNode('Button1');
-            const node2 = new MockRedDotNode('Button2');
-
-            const redDot1 = manager.addRedDot(node1);
-            const firstInstance = redDot1;
-
-            manager.removeRedDot(node1);
-
-            const redDot2 = manager.addRedDot(node2);
-            assert.equal(redDot2, firstInstance, '对象池复用实例');
-
-            resolve(true);
-        });
+        manager.setRedDotNumber(targetNode, 10);
+        const redDot = manager.getRedDot(targetNode);
+        expect(redDot.currentNumber).toBe(10);
     });
-};
 
-const test_07 = () => {
-    return new Promise((resolve) => {
-        test('UI层 - 清空所有红点', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive);
+    test("对象池 - 红点复用", () => {
+        const node1 = new MockRedDotNode('Button1');
+        const node2 = new MockRedDotNode('Button2');
 
-            const node1 = new MockRedDotNode('Button1');
-            const node2 = new MockRedDotNode('Button2');
+        const redDot1 = manager.addRedDot(node1);
+        const firstInstance = redDot1;
 
-            manager.addRedDot(node1);
-            manager.addRedDot(node2);
+        manager.removeRedDot(node1);
 
-            manager.clearAll();
-
-            assert.equal(manager.getRedDot(node1), null, '红点1已清除');
-            assert.equal(manager.getRedDot(node2), null, '红点2已清除');
-
-            resolve(true);
-        });
+        const redDot2 = manager.addRedDot(node2);
+        expect(redDot2).toBe(firstInstance);
     });
-};
 
-const test_08 = () => {
-    return new Promise((resolve) => {
-        test('不使用事件管理器', async () => {
-            const drive = new MockRedDotDrive();
-            const manager = new RedDotManager(drive); // 不传 eventManager
+    test("UI层 - 清空所有红点", () => {
+        const node1 = new MockRedDotNode('Button1');
+        const node2 = new MockRedDotNode('Button2');
 
-            // 不应该抛出错误
-            manager.setCount('shop', 5);
-            assert.equal(manager.getCount('shop'), 5, '不使用事件也能正常工作');
+        manager.addRedDot(node1);
+        manager.addRedDot(node2);
 
-            resolve(true);
-        });
+        manager.clearAll();
+
+        expect(manager.getRedDot(node1)).toBe(null);
+        expect(manager.getRedDot(node2)).toBe(null);
     });
-};
 
-let functions = [
-    test_00,
-    test_01,
-    test_02,
-    test_03,
-    test_04,
-    test_05,
-    test_06,
-    test_07,
-    test_08,
-];
+    test("不使用事件管理器", () => {
+        const managerNoEvent = new RedDotManager(drive);
 
-describe('RedDot功能', async () => {
-    while (functions.length > 0) {
-        let func = functions.shift();
-        if (func) {
-            await func();
-            await waitXms();
-        }
-    }
+        // 不应该抛出错误
+        managerNoEvent.setCount('shop', 5);
+        expect(managerNoEvent.getCount('shop')).toBe(5);
+    });
+
+    test("多层级红点 - 3层结构", () => {
+        manager.setCount('shop.weapon.sword', 2);
+        manager.setCount('shop.weapon.bow', 3);
+        manager.setCount('shop.armor.helmet', 1);
+
+        expect(manager.getCount('shop.weapon.sword')).toBe(2);
+        expect(manager.getCount('shop.weapon.bow')).toBe(3);
+        expect(manager.getCount('shop.weapon')).toBe(5);
+        expect(manager.getCount('shop.armor')).toBe(1);
+        expect(manager.getCount('shop')).toBe(6);
+    });
+
+    test("红点数字为0时不显示", () => {
+        manager.setCount('shop.weapon', 5);
+        expect(manager.getShow('shop.weapon')).toBe(true);
+
+        manager.setCount('shop.weapon', 0);
+        expect(manager.getShow('shop.weapon')).toBe(false);
+    });
 });
-
-const waitXms = (ms: number = 0) => {
-    return new Promise<void>((resolve) => {
-        setTimeout(() => {
-            resolve();
-        }, ms);
-    });
-};
