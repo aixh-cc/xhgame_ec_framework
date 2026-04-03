@@ -11,6 +11,7 @@ outline: deep
 ### 核心特性
 
 - **数据层**：树形结构管理红点数据，支持多层级路径（如 `shop.weapon.sword`），父节点自动汇总子节点计数
+- **批处理优化**：收集同一帧内的红点变化，批量触发事件，避免重复更新（10倍性能提升）
 - **UI层**：通过可插拔的 `IRedDotDrive` 接口实现引擎无关的红点显示，支持 Cocos Creator 等多种引擎
 - **事件系统**：可选集成 `EventManager`，支持红点变化的响应式通知
 - **对象池**：自动管理红点实例的创建和复用，提升性能
@@ -20,8 +21,47 @@ outline: deep
 RedDotManager 采用数据层和UI层分离的设计：
 - **数据层**：负责红点的逻辑状态（计数、显示/隐藏、层级关系）
 - **UI层**：负责红点的视觉呈现（创建节点、位置、样式）
+- **批处理优化**：收集同一帧内的变化，批量触发事件，避免树形结构冒泡导致的重复更新
 
 这种分离使得红点逻辑可以独立于具体的渲染引擎进行测试和维护。
+
+### 批处理机制
+
+为了优化性能，RedDotManager 采用批处理模式：
+
+**问题**：在树形结构中，子节点变化会向上冒泡触发父节点事件。如果不做优化：
+```ts
+// 设置10个子节点
+for (let i = 1; i <= 10; i++) {
+  redDotManager.setCount(`shop.item${i}`, i);
+}
+// 问题：父节点 'shop' 会被触发10次，造成10次UI更新
+```
+
+**解决方案**：批处理机制
+- `setCount()` 只收集变化到待通知队列，不立即触发事件
+- 调用 `flush()` 批量触发所有待处理的事件
+- 同一节点在一帧内多次修改，只触发一次事件（使用最新数据）
+- 树形结构的父节点自动去重（10个子节点变化，父节点只触发1次）
+
+**性能对比**：
+| 场景 | 优化前 | 优化后 | 性能提升 |
+|------|--------|--------|----------|
+| 10个子节点更新 | 父节点触发10次 | 父节点触发1次 | 10倍 |
+| 同一节点多次修改 | 触发N次 | 触发1次 | N倍 |
+
+**使用方式**：
+```ts
+// 1. 设置红点数量（收集到队列）
+redDotManager.setCount('shop.weapon', 5);
+redDotManager.setCount('shop.armor', 3);
+
+// 2. 在游戏循环中批量触发事件
+update(dt: number) {
+  // ... 其他游戏逻辑
+  redDotManager.flush(); // 批量触发红点事件
+}
+```
 
 ## 快速开始
 
@@ -39,9 +79,14 @@ const redDotManager = new RedDotManager(drive)
 ### 2. 数据层操作
 
 ```ts
-// 设置红点数量
+// 设置红点数量（收集到待通知队列）
 redDotManager.setCount('shop.weapon', 5)
 redDotManager.setCount('shop.armor', 3)
+
+// 在游戏循环中批量触发事件
+update(dt: number) {
+  redDotManager.flush() // 批量触发红点事件
+}
 
 // 获取红点数量（包含子节点）
 console.log(redDotManager.getCount('shop.weapon')) // 5
@@ -86,12 +131,29 @@ redDotManager.register('shop.weapon')
 redDotManager.register('shop.weapon.sword')
 ```
 
-### setCount(key: string, count: number)
+### setCount(key: string, count: number, force?: boolean)
 
-设置红点数量。会自动注册节点并触发变化通知。
+设置红点数量（收集到待通知队列，不立即触发事件）。
+
+- `key`: 红点节点键名，支持层级（如 `'shop.weapon.sword'`）
+- `count`: 红点数量
+- `force`: 是否强制更新（默认 `true`）
+- 返回：是否实际更新了红点数量
 
 ```ts
+// 设置红点数量（收集到队列）
 redDotManager.setCount('shop.weapon', 5)
+
+// 相同值不触发（force=false）
+redDotManager.setCount('shop.weapon', 5, false)
+
+// 强制触发（force=true）
+redDotManager.setCount('shop.weapon', 5, true)
+
+// 在游戏循环中批量触发
+update(dt: number) {
+  redDotManager.flush() // 批量触发所有待处理的事件
+}
 ```
 
 **多层级自动汇总**：
@@ -131,7 +193,39 @@ if (redDotManager.getShow('shop')) {
 
 ```ts
 redDotManager.clear('shop.weapon')
+
+// 需要调用 flush 才会触发事件
+redDotManager.flush()
 ```
+
+### flush()
+
+批量触发所有待处理的红点事件。应在游戏循环的每帧结束时调用。
+
+```ts
+// 在游戏主循环中调用
+update(dt: number) {
+  // ... 其他游戏逻辑
+  redDotManager.flush() // 批量触发红点事件
+}
+```
+
+**重要**：如果不调用 `flush()`，红点事件不会触发，UI不会更新。
+
+### notifyImmediate(key: string)
+
+立即触发事件（绕过批处理，用于特殊场景）。
+
+```ts
+// 立即触发，不等待 flush
+redDotManager.setCount('shop.weapon', 5)
+redDotManager.notifyImmediate('shop.weapon')
+```
+
+**使用场景**：
+- 初始化时需要立即显示红点
+- 调试时需要立即查看效果
+- 特殊业务逻辑要求立即响应
 
 ## UI层 API
 
@@ -260,15 +354,31 @@ interface RedDotChangeData {
 
 ### 变化通知机制
 
-当调用 `setCount()` 或 `clear()` 时，会向上冒泡通知所有父节点：
+当调用 `setCount()` 或 `clear()` 时，会收集当前节点及所有父节点到待通知队列。调用 `flush()` 时批量触发事件：
 
 ```ts
+// 设置红点数量（收集到队列）
 redDotManager.setCount('shop.weapon.sword', 5)
 
-// 触发事件：
+// 调用 flush 批量触发事件：
+redDotManager.flush()
+
+// 触发的事件：
 // 1. redDot_shop.weapon.sword (count=5)
 // 2. redDot_shop.weapon (count=5)
 // 3. redDot_shop (count=5)
+```
+
+**批处理优化**：同一帧内多次修改，每个节点只触发一次：
+
+```ts
+// 设置10个子节点
+for (let i = 1; i <= 10; i++) {
+  redDotManager.setCount(`shop.item${i}`, i)
+}
+
+// 调用 flush，父节点 'shop' 只触发1次（而不是10次）
+redDotManager.flush()
 ```
 
 ### 不使用事件系统
@@ -486,6 +596,8 @@ function onNewWeaponArrived() {
     // 父节点自动汇总
     console.log(redDotManager.getCount('shop.weapon')) // 5
     console.log(redDotManager.getCount('shop'))        // 5
+
+    // 注意：事件还未触发，需要在游戏循环中调用 flush
 }
 
 function onNewArmorArrived() {
@@ -494,6 +606,12 @@ function onNewArmorArrived() {
 
     // 商城总计数更新
     console.log(redDotManager.getCount('shop')) // 6
+}
+
+// 在游戏循环中批量触发事件
+function update(dt: number) {
+    // ... 其他游戏逻辑
+    redDotManager.flush() // 批量触发红点事件
 }
 
 // 5. UI层操作 - 添加红点
@@ -635,18 +753,24 @@ redDotManager.addRedDot(button1)    // 创建新实例
 redDotManager.removeRedDot(button1) // 回收到对象池
 redDotManager.addRedDot(button2)    // 自动复用对象池实例
 
-// ✅ 批量更新时避免频繁触发事件
-function batchUpdate() {
-    // 如果担心性能，可以临时不使用事件系统
-    const managerNoEvent = new RedDotManager(drive)
-    managerNoEvent.setCount('shop.weapon.sword', 10)
-    managerNoEvent.setCount('shop.weapon.bow', 20)
-    // ... 批量更新完成后，手动触发一次UI更新
+// ✅ 批处理自动优化，同一帧内多次修改只触发一次
+for (let i = 1; i <= 10; i++) {
+  redDotManager.setCount(`shop.item${i}`, i)
 }
+redDotManager.flush() // 父节点只触发1次
+
+// ✅ 使用 force 参数优化
+redDotManager.setCount('shop.weapon', 5, false) // 值相同时不收集
 
 // ✅ 使用 getShow() 而不是 getCount() > 0
 if (redDotManager.getShow('shop')) {  // 更语义化
     // ...
+}
+
+// ✅ 在游戏循环中统一调用 flush
+update(dt: number) {
+  // ... 其他游戏逻辑
+  redDotManager.flush() // 批量触发红点事件
 }
 ```
 
@@ -694,4 +818,64 @@ function closeShop() {
     // 或者清空所有
     redDotManager.clearAll()
 }
+
+// ❌ 错误：忘记调用 flush
+function updateRedDot() {
+    redDotManager.setCount('shop.weapon', 5)
+    // 忘记调用 flush，红点不会更新
+}
+
+// ✅ 正确：在游戏循环中调用 flush
+update(dt: number) {
+    // ... 其他游戏逻辑
+    redDotManager.flush() // 批量触发红点事件
+}
+```
+
+## 常见问题
+
+### Q: 为什么红点不显示？
+
+A: 确保在游戏循环中调用了 `flush()`：
+
+```ts
+update(dt: number) {
+  redDotManager.flush() // 必须调用
+}
+```
+
+### Q: 如何调试红点事件？
+
+A: 在 EventManager 中开启调试模式：
+
+```ts
+eventManager.setDebug(true)
+```
+
+### Q: 批处理会影响实时性吗？
+
+A: 不会。批处理只是延迟到帧结束时触发，通常在16ms内（60fps），用户感知不到延迟。如果需要立即触发，使用 `notifyImmediate()`。
+
+### Q: 如何立即触发红点事件？
+
+A: 使用 `notifyImmediate()` 绕过批处理：
+
+```ts
+redDotManager.setCount('shop.weapon', 5)
+redDotManager.notifyImmediate('shop.weapon') // 立即触发
+```
+
+### Q: 为什么要使用批处理？
+
+A: 批处理解决了树形结构冒泡导致的性能问题。例如：
+
+```ts
+// 设置10个子节点
+for (let i = 1; i <= 10; i++) {
+  redDotManager.setCount(`shop.item${i}`, i)
+}
+
+// 不使用批处理：父节点 'shop' 会被触发10次
+// 使用批处理：父节点 'shop' 只触发1次（10倍性能提升）
+redDotManager.flush()
 ```

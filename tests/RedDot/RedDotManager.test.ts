@@ -120,11 +120,13 @@ describe("RedDot功能", () => {
         });
 
         managerWithEvent.setCount('shop.weapon', 5);
+        managerWithEvent.flush(); // 需要调用 flush 触发事件
         expect(notifyCount).toBe(1);
         expect(lastData.count).toBe(5);
         expect(lastData.show).toBe(true);
 
         managerWithEvent.clear('shop.weapon');
+        managerWithEvent.flush(); // 需要调用 flush 触发事件
         expect(notifyCount).toBe(2);
         expect(lastData.count).toBe(0);
         expect(lastData.show).toBe(false);
@@ -218,14 +220,172 @@ describe("RedDot功能", () => {
         });
 
         managerWithEvent.setCount('shop', 5);
+        managerWithEvent.flush();
         expect(notifyCount).toBe(1);
 
-        // 相同值不触发通知
-        managerWithEvent.setCount('shop', 5);
+        // 相同值，force=false 不触发通知
+        managerWithEvent.setCount('shop', 5, false);
+        managerWithEvent.flush();
         expect(notifyCount).toBe(1);
 
         // force=true 强制触发通知
         managerWithEvent.setCount('shop', 5, true);
+        managerWithEvent.flush();
         expect(notifyCount).toBe(2);
+    });
+
+    test("批处理 - flush 批量触发事件", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
+
+        let shopWeaponNotifyCount = 0;
+        let shopArmorNotifyCount = 0;
+        let shopNotifyCount = 0;
+
+        eventManager.on('redDot_shop.weapon', (event, data) => {
+            shopWeaponNotifyCount++;
+        });
+
+        eventManager.on('redDot_shop.armor', (event, data) => {
+            shopArmorNotifyCount++;
+        });
+
+        eventManager.on('redDot_shop', (event, data) => {
+            shopNotifyCount++;
+        });
+
+        // 设置多个子节点，但不会立即触发事件
+        managerWithEvent.setCount('shop.weapon', 5);
+        managerWithEvent.setCount('shop.armor', 3);
+        managerWithEvent.setCount('shop.potion', 2);
+
+        // 此时事件还未触发
+        expect(shopWeaponNotifyCount).toBe(0);
+        expect(shopArmorNotifyCount).toBe(0);
+        expect(shopNotifyCount).toBe(0);
+
+        // 调用 flush 批量触发
+        managerWithEvent.flush();
+
+        // 每个节点只触发一次
+        expect(shopWeaponNotifyCount).toBe(1);
+        expect(shopArmorNotifyCount).toBe(1);
+        expect(shopNotifyCount).toBe(1);
+    });
+
+    test("批处理 - 同一节点多次修改只触发一次", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
+
+        let notifyCount = 0;
+        let lastData: any = null;
+
+        eventManager.on('redDot_shop', (event, data) => {
+            notifyCount++;
+            lastData = data;
+        });
+
+        // 同一帧内多次修改同一节点
+        managerWithEvent.setCount('shop.weapon', 1);
+        managerWithEvent.setCount('shop.weapon', 2);
+        managerWithEvent.setCount('shop.weapon', 3);
+        managerWithEvent.setCount('shop.armor', 5);
+
+        // flush 前不触发
+        expect(notifyCount).toBe(0);
+
+        // flush 后只触发一次，使用最新数据
+        managerWithEvent.flush();
+        expect(notifyCount).toBe(1);
+        expect(lastData.count).toBe(8); // 3 + 5
+    });
+
+    test("批处理 - flush 后队列清空", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
+
+        let notifyCount = 0;
+
+        eventManager.on('redDot_shop', (event, data) => {
+            notifyCount++;
+        });
+
+        managerWithEvent.setCount('shop', 5);
+        managerWithEvent.flush();
+        expect(notifyCount).toBe(1);
+
+        // 再次 flush 不应该触发
+        managerWithEvent.flush();
+        expect(notifyCount).toBe(1);
+    });
+
+    test("批处理 - flush 过程中产生的新事件不影响当前批次", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
+
+        let notifyCount = 0;
+
+        eventManager.on('redDot_shop', (event, data) => {
+            notifyCount++;
+            // 在事件处理中修改其他节点
+            if (notifyCount === 1) {
+                managerWithEvent.setCount('shop.weapon', 10);
+            }
+        });
+
+        managerWithEvent.setCount('shop', 5);
+        managerWithEvent.flush();
+
+        // 第一次 flush 只触发一次
+        expect(notifyCount).toBe(1);
+
+        // 第二次 flush 触发新产生的事件
+        managerWithEvent.flush();
+        expect(notifyCount).toBe(2);
+    });
+
+    test("notifyImmediate - 立即触发绕过批处理", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
+
+        let notifyCount = 0;
+
+        eventManager.on('redDot_shop', (event, data) => {
+            notifyCount++;
+        });
+
+        // 使用 notifyImmediate 立即触发
+        managerWithEvent.setCount('shop', 5);
+        expect(notifyCount).toBe(0); // 还未触发
+
+        managerWithEvent.notifyImmediate('shop');
+        expect(notifyCount).toBe(1); // 立即触发
+
+        // flush 仍会触发一次（因为 setCount 收集了）
+        managerWithEvent.flush();
+        expect(notifyCount).toBe(2);
+    });
+
+    test("批处理 - 树形冒泡去重", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
+
+        let shopNotifyCount = 0;
+
+        eventManager.on('redDot_shop', (event, data) => {
+            shopNotifyCount++;
+        });
+
+        // 设置10个子节点，每个都会向上冒泡到 shop
+        for (let i = 1; i <= 10; i++) {
+            managerWithEvent.setCount(`shop.item${i}`, i);
+        }
+
+        // flush 前不触发
+        expect(shopNotifyCount).toBe(0);
+
+        // flush 后父节点只触发一次（去重效果）
+        managerWithEvent.flush();
+        expect(shopNotifyCount).toBe(1);
     });
 });

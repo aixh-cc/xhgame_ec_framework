@@ -39,10 +39,56 @@ export class RedDotNode {
 
 /**
  * 红点管理器 - 整合数据层和UI层
- * - 数据层：管理红点树结构
- * - 状态管理：对象池、活跃红点跟踪
- * - UI层：委托给 IRedDotDrive 实现
- * - 事件通知：通过依赖注入的 EventManager
+ *
+ * ## 核心功能
+ * - **数据层**：管理红点树结构，支持层级关系（如 'shop.weapon.sword'）
+ * - **状态管理**：对象池、活跃红点跟踪
+ * - **UI层**：委托给 IRedDotDrive 实现平台相关的UI渲染
+ * - **事件通知**：通过依赖注入的 EventManager 发送红点变化事件
+ * - **批处理优化**：收集同一帧内的红点变化，批量触发事件，避免重复更新
+ *
+ * ## 批处理机制
+ * 为了优化性能，红点管理器采用批处理模式：
+ * - `setCount()` 只收集变化到待通知队列，不立即触发事件
+ * - 调用 `flush()` 批量触发所有待处理的事件
+ * - 同一节点在一帧内多次修改，只触发一次事件（使用最新数据）
+ * - 树形结构的父节点自动去重（10个子节点变化，父节点只触发1次）
+ *
+ * ## 使用示例
+ *
+ * ### 基础用法
+ * ```typescript
+ * const manager = new RedDotManager(drive, eventManager);
+ *
+ * // 设置红点数量（收集到队列）
+ * manager.setCount('shop.weapon', 5);
+ * manager.setCount('shop.armor', 3);
+ *
+ * // 在游戏循环中批量触发事件
+ * update(dt: number) {
+ *   manager.flush(); // 批量触发红点事件
+ * }
+ * ```
+ *
+ * ### 监听红点事件
+ * ```typescript
+ * eventManager.on('redDot_shop.weapon', (event, data) => {
+ *   console.log(data.show, data.count); // { show: true, count: 5 }
+ * });
+ * ```
+ *
+ * ### 立即触发（特殊场景）
+ * ```typescript
+ * // 绕过批处理，立即触发事件
+ * manager.notifyImmediate('shop.weapon');
+ * ```
+ *
+ * ## 性能优化
+ * - **优化前**：10个子节点更新 → 父节点触发10次 → 10次UI更新
+ * - **优化后**：10个子节点更新 → 收集到队列 → flush时父节点触发1次 → 1次UI更新
+ * - **性能提升**：10倍（取决于同帧内的子节点数量）
+ *
+ * @see tests/RedDot/RedDotManager.test.ts 完整测试用例
  */
 export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
     // === 数据层属性 ===
@@ -62,6 +108,9 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
         fontSize: 12,
         numberColor: { r: 255, g: 255, b: 255, a: 255 }
     };
+
+    // === 批处理属性 ===
+    private _pendingNotifyKeys: Set<string> = new Set();
 
     constructor(drive: T, eventManager?: EventManager<RedDotEventMap>) {
         this._drive = drive;
@@ -144,10 +193,48 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
     }
 
     /**
-     * 通知红点变化（私有方法）
+     * 通知红点变化（收集到待通知队列）
      */
     private notifyChange(key: string): void {
-        if (!this._eventManager) return; // 兼容不使用事件的场景
+        if (!this._eventManager) return;
+
+        // 收集当前节点及所有父节点到待通知队列
+        let node = this.nodeMap.get(key);
+        while (node) {
+            this._pendingNotifyKeys.add(node.key);
+            node = node.parent;
+        }
+    }
+
+    /**
+     * 刷新：批量触发所有待处理的红点事件
+     * 应在游戏循环的每帧结束时调用
+     */
+    flush(): void {
+        if (!this._eventManager || this._pendingNotifyKeys.size === 0) return;
+
+        // 复制并清空队列（避免在触发过程中产生的新事件影响当前批次）
+        const keysToNotify = new Set(this._pendingNotifyKeys);
+        this._pendingNotifyKeys.clear();
+
+        // 批量触发事件
+        keysToNotify.forEach(key => {
+            const node = this.nodeMap.get(key);
+            if (node) {
+                const count = node.getTotalCount();
+                this._eventManager.emit(`redDot_${key}`, {
+                    show: count > 0,
+                    count
+                });
+            }
+        });
+    }
+
+    /**
+     * 立即通知（绕过批处理，用于特殊场景）
+     */
+    notifyImmediate(key: string): void {
+        if (!this._eventManager) return;
 
         let node = this.nodeMap.get(key);
         while (node) {

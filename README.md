@@ -9,6 +9,7 @@
 - UI 管理：驱动可插拔，统一打开/移除/状态检查，Toast/Loading 控制
 - 事件中心：发布-订阅、按 tag 批量清理、重复监听去重、泛型类型安全
 - 时间系统：播放/暂停/重置、一次性与循环调度、由驱动更新
+- 红点系统：树形结构管理、批处理优化、事件通知、UI层对象池
 - 资源与表：工厂/表管理的轻量封装
 - 存储与加密：可选 md5+加密包装，类型化读写
 - 网络抽象：Http/Socket 接口聚合
@@ -22,6 +23,7 @@ src/                # 核心运行时代码
   Ui/               # UI 管理
   Event/            # 事件系统
   Time/             # 时间系统
+  RedDot/           # 红点系统
   Storage/          # 存储管理
   Crypto/           # 加密
   Net/              # 网络抽象
@@ -72,6 +74,12 @@ npm run build
 ### 时间（`src/Time`）
 - `TimeSystem`：播放/暂停/重置、一次性与循环调度，`updateByDrive(dt)` 驱动
 - 参考：`tests/Time/TimeSystem.test.ts`
+
+### 红点（`src/RedDot`）
+- `RedDotManager`：树形结构管理、批处理优化、事件通知、UI层对象池
+- 批处理机制：`setCount()` 收集变化，`flush()` 批量触发事件，避免重复更新
+- 性能优化：10个子节点更新，父节点只触发1次事件（10倍性能提升）
+- 参考：`tests/RedDot/RedDotManager.test.ts`
 
 ### 存储（`src/Storage`）
 - `StorageManager`：可选加密包装、`set/get/remove/clear` 与类型化读取
