@@ -206,4 +206,26 @@ describe("RedDot功能", () => {
         manager.setCount('shop.weapon', 0);
         expect(manager.getShow('shop.weapon')).toBe(false);
     });
+
+    test("force参数 - 强制触发通知", () => {
+        const eventManager = new EventManager<RedDotEventMap>();
+        const managerWithEvent = new RedDotManager(drive, eventManager);
+
+        let notifyCount = 0;
+
+        eventManager.on('redDot_shop', (event, data) => {
+            notifyCount++;
+        });
+
+        managerWithEvent.setCount('shop', 5);
+        expect(notifyCount).toBe(1);
+
+        // 相同值不触发通知
+        managerWithEvent.setCount('shop', 5);
+        expect(notifyCount).toBe(1);
+
+        // force=true 强制触发通知
+        managerWithEvent.setCount('shop', 5, true);
+        expect(notifyCount).toBe(2);
+    });
 });

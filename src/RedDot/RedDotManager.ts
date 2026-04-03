@@ -106,10 +106,10 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
     /**
      * 设置红点数量
      */
-    setCount(key: string, count: number): void {
+    setCount(key: string, count: number, force?: boolean): void {
         this.register(key);
         const node = this.nodeMap.get(key);
-        if (node && node.count !== count) {
+        if (node && (node.count !== count || force === true)) {
             node.count = count;
             this.notifyChange(key);
         }
