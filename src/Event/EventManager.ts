@@ -96,27 +96,27 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
         this._eventIndex_TagArray.length = this._eventIndex_TagArray.length - 1
     }
 
-    /** 监听事件；在相同 `name+event+context` 时自动去重 */
+    /** 监听事件；在相同 `name+context` 时自动去重（替换旧监听器） */
     on<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
     on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
     on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
         if (this._eventIndex_NameArray.indexOf(name) > -1) {
             let indexs = getAllIndices(this._eventIndex_NameArray, name)
-            let is_has_same = false
+            let existingEventItemId: number | null = null
             for (let i = 0; i < indexs.length; i++) {
                 let _index = indexs[i]
                 let eventItem = this._eventIndex_EventItemArray[_index]
-                if (eventItem && eventItem.context === context && eventItem.event == event) {
-                    is_has_same = true
+                if (eventItem && eventItem.context === context) {
+                    existingEventItemId = eventItem.id
                     break;
                 }
             }
-            if (is_has_same) {
-                this._debug('有重复了,不进行push')
-            } else {
-                this._debug('event不同,进行push')
-                this.createEventItem(name, event, context)
+            if (existingEventItemId !== null) {
+                this._debug('相同 name+context 已存在,先删除旧的')
+                this.removeEventItem(existingEventItemId)
             }
+            this._debug('添加新的监听器')
+            this.createEventItem(name, event, context)
         } else {
             this.createEventItem(name, event, context)
             this._debug('在通过 事件名name=' + name + ' 在 name2EventItemsMap 中未找到,则新增一个')

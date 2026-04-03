@@ -169,6 +169,37 @@ describe("Event功能", () => {
         expect(obj1_on_arr).toEqual(effective_emit_arr)
     });
 
+    test("按 name+context 去重（匿名函数场景）", () => {
+        let callCount = 0
+        const context = {}
+
+        // 模拟 bindRedDot 场景：相同 name + context，每次传入新的匿名函数
+        // 按 name+context 去重，后续调用会替换之前的监听器
+        eventManager.on('redDot_key1', (event, data) => { callCount++ }, context)
+        eventManager.on('redDot_key1', (event, data) => { callCount++ }, context)
+        eventManager.on('redDot_key1', (event, data) => { callCount++ }, context)
+
+        eventManager.emit('redDot_key1', {}, context)
+
+        // 只保留最后一个监听器，触发1次
+        expect(callCount).toBe(1)
+    });
+
+    test("按 name+context 去重（同一函数引用）", () => {
+        let callCount = 0
+        const context = {}
+        const callback = (event: any, data: any) => { callCount++ }
+
+        eventManager.on('redDot_key1', callback, context)
+        eventManager.on('redDot_key1', callback, context)
+        eventManager.on('redDot_key1', callback, context)
+
+        eventManager.emit('redDot_key1', {}, context)
+
+        // 只保留最后一个监听器，触发1次
+        expect(callCount).toBe(1)
+    });
+
     test("测试设置tag", () => {
         let emit_arr = []
         let effective_emit_arr = []
