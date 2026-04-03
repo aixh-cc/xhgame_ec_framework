@@ -156,13 +156,13 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
      * 设置红点数量
      * @param key 红点节点键名（支持层级，如 'a.b.c'）
      * @param count 新的红点数量
-     * @param force 是否强制更新（默认 true）
+     * @param ignoreChange 是否忽略数量变化（默认 false）
      * @returns 是否实际更新了红点数量
      */
-    setCount(key: string, count: number, force: boolean = true): boolean {
+    setCount(key: string, count: number, ignoreChange: boolean = false): boolean {
         this.register(key);
         const node = this.nodeMap.get(key);
-        if (node && (node.count !== count || force === true)) {
+        if (node && (node.count !== count || ignoreChange)) {
             node.count = count;
             this.notifyChange(key);
             return true;
