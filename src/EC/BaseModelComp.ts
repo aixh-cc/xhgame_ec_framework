@@ -41,10 +41,21 @@ export abstract class BaseModelComp extends Comp implements ISubject {
         }
         this._viewObservers.splice(observerIndex, 1);
     }
-    notify(is_update_now: boolean = false): void {
+
+    /**
+     * 
+     * 通知监听者
+     * @param is_update_now 是否立即更新
+     * @param oneViewObserver 只通知一个，只有is_update_now为true时才有效
+     */
+    notify(is_update_now: boolean = false, oneViewObserver: IObserver = null): void {
         if (is_update_now) {
-            for (const _viewObserver of this._viewObservers) {
-                _viewObserver.updateBySubject(this);
+            if (oneViewObserver) {
+                oneViewObserver.updateBySubject(this);
+            } else {
+                for (const _viewObserver of this._viewObservers) {
+                    _viewObserver.updateBySubject(this);
+                }
             }
         } else {
             this.setDirtyMark()
