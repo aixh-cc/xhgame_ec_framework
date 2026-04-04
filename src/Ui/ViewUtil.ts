@@ -3,9 +3,9 @@ import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
 import { IView } from "./View";
 
 export class ViewUtil {
-    static bindAttr(observer: IObserver, bindAttrMap: Record<string, string>): string[] {
+    static bindAttr(observer: IObserver, bindAttrMap: Record<string, string>): BaseModelComp[] {
         let keys = Object.keys(bindAttrMap);
-        let allCompNames = new Set<string>()
+        let allBaseModelComps: BaseModelComp[] = []
         for (let key of keys) {
             let _bindAttrLink: string = bindAttrMap[key]
             if (_bindAttrLink.indexOf('::') == -1) {
@@ -16,11 +16,13 @@ export class ViewUtil {
                 if (!modelComp) {
                     continue;
                 }
-                modelComp.attachObserver(observer)
-                allCompNames.add(compName)
+                if (allBaseModelComps.indexOf(modelComp) == -1) {
+                    allBaseModelComps.push(modelComp)
+                    modelComp.attachObserver(observer)
+                }
             }
         }
-        return [...allCompNames]
+        return [...allBaseModelComps]
     }
     static updateByModel(modelComp: BaseModelComp, observer: IView) {
         let bindAttrMap = observer.getBindAttrMap()
