@@ -168,12 +168,20 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
     /** 获取组件（按类） */
     getComponent<T extends Comp>(componentClass: new () => T): T | undefined {
         let hasIndex = this._components_class.indexOf(componentClass)
+        if (hasIndex === -1) {
+            console.error('无componentClass=' + componentClass)
+            return undefined
+        }
         return this.components[hasIndex] as T;
     }
 
     /** 获取组件（按类名） */
     getComponentByName<T extends Comp>(className: string): T | undefined {
         let hasIndex = this._components_names.indexOf(className)
+        if (hasIndex === -1) {
+            console.error('无className=' + className)
+            return undefined
+        }
         return this.components[hasIndex] as T;
     }
 }
