@@ -92,7 +92,7 @@ bun install
 
 ```bash
 # 运行所有测试
-bun ./tests/run.test.mjs
+bun test
 
 # 运行特定模块测试
 bun ./tests/core/EC/EC.test.ts

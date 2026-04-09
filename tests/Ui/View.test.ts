@@ -71,4 +71,58 @@ describe("View功能", () => {
         expect(testView.personBooks).toEqual(['l', 's', 'w'])
         expect(Comp.isDirtyComp(testViewComp)).toBe(false)
     });
+
+    test("测试组件回收时清理 observers", async () => {
+        Comp.clearPool();
+
+        let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
+        let testViewComp = await mygameEntiy.attachComponent(TestViewComp).done() as TestViewComp
+
+        // 创建 View 并绑定
+        let testView = new TestView()
+        testView.setViewComp(testViewComp)
+
+        expect(testViewComp.getObservers().length).toBe(1)
+
+        // 卸载组件（会回收到池子）
+        testViewComp.detach()
+
+        // 验证 observers 已清理（防止池子污染）
+        expect(testViewComp.getObservers().length).toBe(0)
+
+        Entity.removeEntity(mygameEntiy)
+    });
+
+    test("测试组件重用不会触发旧 View", async () => {
+        Comp.clearPool();
+
+        let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
+
+        // 第一次使用
+        let testViewComp1 = await mygameEntiy.attachComponent(TestViewComp).done() as TestViewComp
+        let testView1 = new TestView()
+        testView1.setViewComp(testViewComp1)
+        testViewComp1.tips = 'first'
+        testViewComp1.notify(true)
+        expect(testView1.tips).toBe('first')
+
+        // 卸载组件（回收到池子）
+        testViewComp1.detach()
+
+        // 第二次使用（从池子取出）
+        let testViewComp2 = await mygameEntiy.attachComponent(TestViewComp).done() as TestViewComp
+        expect(testViewComp2).toBe(testViewComp1) // 应该是同一个实例（从池子取出）
+
+        let testView2 = new TestView()
+        testView2.setViewComp(testViewComp2)
+        testViewComp2.tips = 'second'
+        testViewComp2.notify(true)
+
+        // 验证：testView1 不应该被更新（因为已经解绑）
+        expect(testView1.tips).toBe('first') // 保持旧值
+        expect(testView2.tips).toBe('second') // 新 View 正常更新
+
+        testViewComp2.detach()
+        Entity.removeEntity(mygameEntiy)
+    });
 });

@@ -43,6 +43,13 @@ export abstract class Comp {
         }
         comp.onDetach();
         comp.entity = null
+
+        // 特殊处理：如果是 BaseModelComp，清理所有 observers
+        // 防止组件回收到池子时保留旧的 observer 引用
+        if ('_viewObservers' in comp && Array.isArray((comp as any)._viewObservers)) {
+            (comp as any)._viewObservers = [];
+        }
+
         comp.reset();
         // 获取组件实例的构造函数
         const compClass = comp.constructor as new () => Comp;

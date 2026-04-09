@@ -154,4 +154,4 @@ onClickItem: any = null
 - [ ] `IUiDrive` 实现类添加 `getFirstUIView` 方法
 - [ ] `IItem` 实现类属性加上显式类型声明
 - [ ] 确认构建无 warning：`npm run build`
-- [ ] 确认测试通过：`bun ./tests/run.test.mjs`
+- [ ] 确认测试通过：`bun test`

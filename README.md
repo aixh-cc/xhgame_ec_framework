@@ -46,7 +46,7 @@ bun install
 
 ### 运行测试
 ```bash
-bun ./tests/run.test.mjs
+bun test
 ```
 
 ### 构建
