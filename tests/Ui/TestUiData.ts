@@ -63,6 +63,24 @@ export class TestViewComp extends BaseModelComp {
     }
 }
 
+// 全局 ModelComp（模拟 PlayerAtlasModelComp 等全局数据组件）
+@autoBindForDI('GlobalModelComp')
+export class GlobalModelComp extends BaseModelComp {
+    compName: string = 'GlobalModelComp'
+    initBySystems: ISystemStatic[] = []
+
+    globalData: string = 'global_default'
+    count: number = 0
+
+    reset() {
+        this.globalData = 'global_default'
+        this.count = 0
+    }
+    onDetach() {
+
+    }
+}
+
 export class TestNode implements INode {
     name: string = ''
     constructor(name: string) {

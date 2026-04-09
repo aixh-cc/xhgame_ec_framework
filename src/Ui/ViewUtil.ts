@@ -24,6 +24,21 @@ export class ViewUtil {
         }
         return [...allBaseModelComps]
     }
+    /**
+     * 解绑观察者与 ModelComp 的绑定关系
+     * @param observer 观察者（通常是 View）
+     * @param modelComps 需要解绑的 ModelComp 数组
+     */
+    static unBindAttr(observer: IObserver, modelComps: BaseModelComp[]): void {
+        if (!modelComps || modelComps.length === 0) {
+            return;
+        }
+        for (let modelComp of modelComps) {
+            if (modelComp) {
+                modelComp.detachObserver(observer);
+            }
+        }
+    }
     static updateByModel(modelComp: BaseModelComp, observer: IView) {
         let bindAttrMap = observer.getBindAttrMap()
         if (bindAttrMap == null) {

@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { TestView, TestViewComp } from "./TestUiData";
+import { TestView, TestViewComp, GlobalModelComp } from "./TestUiData";
 import { Entity } from "../../src/EC/Entity";
 import { GameEntity } from "../EC/TestECData";
 import { Comp } from "../../src/EC/Comp";
@@ -123,6 +123,63 @@ describe("View功能", () => {
         expect(testView2.tips).toBe('second') // 新 View 正常更新
 
         testViewComp2.detach()
+        Entity.removeEntity(mygameEntiy)
+    });
+
+    test("测试 View 关闭时清理全局 ModelComp 的 observers", async () => {
+        Comp.clearPool();
+
+        let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
+
+        // 创建全局 ModelComp（模拟 PlayerAtlasModelComp，不会 detach）
+        let globalModelComp = await mygameEntiy.attachComponent(GlobalModelComp).done() as GlobalModelComp
+        globalModelComp.globalData = 'initial'
+        globalModelComp.count = 100
+
+        // 创建 View 的专属 ViewComp
+        let testViewComp1 = await mygameEntiy.attachComponent(TestViewComp).done() as TestViewComp
+
+        // 创建 View，但不调用 constructor 中的 onLoad（避免自动绑定）
+        class TestViewWithoutAutoLoad extends TestView {
+            constructor() {
+                super()
+                // 清空 constructor 中的自动绑定
+                this.clearBindAttrMap()
+            }
+        }
+
+        let testView1 = new TestViewWithoutAutoLoad()
+        testView1.setViewComp(testViewComp1)
+
+        // 手动绑定：自己的 ViewComp + 全局 ModelComp
+        testView1.setBindAttrMap({
+            "tips": 'TestViewComp::tips',  // 绑定自己的 ViewComp
+            "personAge": 'GlobalModelComp::count'  // 绑定全局 ModelComp
+        })
+
+        // 验证：testView1 绑定了 TestViewComp 和 GlobalModelComp
+        expect(testViewComp1.getObservers().length).toBe(1)
+        expect(globalModelComp.getObservers().length).toBe(1)
+
+        // 触发更新
+        globalModelComp.notify(true)
+        expect(testView1.personAge).toBe(100)
+
+        // 关闭 View
+        testView1.closeView()  // 会 detach testViewComp1，并清理所有绑定
+
+        // 验证：testViewComp1 的 observers 被清理（因为组件被 detach）
+        expect(testViewComp1.getObservers().length).toBe(0)
+        // 验证：globalModelComp 的 observer 也被清理
+        expect(globalModelComp.getObservers().length).toBe(0)
+
+        // 更新全局数据，testView1 不会再收到通知
+        globalModelComp.count = 200
+        globalModelComp.notify(true)
+        expect(testView1.personAge).toBe(100)  // testView1 不再更新
+
+        // 清理
+        globalModelComp.detach()
         Entity.removeEntity(mygameEntiy)
     });
 });
