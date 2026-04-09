@@ -16,7 +16,7 @@ bun install
 npm run build
 
 # 运行测试
-bun ./tests/run.test.mjs
+bun test
 
 # 清理构建产物
 npm run clean
