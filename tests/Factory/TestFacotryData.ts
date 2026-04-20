@@ -30,7 +30,7 @@ export abstract class BaseTestItem implements IItem {
         this.positions = [0, 0, 0]
     }
     mock_vm: any = null
-    getViewVm<T>(): T {
+    getBodyView<T>(): T {
         if (this.mock_vm == null) {
             this.mock_vm = {}
         }

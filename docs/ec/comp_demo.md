@@ -76,15 +76,15 @@ export class GateGroupMissionViewSystem extends System {
             let missionUiItem = xhgame.factory.getFactory(xhgame.factory.enums.uiItem).produceItem('mission_item')
             missionUiItem.positions = itemsPositions[_index]
             missionUiItem.itemsIndex = _index
-            let vm = missionUiItem.getViewVm<IMissionItemViewVM>()
-            vm.starNum = _iMissionItem.maxStar
-            vm.isFight = false
-            vm.battleId = _iMissionItem.battleId
+            let bodyView = missionUiItem.getBodyView<IMissionItemView>()  
+            bodyView.starNum = _iMissionItem.maxStar
+            bodyView.isFight = false
+            bodyView.battleId = _iMissionItem.battleId
             if (_iMissionItem.maxScore == 0) {
-                vm.isActive = false
+                bodyView.isActive = false
             }
             if (_iMissionItem.battleId <= maxBattleId) {
-                vm.isActive = true
+                bodyView.isActive = true
             }
             missionUiItem.onClickCallback = () => {
                 console.log('clickMissionItem', missionUiItem.itemsIndex)
@@ -94,7 +94,7 @@ export class GateGroupMissionViewSystem extends System {
             comp.uiItems.push(missionUiItem)
             if (playerModel.selectedBattleId == _iMissionItem.battleId) {
                 comp.selectedIndex = _iMissionItem.index
-                vm.isFight = true
+                bodyView.isFight = true
             }
         })
     }
@@ -104,15 +104,15 @@ export class GateGroupMissionViewSystem extends System {
         console.log('玩家点击了MissionItem', uiItem)
         const playerModel = xhgame.gameEntity.safeGetComponentByRegisterName('PlayerModelComp')
         const maxBattleId = playerModel.playerInfo.maxBattleId
-        let vm = uiItem.getViewVm<IMissionItemViewVM>()
-        if (vm.battleId > maxBattleId) {
-            console.log('vm.battleId > maxBattleId')
+        let bodyView = uiItem.getBodyView<IMissionItemView>()  
+        if (bodyView.battleId > maxBattleId) {
+            console.log('bodyView.battleId > maxBattleId')
             return // 不能点击
         }
-        vm.isFight = true
+        bodyView.isFight = true
         let pre_uiItem = comp.uiItems[comp.selectedIndex]
-        let pre_vm = pre_uiItem.getViewVm<IMissionItemViewVM>()
-        pre_vm.isFight = false
+        let pre_bodyView = pre_uiItem.getBodyView<IMissionItemView>()  
+        pre_bodyView.isFight = false
         // 
         comp.selectedIndex = uiItemIndex
     }

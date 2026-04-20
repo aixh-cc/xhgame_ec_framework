@@ -57,10 +57,6 @@ class CocosUiItem {
 **核心方法**：
 ```typescript
 // 获取 ViewModel 实例
-getModelView(): CocosBaseItemView
-
-// 获取 ViewModel 接口（类型安全）
-getViewVm<T>(): T
 
 // 场景管理
 toScene(nodePath?: string): void  // 添加到场景
@@ -152,13 +148,7 @@ uiItem.onClickCallback = (item) => {
 }
 
 // 4. 获取 ViewModel 并绑定数据
-const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
-vm.swordId = swordData.swordId
-vm.swordNo = swordData.config.goodsNo
-vm.swordName = swordData.config.name
-vm.is_lock = !swordData.isCollected
-vm.star = swordData.playerSword.level
-vm.has_fragment_num = swordData.fragmentCount
+uiItem.getBodyView<IAtlasSwordItemView>().setData(swordData)
 
 // 5. 显示到场景
 uiItem.toScene()
@@ -183,11 +173,7 @@ virtualGrid.initVirtualGrid(
         }
 
         // 设置 ViewModel 数据
-        const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
-        vm.swordId = data.swordId
-        vm.swordNo = data.config.goodsNo
-        vm.is_lock = !data.isCollected
-        vm.star = data.playerSword.level
+        //
     }
 )
 ```
@@ -226,7 +212,7 @@ interface IAtlasSword { ... }
 
 // UI 层：统一管理容器
 class CocosUiItem {
-    getViewVm<T>(): T  // 桥接到 ViewModel
+    getBodyView<T>(): T  // 桥接到 ViewModel
 }
 
 // ViewModel 层：专注显示逻辑
@@ -289,7 +275,7 @@ export class BunUiItem extends BaseBunItem implements IUiItem {
     // 关键：使用 mock_vm 模拟 ViewModel
     mock_vm: any = null
 
-    getViewVm<T>(): T {
+    getBodyView<T>(): T {
         if (this.mock_vm == null) {
             this.mock_vm = {}
         }
@@ -314,25 +300,25 @@ const uiItem = xhgame.factory
     .getFactory(xhgame.factory.enums.uiItem)
     .produceItem('atlas_sword_item')  // 返回 CocosUiItem
 
-const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
-vm.swordId = 1001
-vm.is_lock = false
-vm.star = 3
+const bodyView = uiItem.getBodyView<IAtlasSwordItemView>()
+bodyView.setData(swordData)
+bodyView.is_lock = false
+bodyView.star = 3
 
 // 在 Bun 测试环境中运行（完全相同的代码！）
 const uiItem = xhgame.factory
     .getFactory(xhgame.factory.enums.uiItem)
     .produceItem('atlas_sword_item')  // 返回 BunUiItem
 
-const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
-vm.swordId = 1001  // 写入 mock_vm.swordId
-vm.is_lock = false // 写入 mock_vm.is_lock
-vm.star = 3        // 写入 mock_vm.star
+const bodyView = uiItem.getBodyView<IAtlasSwordItemView>()
+bodyView.setData(swordData)
+bodyView.is_lock = false
+bodyView.star = 3
 
 // 验证数据
-assert(vm.swordId === 1001)
-assert(vm.is_lock === false)
-assert(vm.star === 3)
+assert(bodyView.swordId === 1001)
+assert(bodyView.is_lock === false)
+assert(bodyView.star === 3)
 ```
 
 ### 完整测试用例
@@ -390,12 +376,12 @@ test('测试100场战斗', async () => {
 **3. 调试业务逻辑**
 ```typescript
 // 不需要 Cocos 环境，直接测试数据流
-const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
-vm.swordId = 1001
+const bodyView = uiItem.getBodyView<IAtlasSwordItemView>()
+bodyView.swordId = 1001
 
-console.log(vm)  // { swordId: 1001 }
-// 在 Cocos 中，vm 是真实的 AtlasSwordItemView 实例
-// 在 Bun 中，vm 是 mock_vm 对象
+console.log(bodyView)  // { swordId: 1001 }
+// 在 Cocos 中，bodyView 是真实的 AtlasSwordItemView 实例
+// 在 Bun 中，bodyView 是 mock_vm 对象
 // 但业务代码完全相同！
 ```
 
@@ -405,21 +391,21 @@ console.log(vm)  // { swordId: 1001 }
 ```typescript
 // IUiItem 接口定义了契约
 interface IUiItem {
-    getViewVm<T>(): T
+    getBodyView<T>(): T
     toScene(): void
     toPool(): void
 }
 
 // CocosUiItem 实现：真实 UI
 class CocosUiItem implements IUiItem {
-    getViewVm<T>(): T {
+    getBodyView<T>(): T {
         return this.node.getComponent(CocosBaseItemView) as T
     }
 }
 
 // BunUiItem 实现：模拟 UI
 class BunUiItem implements IUiItem {
-    getViewVm<T>(): T {
+    getBodyView<T>(): T {
         return this.mock_vm as T
     }
 }
@@ -536,9 +522,9 @@ const goodsItem = xhgame.factory
     .getFactory(xhgame.factory.enums.uiItem)
     .produceItem('goods_item')
 
-const vm = goodsItem.getViewVm<IGoodsItemViewVM>()
-vm.goodsNo = 'gold_coin'
-vm.num = 100
+const bodyView = goodsItem.getBodyView<IGoodsItemView>()
+bodyView.goodsNo = 'gold_coin'
+bodyView.num = 100
 
 goodsItem.toScene()
 ```
@@ -547,28 +533,28 @@ goodsItem.toScene()
 
 ```typescript
 // 方式 1: 直接设置（适合简单场景）
-const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
-vm.swordNo = data.config.goodsNo
-vm.star = data.playerSword.level
+const bodyView = uiItem.getBodyView<IAtlasSwordItemView>()
+bodyView.swordNo = data.config.goodsNo
+bodyView.star = data.playerSword.level
 
 // 方式 2: 封装设置函数（适合复杂逻辑）
 class GateAtlasDialogViewSystem {
     static setUiItemData(uiItem: IUiItem, data: IAtlasSword) {
-        const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
+        const bodyView = uiItem.getBodyView<IAtlasSwordItemView>()
 
         // 复杂的数据映射逻辑
-        vm.swordId = data.swordId
-        vm.swordNo = data.config.goodsNo
+        bodyView.swordId = data.swordId   
+        bodyView.swordNo = data.config.goodsNo
 
         if (data.playerSword && data.playerSword.level > 0) {
-            vm.level_up_fragment_num =
+            bodyView.level_up_fragment_num =
                 data.config.upgradeFragments[data.playerSword.level - 1]
         } else {
-            vm.level_up_fragment_num = data.config.fragmentCount
+            bodyView.level_up_fragment_num = data.config.fragmentCount
         }
 
-        vm.is_lock = !data.isCollected
-        vm.star = data.isCollected ? data.playerSword.level : 0
+        bodyView.is_lock = !data.isCollected
+        bodyView.star = data.isCollected ? data.playerSword.level : 0
     }
 }
 
@@ -582,11 +568,11 @@ GateAtlasDialogViewSystem.setUiItemData(uiItem, swordData)
 // UI 层处理通用交互
 uiItem.onClickCallback = (item) => {
     // 获取 ViewModel 数据
-    const vm = item.getViewVm<IAtlasSwordItemVM>()
-    console.log('点击了剑', vm.swordId)
+    const bodyView = item.getBodyView<IAtlasSwordItemView>()
+    console.log('点击了剑', bodyView.swordId)
 
     // 触发业务逻辑
-    openSwordDetailDialog(vm.swordId)
+    openSwordDetailDialog(bodyView.swordId)
 }
 
 // 拖拽交互
@@ -595,9 +581,9 @@ uiItem.onStarted = (item, startX, startY, curX, curY) => {
     console.log('开始拖拽')
 }
 uiItem.onEnded = (item, startX, startY, endX, endY) => {
-    const vm = item.getViewVm<IUpJianzhenItemVM>()
+    const bodyView = item.getBodyView<IAtlasSwordItemView>()
     // 处理拖拽结束逻辑
-    handleDragEnd(vm.swordId, endX, endY)
+    handleDragEnd(bodyView.swordId, endX, endY)
 }
 ```
 
@@ -671,23 +657,23 @@ export class AtlasSwordItemView extends CocosBaseItemView {
 ```typescript
 export class GateAtlasDialogViewSystem {
     static setUiItemData(uiItem: IUiItem, data: IAtlasSword) {
-        const vm = uiItem.getViewVm<IAtlasSwordItemVM>()
+        const bodyView = uiItem.getBodyView<IAtlasSwordItemView>()
 
         // 复杂的转换逻辑集中在这里
         const config = xhgame.table
             .getTable(xhgame.table.enums.swordConfig)
             .getInfo(data.swordId)
 
-        vm.swordNo = config.goodsNo
-        vm.swordName = config.name
+        bodyView.swordNo = config.goodsNo
+        bodyView.swordName = config.name
 
         // 根据业务规则计算显示值
         if (data.isCollected) {
-            vm.is_lock = false
-            vm.star = data.playerSword.level
+            bodyView.is_lock = false
+            bodyView.star = data.playerSword.level
         } else {
-            vm.is_lock = true
-            vm.star = 0
+            bodyView.is_lock = true
+            bodyView.star = 0
         }
     }
 }

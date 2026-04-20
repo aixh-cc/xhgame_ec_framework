@@ -274,8 +274,6 @@ export class PlayerMissionModelComp extends BaseModelComp {
 ```typescript
 virtualGrid.initVirtualGrid('mission_item', 'path', (uiItem, data, index) => {
     uiItem.redDotKey = `gate.mission.item${index}`
-    const vm = uiItem.getViewVm<IMissionItemVM>()
-    vm.missionName = data.name
 })
 ```
 
