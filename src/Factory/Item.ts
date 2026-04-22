@@ -22,8 +22,6 @@ export interface IItem {
     baseAttrReset(): void
     /** 获取Item的BodyView */
     getBodyView<T>(): T
-    /** 保留1.0.0版本的,后续版本会移除 */
-    getViewVM<T>(): T
 }
 
 export interface IItemProduceDrive {
