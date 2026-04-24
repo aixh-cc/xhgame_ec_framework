@@ -4,7 +4,7 @@ import { Comp } from "./Comp";
  * 组件
  */
 export abstract class BaseModelComp extends Comp implements ISubject {
-    compName: string;
+    compName!: string;
     abstract reset(): void
     /**
      * 监听挂载
@@ -15,6 +15,10 @@ export abstract class BaseModelComp extends Comp implements ISubject {
     /** 所有model都需要挂载到DI中 */
     bindToDI() {
         DI.bindInstance(this.compName, this)
+    }
+    /** 组件移除时从 DI 容器解绑，防止池中旧实例被 DI 引用导致内存泄漏 */
+    protected onRemoveCleanup(): void {
+        DI.unbind(this.compName);
     }
     abstract onDetach(): void
     /**
@@ -48,7 +52,7 @@ export abstract class BaseModelComp extends Comp implements ISubject {
      * @param is_update_now 是否立即更新
      * @param oneViewObserver 只通知一个，只有is_update_now为true时才有效
      */
-    notify(is_update_now: boolean = false, oneViewObserver: IObserver = null): void {
+    notify(is_update_now: boolean = false, oneViewObserver: IObserver | null = null): void {
         if (is_update_now) {
             if (oneViewObserver) {
                 oneViewObserver.updateBySubject(this);

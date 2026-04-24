@@ -4,7 +4,7 @@
         "module": "commonjs",
         "experimentalDecorators": true,
         "strict": true,
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         "moduleResolution": "Node",
         "skipLibCheck": true,
         "esModuleInterop": true,
@@ -16,7 +16,8 @@
         },
         "types": [
             "@cocos/creator-types/engine",
-            "@cocos/creator-types/editor"
+            "@cocos/creator-types/editor",
+            "bun"
         ]
     },
     "include": [

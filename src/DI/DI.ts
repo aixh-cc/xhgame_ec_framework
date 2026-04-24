@@ -83,13 +83,17 @@ class DI {
     static make<T>(identifier: string | symbol | NewableFunction): T {
         const idStr = typeof identifier === 'string' ? identifier : (identifier as any).name || 'unknown';
         const container = this.getContainer();
+        if (!container.isBound(identifier)) {
+            console.warn(`[DI] make(${idStr}): 标识符未绑定，返回 null`)
+            return null as any;
+        }
         try {
             const instance = container.get<T>(identifier);
             return instance;
         } catch (error) {
-            // console.error(`DI.make: Failed to resolve ${idStr}`, error);
-            // throw error;
-            return null
+            // 已绑定但获取失败是编程错误（如循环依赖），应当抛出
+            console.error(`[DI] make(${idStr}): 已绑定但解析失败`, error);
+            throw error;
         }
     }
     /**

@@ -9,7 +9,7 @@ export class RedDotNode {
     key: string;
     count: number = 0;
     children: Map<string, RedDotNode> = new Map();
-    parent: RedDotNode = null;
+    parent: RedDotNode | null = null;
 
     constructor(key: string) {
         this.key = key;
@@ -25,7 +25,7 @@ export class RedDotNode {
             child.parent = this;
             this.children.set(childKey, child);
         }
-        return this.children.get(childKey);
+        return this.children.get(childKey)!;
     }
 
     getTotalCount(): number {
@@ -147,7 +147,7 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
                 current = current.addChild(path);
                 this.nodeMap.set(path, current);
             } else {
-                current = this.nodeMap.get(path);
+                current = this.nodeMap.get(path)!;
             }
         }
     }
@@ -199,10 +199,10 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
         if (!this._eventManager) return;
 
         // 收集当前节点及所有父节点到待通知队列
-        let node = this.nodeMap.get(key);
+        let node: RedDotNode | undefined = this.nodeMap.get(key);
         while (node) {
             this._pendingNotifyKeys.add(node.key);
-            node = node.parent;
+            node = node.parent ?? undefined;
         }
     }
 
@@ -222,7 +222,7 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
             const node = this.nodeMap.get(key);
             if (node) {
                 const count = node.getTotalCount();
-                this._eventManager.emit(`redDot_${key}`, {
+                this._eventManager!.emit(`redDot_${key}`, {
                     show: count > 0,
                     count
                 });
@@ -236,14 +236,14 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
     notifyImmediate(key: string): void {
         if (!this._eventManager) return;
 
-        let node = this.nodeMap.get(key);
+        let node: RedDotNode | undefined = this.nodeMap.get(key);
         while (node) {
             const count = node.getTotalCount();
-            this._eventManager.emit(`redDot_${node.key}`, {
+            this._eventManager!.emit(`redDot_${node.key}`, {
                 show: count > 0,
                 count
             });
-            node = node.parent;
+            node = node.parent ?? undefined;
         }
     }
 
@@ -255,7 +255,7 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
     addRedDot(targetNode: IRedDotNode, config?: IRedDotConfig): IRedDotInstance {
         // 如果已经有红点，直接返回
         if (this._activeRedDots.has(targetNode)) {
-            return this._activeRedDots.get(targetNode);
+            return this._activeRedDots.get(targetNode)!;
         }
 
         // 从对象池获取或创建新的红点
@@ -322,7 +322,7 @@ export class RedDotManager<T extends IRedDotDrive = IRedDotDrive> {
         let redDot: IRedDotInstance;
 
         if (this._pool.length > 0) {
-            redDot = this._pool.pop();
+            redDot = this._pool.pop()!;
             this._drive.updateRedDotConfig(redDot, config);
         } else {
             redDot = this._drive.createRedDot(config);

@@ -14,7 +14,7 @@ export class CryptoManager<T extends ICrypto> {
 
     private _key: string
 
-    constructor(key: string, crypto: T = null) {
+    constructor(key: string, crypto: T) {
         this._key = key
         this._crypto = crypto
     }

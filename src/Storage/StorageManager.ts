@@ -124,7 +124,13 @@ export class StorageManager {
     /** 获取 JSON 对象 */
     getJson(key: string, defaultValue?: any): any {
         var r = this.get(key);
-        return (r && JSON.parse(r)) || defaultValue;
+        if (!r) return defaultValue;
+        try {
+            return JSON.parse(r);
+        } catch (e) {
+            console.error(`[StorageManager] getJson 解析失败, key=${key}`, e);
+            return defaultValue;
+        }
     }
 
     /**

@@ -4,7 +4,7 @@ import { ViewUtil } from "./ViewUtil";
 /** View 抽象接口（观察者） */
 export interface IView extends IObserver {
     setViewComp(modelComp: BaseModelComp, isRebindAttr?: boolean): void
-    getViewComp(): BaseModelComp
+    getViewComp(): BaseModelComp | null
     closeView(): void
     getBindAttrMap(): any
     setBindAttrMap(val: any): void
@@ -20,8 +20,8 @@ export interface IView extends IObserver {
 export abstract class SimpleBaseView implements IView {
     abstract name: string;
     abstract reset(): void
-    viewModelComp: BaseModelComp = null
-    private _bindAttrMap: Record<string, string> = null
+    viewModelComp: BaseModelComp | null = null
+    private _bindAttrMap: Record<string, string> | null = null
     private _boundModelComps: BaseModelComp[] = []
 
     setViewComp(comp: BaseModelComp, isRebindAttr: boolean = false) {
@@ -55,6 +55,8 @@ export abstract class SimpleBaseView implements IView {
         if (this.viewModelComp) {
             this.viewModelComp.detach()
         }
+        this.viewModelComp = null;
+        this._bindAttrMap = null;
     }
     getBindAttrMap() {
         return this._bindAttrMap

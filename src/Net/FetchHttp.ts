@@ -12,18 +12,22 @@ export class FetchHttp implements IHttp {
         headers.forEach(header => {
             headersObject[header[0]] = header[1];
         });
-        return new Promise(async (resolve, reject) => {
-            if (headersObject['Content-Type'] == 'application/json') {
-                reqData = JSON.stringify(reqData)
-            }
-            let response = await fetch(url, {
-                method: method,
-                headers: headersObject,
-                body: reqData,
-            })
-            const ret = await response.json();
-            resolve(ret)
-        })
+        if (headersObject['Content-Type'] === 'application/json') {
+            reqData = JSON.stringify(reqData)
+        }
+        const response = await fetch(url, {
+            method: method,
+            headers: headersObject,
+            body: reqData,
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        }
+        return response.text();
     }
 
 }

@@ -43,7 +43,7 @@ export interface IManagers {
     setAudioManager(audioManager: AudioManager<IAudioDrive>): void
     getAudioManager(): AudioManager<IAudioDrive>
     // asset
-    setAssetManager(audioManager: AssetManager<IAssetDrive>): void
+    setAssetManager(assetManager: AssetManager<IAssetDrive>): void
     getAssetManager(): AssetManager<IAssetDrive>
     // reddot
     setRedDotManager(redDotManager: RedDotManager<IRedDotDrive>): void

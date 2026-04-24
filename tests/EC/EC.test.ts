@@ -26,6 +26,7 @@ describe("Entity功能", () => {
         let mygameEntiy = Entity.createEntity<GameEntity>(GameEntity)
         mygameEntiy.attachComponent(TestSenceComp)
         expect(mygameEntiy.getComponent(TestSenceComp)?.compName).toBe('TestSenceComp')
+        // 重复挂载：应被去重保护，不会新增（GameModelComp + TestSenceComp = 2）
         mygameEntiy.attachComponent(TestSenceComp)
         expect(mygameEntiy.components.length).toBe(2)
 

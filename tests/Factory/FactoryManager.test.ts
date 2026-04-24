@@ -7,7 +7,7 @@ describe("FactoryManager功能", () => {
         let factoryManager = new FactoryManager<MyTestFactoryConfig>(new MyTestFactoryConfig())
         factoryManager.autoRegister()
         expect(factoryManager.getFactorys().size).toBe(3)
-        let effectItemFactory = factoryManager.getFactory(FactoryType.effectItem)
+        let effectItemFactory = factoryManager.getFactory("effectItem" as any)
         expect(effectItemFactory?.name).toBe('effectItem')
     });
 });

@@ -23,6 +23,12 @@ export class XMLHttp implements IHttp {
                     }
                 }
             };
+            xhr.onerror = function () {
+                reject(new Error(`XHR GET ${url} 网络错误`));
+            };
+            xhr.ontimeout = function () {
+                reject(new Error(`XHR GET ${url} 请求超时`));
+            };
             xhr.open("GET", url, true);
             for (let i = 0; i < headers.length; i++) {
                 const _header = headers[i];
@@ -56,6 +62,12 @@ export class XMLHttp implements IHttp {
                         reject('请求失败');
                     }
                 }
+            };
+            xhr.onerror = function () {
+                reject(new Error(`XHR POST ${url} 网络错误`));
+            };
+            xhr.ontimeout = function () {
+                reject(new Error(`XHR POST ${url} 请求超时`));
             };
             xhr.open("POST", url, true);
             for (let i = 0; i < headers.length; i++) {

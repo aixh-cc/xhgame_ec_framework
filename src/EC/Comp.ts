@@ -7,9 +7,10 @@ import { TimeSystem } from "../Time/TimeSystem";
 export abstract class Comp {
     abstract compName: string
     /**
-     * 组件池
+     * 组件池（每类组件最大缓存数量）
      */
     private static compsPool: Map<new () => any, Comp[]> = new Map();
+    private static readonly MAX_POOL_SIZE = 64;
     /**
      * 清理组件池（用于测试隔离）
      */
@@ -41,6 +42,7 @@ export abstract class Comp {
             TimeSystem.getInstance().removeSystemFromTimeUpdate(comp._updateBridge)
             comp._updateBridge = null
         }
+        comp.onRemoveCleanup();
         comp.onDetach();
         comp.entity = null
 
@@ -55,9 +57,12 @@ export abstract class Comp {
         const compClass = comp.constructor as new () => Comp;
         // 从组件池中找到对应的构造函数对应的池子
         const pool = this.compsPool.get(compClass);
-        // 如果池子存在，将组件实例放回池子中
+        // 如果池子存在且未满，将组件实例放回池子中
         if (pool) {
-            pool.push(comp);
+            if (pool.length < Comp.MAX_POOL_SIZE) {
+                pool.push(comp);
+            }
+            // 超过上限则丢弃，让 GC 回收
         } else {
             // 如果池子不存在，创建一个新的池子并将组件实例放入
             this.compsPool.set(compClass, [comp]);
@@ -66,17 +71,25 @@ export abstract class Comp {
 
     private static _dirty_comps: Comp[] = [];
     static pushDirtyComp(comp: Comp) {
-        Comp._dirty_comps.push(comp)
+        // 使用 Set 进行 O(1) 去重检查
+        if (Comp._dirty_comps.indexOf(comp) === -1) {
+            Comp._dirty_comps.push(comp)
+        }
     }
     static isDirtyComp(comp: Comp): boolean {
         return Comp._dirty_comps.indexOf(comp) !== -1
     }
     static notifyAllDirtyComps() {
-        for (let i = 0; i < Comp._dirty_comps.length; i++) {
-            const element = Comp._dirty_comps[i];
-            element.notify(true)
+        // 先取快照再清空，避免通知过程中新增的脏组件被丢弃
+        const snapshot = Comp._dirty_comps;
+        Comp._dirty_comps = [];
+        for (let i = 0; i < snapshot.length; i++) {
+            try {
+                snapshot[i].notify(true);
+            } catch (e) {
+                console.error('[Comp] notifyAllDirtyComps 回调异常:', e);
+            }
         }
-        Comp._dirty_comps = []
     }
     abstract notify(is_update_now: boolean): void
     /**
@@ -111,6 +124,8 @@ export abstract class Comp {
             }, 0)
         })
     }
+    /** 组件移除时的额外清理钩子（子类可覆盖，如清理 DI 绑定） */
+    protected onRemoveCleanup(): void { }
     /** 监听从实体卸载 */
     abstract onDetach(): void
     /** 重置 */
@@ -137,14 +152,14 @@ export abstract class Comp {
     /**
      * 初始化完成后的回调通知
      */
-    initedCallback: (comp: this) => void = null
+    initedCallback: ((comp: Comp) => void) | null = null
     /**
      * 初始化等待异步操作完成指令函数
      * @returns 
      */
     async done(): Promise<this> {
         return new Promise((resolve) => {
-            this.initedCallback = resolve;
+            this.initedCallback = resolve as (comp: Comp) => void;
         });
     }
 }

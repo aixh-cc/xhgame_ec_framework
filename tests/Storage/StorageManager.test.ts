@@ -28,8 +28,8 @@ describe("StorageManager功能", () => {
         expect(storageManager.getNumber('test_number')).toBe(0)
 
         storageManager.clear()
-        expect(storageManager.get('test_boolen')).toBe(null)
-        expect(storageManager.get('tt')).toBe(null)
+        expect(storageManager.get('test_boolen')).toBe(null as any)
+        expect(storageManager.get('tt')).toBe(null as any)
     });
 
     test("测试StorageManager的加密存储", () => {
@@ -50,7 +50,7 @@ describe("StorageManager功能", () => {
         expect(storageManager.getNumber('test_number')).toBe(0)
 
         storageManager.clear()
-        expect(storageManager.get('test_boolen')).toBe(null)
-        expect(storageManager.get('tt')).toBe(null)
+        expect(storageManager.get('test_boolen')).toBe(null as any)
+        expect(storageManager.get('tt')).toBe(null as any)
     });
 });

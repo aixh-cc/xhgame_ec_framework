@@ -21,7 +21,8 @@ const test_02 = () => {
             websocket.onSocketOpen(() => {
                 console.log('连接成功')
             })
-            let res = await netManager.socket.connectSocket({ url: 'wss://shoushenv2.mysxjt.com/websocket/ws?type=admin&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIxMjcuMC4wLjEiLCJhdWQiOiIxMjcuMC4wLjEiLCJpYXQiOjE3NTkxMTM5OTUsIm5iZiI6MTc1OTExMzk5NSwiZXhwIjoxNzYxNzA1OTk1LCJqdGkiOnsiaWQiOjEsInR5cGUiOiJhZG1pbiJ9fQ.6sMeeNlBha9DS-PKbdNIyaAODDVVHrBJR9VIyBx_M0k' })
+            const TEST_TOKEN = process.env.TEST_TOKEN || 'your-test-token-here';
+            let res = await netManager.socket.connectSocket({ url: `wss://test-server.example.com/websocket/ws?type=admin&token=${TEST_TOKEN}` })
             assert.equal(res, true, '连接成功')
             websocket.sendSocketMessage('ping', {})
             websocket.onSocketMessage('ping', (data: any) => {

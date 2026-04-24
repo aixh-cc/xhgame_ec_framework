@@ -44,6 +44,7 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
     setDebug(val: boolean) {
         this._is_debug = val
     }
+    /** @deprecated 请使用 on(name, event, context, tag) 的 tag 参数替代 */
     private _tag: string = ''
     private _nextEventItemId: number = 0
     // 索引到一维
@@ -59,19 +60,23 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
         return this
     }
 
-    createEventItem(name: string, event: (event: IEventItem, obj: any) => void, context: any) {
+    createEventItem(name: string, event: (event: IEventItem, obj: any) => void, context: any, tag: string = '') {
         let eventItemId = ++this._nextEventItemId
         let eventIndex = this._eventIndex_EventIdArray.length; // 当前可用的长度
         let eventItem = { name, event, context, id: eventItemId }
         this._eventIndex_EventIdArray[eventIndex] = eventItemId
         this._eventIndex_EventItemArray[eventIndex] = eventItem
         this._eventIndex_NameArray[eventIndex] = name
-        this._eventIndex_TagArray[eventIndex] = this._tag
+        this._eventIndex_TagArray[eventIndex] = tag
         return eventItemId
     }
 
     removeEventItem(eventItemId: number) {
-        let eventItemIndex = this._eventIndex_EventIdArray.indexOf(eventItemId)
+        let eventItemIndex = this._eventIndex_EventIdArray.indexOf(eventItemId);
+        if (eventItemIndex === -1) {
+            // 可能已被移除，安全跳过
+            return;
+        }
         let lastEventItemIndex = this._eventIndex_EventItemArray.length - 1 // 最后一个index
         let tmp_EventItem = this._eventIndex_EventItemArray[eventItemIndex]
         let tmp_EventId = this._eventIndex_EventIdArray[eventItemIndex]
@@ -100,6 +105,9 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
     on<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
     on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
     on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
+        // 使用 _tag（向后兼容）或空字符串
+        const tag = this._tag;
+        this._tag = ''; // 消费后立即重置
         if (this._eventIndex_NameArray.indexOf(name) > -1) {
             let indexs = getAllIndices(this._eventIndex_NameArray, name)
             let existingEventItemId: number | null = null
@@ -116,12 +124,11 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
                 this.removeEventItem(existingEventItemId)
             }
             this._debug('添加新的监听器')
-            this.createEventItem(name, event, context)
+            this.createEventItem(name, event, context, tag)
         } else {
-            this.createEventItem(name, event, context)
+            this.createEventItem(name, event, context, tag)
             this._debug('在通过 事件名name=' + name + ' 在 name2EventItemsMap 中未找到,则新增一个')
         }
-        this._tag = '' // 置空
     }
 
     /** 取消监听（精确匹配 `name+event+context`） */
@@ -153,7 +160,11 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
                 let _index = indexs[i]
                 let eventItem = this._eventIndex_EventItemArray[_index]
                 if (eventItem && eventItem.context === context) {
-                    eventItem.event.apply(context, [eventItem, obj])
+                    try {
+                        eventItem.event.apply(context, [eventItem, obj])
+                    } catch (e) {
+                        console.error(`[EventManager] emit "${name}" 处理器异常:`, e)
+                    }
                 }
             }
         }

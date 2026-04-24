@@ -30,7 +30,7 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
     /** 当前各个item的灵魂回收池 */
     private _itemPoolsMap: Map<string, TT[]> = new Map();
     /** 生产驱动 */
-    private _itemProduceDrive: T
+    private _itemProduceDrive!: T
     setItemProduceDrive(itemProduceDrive: T) {
         this._itemProduceDrive = itemProduceDrive
         return this
@@ -39,7 +39,7 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         return this._itemProduceDrive
     }
     produceItem(itemNo: string): TT {
-        let item: TT = null
+        let item: TT
         let itemsPool = this._itemPoolsMap.get(itemNo)
         if (itemsPool === undefined) {
             itemsPool = [];
@@ -47,12 +47,12 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         }
         let itemId = this._getNewItemId()
         if (itemsPool.length > 0) {
-            item = itemsPool.pop()
+            item = itemsPool.pop()!;
         } else {
             item = this._itemProduceDrive.createItem(itemNo, itemId) as TT;
         }
         item.init(itemNo, itemId)
-        // 
+        //
         let hasHistory = this._itemHistorysMap.get(item)
         if (hasHistory === undefined) {
             hasHistory = [];

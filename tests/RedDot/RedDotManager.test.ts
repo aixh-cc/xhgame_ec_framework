@@ -152,7 +152,7 @@ describe("RedDot功能", () => {
 
         manager.setRedDotNumber(targetNode, 10);
         const redDot = manager.getRedDot(targetNode);
-        expect(redDot.currentNumber).toBe(10);
+        expect(redDot!.currentNumber).toBe(10);
     });
 
     test("对象池 - 红点复用", () => {

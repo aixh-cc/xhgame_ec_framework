@@ -73,22 +73,27 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
      * - 避免重复打开：记录 opening/opened 状态
      */
     async openUIAsync(uiid: string, comp: BaseModelComp): Promise<boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            if (this.checkOpening(uiid)) {
-                console.error('已经在打开中,uiid=' + uiid)
-                resolve(false)
-            } else {
-                this._openingUiids.push(uiid)
-                this._uiDrive.openUIAsyncByDrive(uiid, comp).then(() => {
-                    let _index = this._openingUiids.indexOf(uiid)
-                    this._openingUiids.splice(_index, 1);
-                    this._openedUiids.push(uiid)
-                    resolve(true)
-                }).catch(() => {
-                    resolve(false)
-                })
+        if (this.checkOpening(uiid)) {
+            console.error('已经在打开中,uiid=' + uiid)
+            return false;
+        }
+        this._openingUiids.push(uiid)
+        try {
+            await this._uiDrive.openUIAsyncByDrive(uiid, comp);
+            let _index = this._openingUiids.indexOf(uiid);
+            if (_index > -1) {
+                this._openingUiids.splice(_index, 1);
             }
-        });
+            this._openedUiids.push(uiid);
+            return true;
+        } catch (err) {
+            let _index = this._openingUiids.indexOf(uiid);
+            if (_index > -1) {
+                this._openingUiids.splice(_index, 1);
+            }
+            console.error(`[UiManager] 打开 UI "${uiid}" 失败:`, err);
+            return false;
+        }
     }
 
     /** 移除ui */
@@ -96,6 +101,8 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
     removeUI(uiid: string) {
         this._uiDrive.removeUI(uiid)
         let _index = this._openedUiids.indexOf(uiid)
-        this._openedUiids.splice(_index, 1);
+        if (_index > -1) {
+            this._openedUiids.splice(_index, 1);
+        }
     }
 }

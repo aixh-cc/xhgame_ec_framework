@@ -53,7 +53,7 @@ const test_01 = () => {
 
 let functions = [
     test_00,
-    // test_01 // 这个有loop,每次都太慢,先隐藏
+    test_01
 ]
 
 describe('时间功能TimeSystem', async () => {

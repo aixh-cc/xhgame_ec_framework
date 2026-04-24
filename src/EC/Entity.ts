@@ -29,6 +29,15 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
         return this._entities;
     }
 
+    /** 清理所有实体及组件（用于场景切换/重置） */
+    static clearAllEntities(): void {
+        const allEntities = [...this._entities.values()];
+        for (let entity of allEntities) {
+            this.removeEntity(entity);
+        }
+        this._entities.clear();
+    }
+
     static createEntity<T extends Entity>(ctor: EntityCtor<T>): T {
         const entity = new ctor();
         this.entities.set(entity.id, entity);
@@ -37,10 +46,21 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
     }
 
     static removeEntity(entity: Entity): void {
-        for (let component of entity.components.values()) {
-            Comp.removeComp(component)
+        // 先创建副本再遍历，防止迭代过程中数组被 splice 修改
+        const allComps = [...entity.components];
+        const errors: Error[] = [];
+        for (let component of allComps) {
+            try {
+                Comp.removeComp(component)
+            } catch (e) {
+                errors.push(e instanceof Error ? e : new Error(String(e)));
+            }
         }
+        // 无论如何都要从 Map 中移除实体
         this.entities.delete(entity.id);
+        if (errors.length > 0) {
+            console.error(`[Entity] removeEntity(${entity.id}) 清理时发生 ${errors.length} 个错误:`, errors);
+        }
     }
 
     static getEntity(entityId: number): Entity | undefined {
@@ -58,6 +78,10 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
     }
     private _components_names: string[] = [];
     private _components_class: any[] = [];
+    /** O(1) 查找：类 → 组件 */
+    private _componentsByClass: Map<new () => Comp, Comp> = new Map();
+    /** O(1) 查找：名称 → 组件 */
+    private _componentsByName: Map<string, Comp> = new Map();
     /** 实体id */
     public readonly id: number;
 
@@ -74,38 +98,47 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
     /** 单实体上挂载组件 */
     /** 挂载组件（避免重复），可选传入 setupData 自动调用 setup */
     attachComponent<T extends Comp>(componentClass: new () => T, ...setupArgs: any[]): T {
-        let hasIndex = this._components_class.indexOf(componentClass)
-        if (hasIndex > -1) {
-            const component = this.components[hasIndex] as T;
-            console.warn('已存在组件,不会触发挂载事件compName=' + component.compName)
-            return component;
-        } else {
-            const component = Comp.createComp(componentClass);
-            if (setupArgs.length > 0) {
-                component.setup(...setupArgs)
-            }
-            // 检查组件依赖
-            for (const req of component.requires) {
-                if (!this._components_names.includes(req)) {
-                    console.warn(`[EC] ${component.compName} 依赖 ${req}，但当前实体未挂载`)
-                }
-            }
-            this._components_class.push(componentClass)
-            this._components_names.push(component.compName)
-            this._components.push(component)
-            this._doAttachComponent(component)
-            return component
+        let existing = this._componentsByClass.get(componentClass);
+        if (existing) {
+            console.warn('已存在组件,不会触发挂载事件compName=' + existing.compName)
+            return existing as T;
         }
+        const component = Comp.createComp(componentClass);
+        if (setupArgs.length > 0) {
+            component.setup(...setupArgs)
+        }
+        // 检查组件依赖
+        for (const req of component.requires) {
+            if (!this._componentsByName.has(req)) {
+                console.warn(`[EC] ${component.compName} 依赖 ${req}，但当前实体未挂载`)
+            }
+        }
+        this._componentsByClass.set(componentClass, component);
+        this._componentsByName.set(component.compName, component);
+        this._components_class.push(componentClass)
+        this._components_names.push(component.compName)
+        this._components.push(component)
+        this._doAttachComponent(component)
+        return component
     }
     private _doAttachComponent(component: Comp) {
         component.attach(this).then(async () => {
-            if (component.initBySystems.length > 0) {
-                for (let i = 0; i < component.initBySystems.length; i++) {
-                    const sys = component.initBySystems[i]
-                    await sys.initComp(component)
+            try {
+                if (component.initBySystems.length > 0) {
+                    for (let i = 0; i < component.initBySystems.length; i++) {
+                        const sys = component.initBySystems[i]
+                        await sys.initComp(component)
+                    }
                 }
+                component.initedCallback && component.initedCallback(component)
+            } catch (e) {
+                console.error(`[Entity] 组件 ${component.compName} (id=${this.id}) 初始化失败:`, e);
+                // 仍然触发回调避免 await comp.done() 永久挂起
+                component.initedCallback && component.initedCallback(null as any)
             }
-            component.initedCallback && component.initedCallback(component)
+        }).catch((e) => {
+            console.error(`[Entity] 组件 ${component.compName} (id=${this.id}) attach 失败:`, e);
+            component.initedCallback && component.initedCallback(null as any)
         })
     }
 
@@ -142,44 +175,47 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
         return this.attachComponentByRegisterName(compName);
     }
 
-    /** 卸载组件（按类） */
+    /** 卸载组件（按类）O(1) */
     detachComponent<T extends Comp>(componentClass: new () => T): void {
-        let hasIndex = this._components_class.indexOf(componentClass)
-        if (hasIndex > -1) {
-            this._removeComponentByIndex(hasIndex)
+        if (this._componentsByClass.has(componentClass)) {
+            // 仍需要 index 来 splice 数组，但 indexOf 只执行一次
+            let hasIndex = this._components_class.indexOf(componentClass);
+            if (hasIndex > -1) {
+                this._removeComponentByIndex(hasIndex);
+            }
         }
     }
     private _removeComponentByIndex(index: number) {
-        const component = this._components[index]
+        const component = this._components[index];
+        const compClass = this._components_class[index];
+        const compName = this._components_names[index];
+        // 清理 O(1) Map
+        this._componentsByClass.delete(compClass);
+        this._componentsByName.delete(compName);
+        // 清理数组
         this._components_class.splice(index, 1);
         this._components_names.splice(index, 1);
         this._components.splice(index, 1);
         Comp.removeComp(component)
     }
-    /** 卸载组件（按类名） */
+    /** 卸载组件（按类名）O(1) */
     detachComponentByName(className: string): void {
-        let hasIndex = this._components_names.indexOf(className)
-        if (hasIndex > -1) {
-            this._removeComponentByIndex(hasIndex)
+        if (this._componentsByName.has(className)) {
+            let hasIndex = this._components_names.indexOf(className);
+            if (hasIndex > -1) {
+                this._removeComponentByIndex(hasIndex);
+            }
         } else {
             console.error('无className=' + className)
         }
     }
-    /** 获取组件（按类） */
+    /** 获取组件（按类）O(1) */
     getComponent<T extends Comp>(componentClass: new () => T): T | undefined {
-        let hasIndex = this._components_class.indexOf(componentClass)
-        if (hasIndex === -1) {
-            return undefined
-        }
-        return this.components[hasIndex] as T;
+        return this._componentsByClass.get(componentClass) as T | undefined;
     }
 
-    /** 获取组件（按类名） */
+    /** 获取组件（按类名）O(1) */
     getComponentByName<T extends Comp>(className: string): T | undefined {
-        let hasIndex = this._components_names.indexOf(className)
-        if (hasIndex === -1) {
-            return undefined
-        }
-        return this.components[hasIndex] as T;
+        return this._componentsByName.get(className) as T | undefined;
     }
 }

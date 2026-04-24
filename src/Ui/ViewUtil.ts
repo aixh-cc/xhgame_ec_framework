@@ -51,24 +51,15 @@ export class ViewUtil {
                 continue; // 跳过
             }
             let vals_arr: string[] = _bindAttrLink.replace(modelComp.compName + '::', '').split('.');
-            let vvv = null
             const [valid, last_i, pre_current] = this._getMoreInfo(modelComp, vals_arr)
-            if (valid) {
-                if (last_i == vals_arr.length - 1) {
-                    vvv = pre_current
-                }
-            }
-            if (vvv) {
-                const that = observer as any
-                let last_key = key
-                if (vals_arr.length > 0) {
-                    last_key = vals_arr[vals_arr.length - 1]
-                }
-                if (typeof that[key] != 'undefined' && vvv[last_key] != 'undefined') {
+            if (valid && last_i === vals_arr.length - 1) {
+                const vvv = pre_current;
+                const that = observer as any;
+                let last_key = vals_arr.length > 0 ? vals_arr[vals_arr.length - 1] : key;
+                // 使用 !== 严格比较，与 undefined 值比较而非字符串 'undefined'
+                if (typeof that[key] !== 'undefined' && vvv[last_key] !== undefined) {
                     that[key] = vvv[last_key];
                 }
-            } else {
-                continue;// 跳过
             }
         }
     }
