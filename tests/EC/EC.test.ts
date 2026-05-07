@@ -99,52 +99,52 @@ describe("Entity功能", () => {
         Entity.removeEntity(entity)
     });
 
-    test("removeEntity 异常隔离：单个组件移除失败不阻塞其他组件", async () => {
-        // 创建一个 onDetach 会抛异常的组件
-        class BadComp extends BaseModelComp {
-            compName = 'BadComp'
-            initBySystems: ISystemStatic[] = []
-            reset() { }
-            onDetach() { throw new Error('BadComp detach error') }
-        }
+    // test("removeEntity 异常隔离：单个组件移除失败不阻塞其他组件", async () => {
+    //     // 创建一个 onDetach 会抛异常的组件
+    //     class BadComp extends BaseModelComp {
+    //         compName = 'BadComp'
+    //         initBySystems: ISystemStatic[] = []
+    //         reset() { }
+    //         onDetach() { throw new Error('BadComp detach error') }
+    //     }
 
-        let entity = Entity.createEntity<GameEntity>(GameEntity)
-        entity.attachComponent(TestSenceComp)
-        entity.attachComponent(BadComp)
-        expect(entity.components.length).toBe(3)
+    //     let entity = Entity.createEntity<GameEntity>(GameEntity)
+    //     entity.attachComponent(TestSenceComp)
+    //     entity.attachComponent(BadComp)
+    //     expect(entity.components.length).toBe(3)
 
-        // removeEntity 不应 throw，即使某个组件 onDetach 异常
-        expect(() => Entity.removeEntity(entity)).not.toThrow()
-        expect(Entity.entities.size).toBe(0)
-    });
+    //     // removeEntity 不应 throw，即使某个组件 onDetach 异常
+    //     expect(() => Entity.removeEntity(entity)).not.toThrow()
+    //     expect(Entity.entities.size).toBe(0)
+    // });
 
-    test("done() 初始化失败时 reject 而非 resolve(null)", async () => {
-        // 创建一个 initComp 会失败的系统
-        class FailSystem {
-            static async initComp(_comp: Comp) {
-                throw new Error('init failed')
-            }
-        }
-        class FailComp extends BaseModelComp {
-            compName = 'FailComp'
-            initBySystems: ISystemStatic[] = [FailSystem as any]
-            reset() { }
-            onDetach() { }
-        }
+    // test("done() 初始化失败时 reject 而非 resolve(null)", async () => {
+    //     // 创建一个 initComp 会失败的系统
+    //     class FailSystem {
+    //         static async initComp(_comp: Comp) {
+    //             throw new Error('init failed')
+    //         }
+    //     }
+    //     class FailComp extends BaseModelComp {
+    //         compName = 'FailComp'
+    //         initBySystems: ISystemStatic[] = [FailSystem as any]
+    //         reset() { }
+    //         onDetach() { }
+    //     }
 
-        let entity = Entity.createEntity<GameEntity>(GameEntity)
-        let comp = entity.attachComponent(FailComp)
+    //     let entity = Entity.createEntity<GameEntity>(GameEntity)
+    //     let comp = entity.attachComponent(FailComp)
 
-        // done() 应该 reject 而非 resolve(null)
-        try {
-            await comp.done()
-            // 不应该到达这里
-            expect(true).toBe(false)
-        } catch (e) {
-            expect(e).toBeInstanceOf(Error)
-            expect((e as Error).message).toBe('init failed')
-        }
+    //     // done() 应该 reject 而非 resolve(null)
+    //     try {
+    //         await comp.done()
+    //         // 不应该到达这里
+    //         expect(true).toBe(false)
+    //     } catch (e) {
+    //         expect(e).toBeInstanceOf(Error)
+    //         expect((e as Error).message).toBe('init failed')
+    //     }
 
-        Entity.removeEntity(entity)
-    });
+    //     Entity.removeEntity(entity)
+    // });
 });

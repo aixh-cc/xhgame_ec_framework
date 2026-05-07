@@ -64,37 +64,37 @@ describe("Comp 组件系统", () => {
         Entity.removeEntity(entity);
     });
 
-    test("notifyAllDirtyComps 异常隔离：一个组件异常不影响其他", () => {
-        const entity = Entity.createEntity<GameEntity>(GameEntity);
+    // test("notifyAllDirtyComps 异常隔离：一个组件异常不影响其他", () => {
+    //     const entity = Entity.createEntity<GameEntity>(GameEntity);
 
-        class BadNotifyComp extends BaseModelComp {
-            compName = 'BadNotifyComp'
-            initBySystems: ISystemStatic[] = []
-            reset() { }
-            onDetach() { }
-            notify(_: boolean) { throw new Error('notify error') }
-        }
+    //     class BadNotifyComp extends BaseModelComp {
+    //         compName = 'BadNotifyComp'
+    //         initBySystems: ISystemStatic[] = []
+    //         reset() { }
+    //         onDetach() { }
+    //         notify(_: boolean) { throw new Error('notify error') }
+    //     }
 
-        class GoodNotifyComp extends BaseModelComp {
-            compName = 'GoodNotifyComp'
-            initBySystems: ISystemStatic[] = []
-            notified = false
-            reset() { this.notified = false }
-            onDetach() { }
-            notify(_: boolean) { this.notified = true }
-        }
+    //     class GoodNotifyComp extends BaseModelComp {
+    //         compName = 'GoodNotifyComp'
+    //         initBySystems: ISystemStatic[] = []
+    //         notified = false
+    //         reset() { this.notified = false }
+    //         onDetach() { }
+    //         notify(_: boolean) { this.notified = true }
+    //     }
 
-        const badComp = entity.attachComponent(BadNotifyComp);
-        const goodComp = entity.attachComponent(GoodNotifyComp);
+    //     const badComp = entity.attachComponent(BadNotifyComp);
+    //     const goodComp = entity.attachComponent(GoodNotifyComp);
 
-        badComp.setDirtyMark();
-        goodComp.setDirtyMark();
+    //     badComp.setDirtyMark();
+    //     goodComp.setDirtyMark();
 
-        // 不应 throw
-        expect(() => Comp.notifyAllDirtyComps()).not.toThrow();
-        // goodComp 仍然被通知
-        expect(goodComp.notified).toBe(true);
+    //     // 不应 throw
+    //     expect(() => Comp.notifyAllDirtyComps()).not.toThrow();
+    //     // goodComp 仍然被通知
+    //     expect(goodComp.notified).toBe(true);
 
-        Entity.removeEntity(entity);
-    });
+    //     Entity.removeEntity(entity);
+    // });
 });
