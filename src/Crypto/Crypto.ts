@@ -38,8 +38,11 @@ export class CryptoEmpty implements ICrypto {
 export class CryptoAES implements ICrypto {
 
     cryptoJS: any
-    constructor(cryptoJS: any) {
+    /** 严格模式：为 true 时拒绝解密 v1 格式，强制升级到 v2 */
+    private strictV2: boolean
+    constructor(cryptoJS: any, strictV2: boolean = false) {
         this.cryptoJS = cryptoJS
+        this.strictV2 = strictV2
     }
 
     /**
@@ -125,6 +128,10 @@ export class CryptoAES implements ICrypto {
         const firstByte = data.words[0] >>> 24; // 取最高 8 位（第一个字节）
         if (firstByte === CryptoAES.V2_VERSION_BYTE) {
             return this.decryptV2(data, key);
+        }
+        // 严格模式下拒绝 v1 格式
+        if (this.strictV2) {
+            throw new Error('strictV2 模式下不允许解密 v1 格式数据，请先将数据升级到 v2 格式');
         }
         // 否则使用 v1 旧格式解密（向后兼容）
         return this.decryptV1(data, key);

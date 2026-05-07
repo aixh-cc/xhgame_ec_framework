@@ -3,6 +3,8 @@ import { Entity } from "../../src/EC/Entity";
 import { GameEntity, TestSenceComp, TestViewComp } from "./TestECData";
 import { DI } from "../../src/DI/DI";
 import { Comp } from "../../src/EC/Comp";
+import { ISystemStatic } from "../../src/EC/System";
+import { BaseModelComp } from "../../src/EC/BaseModelComp";
 
 describe("Entity功能", () => {
     beforeEach(() => {
@@ -51,5 +53,98 @@ describe("Entity功能", () => {
         await mygameEntiy.attachComponent(TestViewComp).setup({ arr: arr, add_value: 10 }).done()
         expect(arr).toEqual([131, 242, 353, 464, 565, 676, 787, 898])
         Entity.removeEntity(mygameEntiy)
+    });
+
+    test("getComponent 和 getComponentByName O(1) 查找", () => {
+        let entity = Entity.createEntity<GameEntity>(GameEntity)
+        entity.attachComponent(TestSenceComp)
+
+        // 按类查找
+        let byClass = entity.getComponent(TestSenceComp)
+        expect(byClass).toBeDefined()
+        expect(byClass!.compName).toBe('TestSenceComp')
+
+        // 按名称查找
+        let byName = entity.getComponentByName('TestSenceComp')
+        expect(byName).toBeDefined()
+        expect(byName!.compName).toBe('TestSenceComp')
+
+        // 同一引用
+        expect(byClass).toBe(byName)
+
+        // 不存在的查找返回 undefined
+        expect(entity.getComponent(TestViewComp)).toBeUndefined()
+        expect(entity.getComponentByName('NotExist')).toBeUndefined()
+
+        Entity.removeEntity(entity)
+    });
+
+    test("detach 后 Map 与数组保持同步", () => {
+        let entity = Entity.createEntity<GameEntity>(GameEntity)
+        entity.attachComponent(TestSenceComp)
+        entity.attachComponent(TestViewComp)
+        expect(entity.components.length).toBe(3) // GameModelComp + TestSenceComp + TestViewComp
+
+        // 按类卸载
+        entity.detachComponent(TestSenceComp)
+        expect(entity.components.length).toBe(2)
+        expect(entity.getComponent(TestSenceComp)).toBeUndefined()
+        expect(entity.getComponentByName('TestSenceComp')).toBeUndefined()
+
+        // 按名称卸载
+        entity.detachComponentByName('TestViewComp')
+        expect(entity.components.length).toBe(1)
+        expect(entity.getComponentByName('TestViewComp')).toBeUndefined()
+
+        Entity.removeEntity(entity)
+    });
+
+    test("removeEntity 异常隔离：单个组件移除失败不阻塞其他组件", async () => {
+        // 创建一个 onDetach 会抛异常的组件
+        class BadComp extends BaseModelComp {
+            compName = 'BadComp'
+            initBySystems: ISystemStatic[] = []
+            reset() { }
+            onDetach() { throw new Error('BadComp detach error') }
+        }
+
+        let entity = Entity.createEntity<GameEntity>(GameEntity)
+        entity.attachComponent(TestSenceComp)
+        entity.attachComponent(BadComp)
+        expect(entity.components.length).toBe(3)
+
+        // removeEntity 不应 throw，即使某个组件 onDetach 异常
+        expect(() => Entity.removeEntity(entity)).not.toThrow()
+        expect(Entity.entities.size).toBe(0)
+    });
+
+    test("done() 初始化失败时 reject 而非 resolve(null)", async () => {
+        // 创建一个 initComp 会失败的系统
+        class FailSystem {
+            static async initComp(_comp: Comp) {
+                throw new Error('init failed')
+            }
+        }
+        class FailComp extends BaseModelComp {
+            compName = 'FailComp'
+            initBySystems: ISystemStatic[] = [FailSystem as any]
+            reset() { }
+            onDetach() { }
+        }
+
+        let entity = Entity.createEntity<GameEntity>(GameEntity)
+        let comp = entity.attachComponent(FailComp)
+
+        // done() 应该 reject 而非 resolve(null)
+        try {
+            await comp.done()
+            // 不应该到达这里
+            expect(true).toBe(false)
+        } catch (e) {
+            expect(e).toBeInstanceOf(Error)
+            expect((e as Error).message).toBe('init failed')
+        }
+
+        Entity.removeEntity(entity)
     });
 });

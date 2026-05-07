@@ -17,6 +17,7 @@ export abstract class Comp {
     public static clearPool(): void {
         this.compsPool.clear();
         this._dirty_comps = [];
+        this._dirty_comps_set.clear();
     }
     /**
      * 创建组件
@@ -70,19 +71,21 @@ export abstract class Comp {
     }
 
     private static _dirty_comps: Comp[] = [];
+    private static _dirty_comps_set: Set<Comp> = new Set();
     static pushDirtyComp(comp: Comp) {
-        // 使用 Set 进行 O(1) 去重检查
-        if (Comp._dirty_comps.indexOf(comp) === -1) {
+        if (!Comp._dirty_comps_set.has(comp)) {
+            Comp._dirty_comps_set.add(comp);
             Comp._dirty_comps.push(comp)
         }
     }
     static isDirtyComp(comp: Comp): boolean {
-        return Comp._dirty_comps.indexOf(comp) !== -1
+        return Comp._dirty_comps_set.has(comp)
     }
     static notifyAllDirtyComps() {
         // 先取快照再清空，避免通知过程中新增的脏组件被丢弃
         const snapshot = Comp._dirty_comps;
         Comp._dirty_comps = [];
+        Comp._dirty_comps_set.clear();
         for (let i = 0; i < snapshot.length; i++) {
             try {
                 snapshot[i].notify(true);
@@ -150,16 +153,19 @@ export abstract class Comp {
      */
     abstract initBySystems: ISystemStatic[]
     /**
-     * 初始化完成后的回调通知
+     * 初始化完成后的回调通知（包含 resolve 和 reject）
      */
-    initedCallback: ((comp: Comp) => void) | null = null
+    _initedCallbacks: { resolve: (comp: Comp) => void, reject: (err: Error) => void } | null = null
     /**
      * 初始化等待异步操作完成指令函数
-     * @returns 
+     * @returns
      */
     async done(): Promise<this> {
-        return new Promise((resolve) => {
-            this.initedCallback = resolve as (comp: Comp) => void;
+        return new Promise((resolve, reject) => {
+            this._initedCallbacks = {
+                resolve: resolve as (comp: Comp) => void,
+                reject
+            };
         });
     }
 }

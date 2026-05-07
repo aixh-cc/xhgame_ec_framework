@@ -71,13 +71,11 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
         return this.nextEntityId++;
     }
 
-    /** 单实体上挂载的组件 */
+    /** 单实体上挂载的组件（有序数组，保留迭代顺序） */
     private _components: Comp[] = [];
     get components() {
         return this._components;
     }
-    private _components_names: string[] = [];
-    private _components_class: any[] = [];
     /** O(1) 查找：类 → 组件 */
     private _componentsByClass: Map<new () => Comp, Comp> = new Map();
     /** O(1) 查找：名称 → 组件 */
@@ -115,8 +113,6 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
         }
         this._componentsByClass.set(componentClass, component);
         this._componentsByName.set(component.compName, component);
-        this._components_class.push(componentClass)
-        this._components_names.push(component.compName)
         this._components.push(component)
         this._doAttachComponent(component)
         return component
@@ -130,15 +126,17 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
                         await sys.initComp(component)
                     }
                 }
-                component.initedCallback && component.initedCallback(component)
+                component._initedCallbacks && component._initedCallbacks.resolve(component)
             } catch (e) {
+                const error = e instanceof Error ? e : new Error(String(e));
                 console.error(`[Entity] 组件 ${component.compName} (id=${this.id}) 初始化失败:`, e);
-                // 仍然触发回调避免 await comp.done() 永久挂起
-                component.initedCallback && component.initedCallback(null as any)
+                // reject 而非 resolve(null)，让调用方通过 .catch() 处理
+                component._initedCallbacks && component._initedCallbacks.reject(error)
             }
         }).catch((e) => {
+            const error = e instanceof Error ? e : new Error(String(e));
             console.error(`[Entity] 组件 ${component.compName} (id=${this.id}) attach 失败:`, e);
-            component.initedCallback && component.initedCallback(null as any)
+            component._initedCallbacks && component._initedCallbacks.reject(error)
         })
     }
 
@@ -177,33 +175,30 @@ export class Entity<TRegistry extends Record<string, new () => Comp> = Record<st
 
     /** 卸载组件（按类）O(1) */
     detachComponent<T extends Comp>(componentClass: new () => T): void {
-        if (this._componentsByClass.has(componentClass)) {
-            // 仍需要 index 来 splice 数组，但 indexOf 只执行一次
-            let hasIndex = this._components_class.indexOf(componentClass);
-            if (hasIndex > -1) {
-                this._removeComponentByIndex(hasIndex);
+        const comp = this._componentsByClass.get(componentClass);
+        if (comp) {
+            const index = this._components.indexOf(comp);
+            if (index > -1) {
+                this._removeComponentByIndex(index);
             }
         }
     }
     private _removeComponentByIndex(index: number) {
         const component = this._components[index];
-        const compClass = this._components_class[index];
-        const compName = this._components_names[index];
         // 清理 O(1) Map
-        this._componentsByClass.delete(compClass);
-        this._componentsByName.delete(compName);
+        this._componentsByClass.delete(component.constructor as new () => Comp);
+        this._componentsByName.delete(component.compName);
         // 清理数组
-        this._components_class.splice(index, 1);
-        this._components_names.splice(index, 1);
         this._components.splice(index, 1);
         Comp.removeComp(component)
     }
     /** 卸载组件（按类名）O(1) */
     detachComponentByName(className: string): void {
-        if (this._componentsByName.has(className)) {
-            let hasIndex = this._components_names.indexOf(className);
-            if (hasIndex > -1) {
-                this._removeComponentByIndex(hasIndex);
+        const comp = this._componentsByName.get(className);
+        if (comp) {
+            const index = this._components.indexOf(comp);
+            if (index > -1) {
+                this._removeComponentByIndex(index);
             }
         } else {
             console.error('无className=' + className)
