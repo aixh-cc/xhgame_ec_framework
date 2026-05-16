@@ -15,13 +15,13 @@ describe("Factory功能", () => {
         let effectItemFactory = factoryManager.getFactory(FactoryType.effectItem)
         if (effectItemFactory) {
             for (let i = 0; i < 100; i++) {
-                let itemNo = 'effect' + i % 10
-                effectItemFactory?.produceItem(itemNo)
+                let modelNo = 'effect' + i % 10
+                effectItemFactory?.produceItem(modelNo)
             }
             expect(effectItemFactory?.getItemPools().size).toBe(10)
             expect(effectItemFactory?.getItemHistorys().size).toBe(100)
             for (let [_item] of effectItemFactory.getItemHistorys()) {
-                if (_item.itemNo == 'effect1') {
+                if (_item.modelNo == 'effect1') {
                     effectItemFactory.recycleItem(_item)
                 }
             }

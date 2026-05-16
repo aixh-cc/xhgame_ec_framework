@@ -7,11 +7,11 @@ export interface IFactory {
     /** 获取当前item */
     getItemProduceDrive(): IItemProduceDrive
     /** 生产item */
-    produceItem(itemNo: string): IItem
+    produceItem(modelNo: string): IItem
     /** 回收item */
     recycleItem(item: IItem): void
     /** 预加载资源 */
-    preloadItemsResource(itemNos?: string[]): Promise<boolean>
+    preloadItemsResource(modelNos?: string[]): Promise<boolean>
     /** 回收所有item */
     recycleAllItems(): void
     /** 获取item对象池 */
@@ -19,7 +19,7 @@ export interface IFactory {
     /** 获取item使用记录 */
     getItemHistorys(): Map<IItem, number[]>
     /** 获取alive数量 */
-    getAliveCount(itemNo?: string): number
+    getAliveCount(modelNo?: string): number
 }
 
 export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem> implements IFactory {
@@ -38,20 +38,20 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
     getItemProduceDrive(): T {
         return this._itemProduceDrive
     }
-    produceItem(itemNo: string): TT {
+    produceItem(modelNo: string): TT {
         let item: TT
-        let itemsPool = this._itemPoolsMap.get(itemNo)
+        let itemsPool = this._itemPoolsMap.get(modelNo)
         if (itemsPool === undefined) {
             itemsPool = [];
-            this._itemPoolsMap.set(itemNo, itemsPool); // 提前准备灵魂池
+            this._itemPoolsMap.set(modelNo, itemsPool); // 提前准备灵魂池
         }
         let itemId = this._getNewItemId()
         if (itemsPool.length > 0) {
             item = itemsPool.pop()!;
         } else {
-            item = this._itemProduceDrive.createItem(itemNo, itemId) as TT;
+            item = this._itemProduceDrive.createItem(modelNo, itemId) as TT;
         }
-        item.init(itemNo, itemId)
+        item.init(modelNo, itemId)
         //
         let hasHistory = this._itemHistorysMap.get(item)
         if (hasHistory === undefined) {
@@ -65,7 +65,7 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
     }
     recycleItem(item: IItem) {
         this._itemProduceDrive.removeItem(item) // 销毁肉身
-        let itemsPool = this._itemPoolsMap.get(item.itemNo)
+        let itemsPool = this._itemPoolsMap.get(item.modelNo)
         if (itemsPool) {
             itemsPool.push(item as TT) // 放回灵魂池
         }
@@ -73,8 +73,8 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         item.reset() // 抹除灵魂记忆
         item.alive = false
     }
-    preloadItemsResource(itemNos?: string[]) {
-        return this._itemProduceDrive.preloadItemsResource(itemNos)
+    preloadItemsResource(modelNos?: string[]) {
+        return this._itemProduceDrive.preloadItemsResource(modelNos)
     }
     private _getNewItemId() {
         return ++this._lastItemId;
@@ -94,12 +94,12 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
     getItemHistorys(): Map<TT, number[]> {
         return this._itemHistorysMap
     }
-    getAliveCount(itemNo: string = ''): number {
+    getAliveCount(modelNo: string = ''): number {
         let count = 0;
         for (let [item, historys] of this._itemHistorysMap) {
             if (item.alive) {
-                if (itemNo != '') {
-                    if (item.itemNo == itemNo) {
+                if (modelNo != '') {
+                    if (item.modelNo == modelNo) {
                         count++
                     }
                 } else {

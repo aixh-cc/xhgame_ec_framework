@@ -283,7 +283,7 @@ export class BunUiItem extends BaseBunItem implements IUiItem {
     }
 
     toScene(): void {
-        console.log('BunUiItem toScene', this.itemNo)
+        console.log('BunUiItem toScene', this.modelNo)
     }
 
     toPool(): void {

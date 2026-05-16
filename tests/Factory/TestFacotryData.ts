@@ -19,11 +19,11 @@ export interface IEffectItem extends IItem {
 export abstract class BaseTestItem implements IItem {
     node: any;
     itemId: number = 0
-    itemNo: string = ''
+    modelNo: string = ''
     alive: boolean = false
     positions: number[] = [0, 0, 0]
-    init(itemNo: string, itemId: number): void {
-        this.itemNo = itemNo
+    init(modelNo: string, itemId: number): void {
+        this.modelNo = modelNo
         this.itemId = itemId
     }
     baseAttrReset() {
@@ -102,7 +102,7 @@ export class TestUiItemProduceDrive implements IItemProduceDrive {
             resolve(true)
         })
     }
-    createItem(itemNo: string, itemId: number) {
+    createItem(modelNo: string, itemId: number) {
         return new TestUiItem()
     }
     removeItem(item: TestUiItem): void {
@@ -121,7 +121,7 @@ export class TestEffectItemProduceDrive implements IItemProduceDrive {
             resolve(true)
         })
     }
-    createItem(itemNo: string, itemId: number) {
+    createItem(modelNo: string, itemId: number) {
         return new TestEffectItem()
     }
     removeItem(item: TestEffectItem): void {
@@ -140,7 +140,7 @@ export class TestUnitItemProduceDrive implements IItemProduceDrive {
             resolve(true)
         })
     }
-    createItem(itemNo: string, itemId: number) {
+    createItem(modelNo: string, itemId: number) {
         return new TestUnitItem()
     }
     removeItem(item: TestUnitItem): void {
@@ -162,7 +162,7 @@ export class MyTestFactoryConfig implements IFactoryConfig {
     [FactoryType.effectItem]: EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem> = (new EffectItemFactory<TestEffectItemProduceDrive, TestEffectItem>()).setItemProduceDrive(new TestEffectItemProduceDrive());
 }
 // export class MyFactoryAction implements IFactoryAction {
-//     createUiItem(itemNo: string): IItem {
+//     createUiItem(modelNo: string): IItem {
 //         return new TestUiItem()
 //     }
 //     removeUiItem(item: IItem): void {
@@ -171,7 +171,7 @@ export class MyTestFactoryConfig implements IFactoryConfig {
 //     getUiItemFactory(): IFactory {
 //         return {} as IFactory
 //     }
-//     createEffectItem(itemNo: string): IItem {
+//     createEffectItem(modelNo: string): IItem {
 //         return new TestUiItem()
 //     }
 //     removeEffectItem(item: IItem): void {

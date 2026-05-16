@@ -3,13 +3,13 @@ export interface IItem {
     /** item出厂id,不能被reset和baseAttrReset重置,只能有工厂设置 */
     itemId: number
     /** item出厂品类,不能被reset和baseAttrReset重置,只能有工厂设置 */
-    itemNo: string
+    modelNo: string
     /** 是否存活,alive=false代表已进入单位池 */
     alive: boolean
     /** 坐标 */
     positions: number[]
     /** 出厂贴标 */
-    init(itemNo: string, itemId: number): void
+    init(modelNo: string, itemId: number): void
     /** 重置 */
     reset(): void
     /** 克隆(自行) */
@@ -27,11 +27,11 @@ export interface IItem {
 export interface IItemProduceDrive {
     name: string
     /** 预加载item的资源 */
-    preloadItemsResource(itemNos?: string[]): Promise<boolean>
+    preloadItemsResource(modelNos?: string[]): Promise<boolean>
     /** 释放item的资源 */
-    releaseItemsResource(itemNos?: string[]): Promise<boolean>
+    releaseItemsResource(modelNos?: string[]): Promise<boolean>
     /** 创建item */
-    createItem(itemNo: string, itemId: number): IItem
+    createItem(modelNo: string, itemId: number): IItem
     /** 移除item */
     removeItem(item: IItem): void
 }
