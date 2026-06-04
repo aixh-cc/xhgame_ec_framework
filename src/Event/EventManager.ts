@@ -101,34 +101,49 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
         this._eventIndex_TagArray.length = this._eventIndex_TagArray.length - 1
     }
 
-    /** 监听事件；在相同 `name+context` 时自动去重（替换旧监听器） */
+    /** 监听事件（允许同一 `name+context` 绑定多个回调） */
     on<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
     on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
     on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
-        // 使用 _tag（向后兼容）或空字符串
-        const tag = this._tag;
-        this._tag = ''; // 消费后立即重置
+        const tag = this._tag
+        this._tag = ''
+        this.createEventItem(name, event, context, tag)
+        this._debug('添加新的监听器 name=' + name)
+    }
+
+    /** 去重监听：相同 name+context 只保留最新的回调 */
+    onSingle<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
+    onSingle(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
+    onSingle(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
+        const tag = this._tag
+        this._tag = ''
         if (this._eventIndex_NameArray.indexOf(name) > -1) {
             let indexs = getAllIndices(this._eventIndex_NameArray, name)
             let existingEventItemId: number | null = null
             for (let i = 0; i < indexs.length; i++) {
-                let _index = indexs[i]
-                let eventItem = this._eventIndex_EventItemArray[_index]
+                let eventItem = this._eventIndex_EventItemArray[indexs[i]]
                 if (eventItem && eventItem.context === context) {
                     existingEventItemId = eventItem.id
-                    break;
+                    break
                 }
             }
             if (existingEventItemId !== null) {
-                this._debug('相同 name+context 已存在,先删除旧的')
                 this.removeEventItem(existingEventItemId)
             }
-            this._debug('添加新的监听器')
-            this.createEventItem(name, event, context, tag)
-        } else {
-            this.createEventItem(name, event, context, tag)
-            this._debug('在通过 事件名name=' + name + ' 在 name2EventItemsMap 中未找到,则新增一个')
         }
+        this.createEventItem(name, event, context, tag)
+        this._debug('onSingle 添加监听器 name=' + name)
+    }
+
+    /** 监听一次，触发后自动移除 */
+    once<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
+    once(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
+    once(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
+        const wrapper = (evt: IEventItem, obj: any) => {
+            this.off(name, wrapper, context)
+            event.call(context, evt, obj)
+        }
+        this.on(name, wrapper, context)
     }
 
     /** 取消监听（精确匹配 `name+event+context`） */

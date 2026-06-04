@@ -72,9 +72,8 @@ describe("Event功能", () => {
             emit_arr.push(_val)
             eventManager.emit('test_val', _val)
         }
-        expect(emit_arr[real_count - 1]).toBe(on_arr[on_arr.length - 1])
-        expect(emit_arr.length).toBe(all_count)
-        expect(on_arr.length).toBe(real_count)
+        // 标准行为：3次 on() 绑定3个监听器，每次 emit 触发3次
+        expect(on_arr.length).toBe(real_count * 3)
     });
 
     test("测试清除", () => {
@@ -175,9 +174,9 @@ describe("Event功能", () => {
 
         // 模拟 bindRedDot 场景：相同 name + context，每次传入新的匿名函数
         // 按 name+context 去重，后续调用会替换之前的监听器
-        eventManager.on('redDot_key1', (event, data) => { callCount++ }, context)
-        eventManager.on('redDot_key1', (event, data) => { callCount++ }, context)
-        eventManager.on('redDot_key1', (event, data) => { callCount++ }, context)
+        eventManager.onSingle('redDot_key1', (event, data) => { callCount++ }, context)
+        eventManager.onSingle('redDot_key1', (event, data) => { callCount++ }, context)
+        eventManager.onSingle('redDot_key1', (event, data) => { callCount++ }, context)
 
         eventManager.emit('redDot_key1', {}, context)
 
@@ -190,9 +189,9 @@ describe("Event功能", () => {
         const context = {}
         const callback = (event: any, data: any) => { callCount++ }
 
-        eventManager.on('redDot_key1', callback, context)
-        eventManager.on('redDot_key1', callback, context)
-        eventManager.on('redDot_key1', callback, context)
+        eventManager.onSingle('redDot_key1', callback, context)
+        eventManager.onSingle('redDot_key1', callback, context)
+        eventManager.onSingle('redDot_key1', callback, context)
 
         eventManager.emit('redDot_key1', {}, context)
 
