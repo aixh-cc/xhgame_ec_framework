@@ -6,15 +6,26 @@ import { IView } from "./View"
  * UI 管理器
  * - 提供 UI 根节点访问、打开/移除 UI、状态查询、Toast/Loading 控制
  * - 依赖具体 UI 驱动实现（`IUiDrive`）
- * 使用示例：`tests/core/Ui/UiManager.test.ts`
+ *
+ * @example
+ * ```ts
+ * const ui = new UiManager<MyUiDrive, Node>(new MyUiDrive())
+ * const opened = await ui.openUIAsync('player-detail', playerModel)
+ * if (opened) ui.toast('打开成功')
+ * ui.removeUI('player-detail')
+ * ```
+ * @typeParam T UI 驱动的具体类型
+ * @typeParam NT UI 节点的具体类型
  */
 export class UiManager<T extends IUiDrive, NT extends INode> {
 
     private _uiDrive: T
 
+    /** 创建管理器。一个管理器通常对应一个 UI 驱动和一组 UI 根节点。 */
     constructor(uiDrive: T) {
         this._uiDrive = uiDrive
     }
+    /** 获取原始 UI 驱动，以调用业务扩展能力。 */
     getDrive() {
         return this._uiDrive
     }
@@ -51,6 +62,7 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
     private _openingUiids: string[] = []
     private _openedUiids: string[] = []
 
+    /** 查询 UI 是否已经打开。 */
     checkOpened(uiid: string) {
         let index = this._openedUiids.indexOf(uiid)
         if (index > -1) {
@@ -59,6 +71,7 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
         return false
     }
 
+    /** 查询 UI 是否正在异步打开。 */
     checkOpening(uiid: string) {
         let index = this._openingUiids.indexOf(uiid)
         if (index > -1) {
@@ -67,10 +80,13 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
         return false
     }
 
-    /** 打开一个UI */
     /**
      * 异步打开 UI
-     * - 避免重复打开：记录 opening/opened 状态
+     *
+     * 同一个 `uiid` 正在打开时直接返回 `false`。驱动抛错时会清理 opening 状态。
+     * @param uiid 业务定义的 UI 唯一标识
+     * @param comp 与 View 绑定的模型组件
+     * @returns 驱动调用未抛错时为 `true`，否则为 `false`
      */
     async openUIAsync(uiid: string, comp: BaseModelComp): Promise<boolean> {
         if (this.checkOpening(uiid)) {
@@ -96,8 +112,7 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
         }
     }
 
-    /** 移除ui */
-    /** 移除已打开的 UI，并更新状态 */
+    /** 移除已打开的 UI，并同步更新管理器中的 opened 状态。 */
     removeUI(uiid: string) {
         this._uiDrive.removeUI(uiid)
         let _index = this._openedUiids.indexOf(uiid)

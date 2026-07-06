@@ -1,3 +1,5 @@
+// Package guide (kept as the first export so it appears near the top of index.d.ts)
+export * from './Guide';
 // Time
 export * from './Time/TimeSystem';
 // EC
