@@ -6,6 +6,19 @@ export interface INode {
     name: string
 }
 
+/** UI 类型。驱动可据此决定挂载层级、遮罩等平台行为。 */
+export type UiType = 'panel' | 'dialog' | 'top'
+
+/** 打开 UI 时传给平台驱动的可选行为配置。 */
+export interface IUiOpenOptions {
+    /** UI 类型，未传时保持驱动默认行为。 */
+    uiType?: UiType
+    /** dialog 遮罩点击是否关闭，dialog 默认 true。 */
+    closeOnMaskClick?: boolean
+    /** dialog 遮罩透明度，0-255，dialog 默认由驱动决定。 */
+    maskOpacity?: number
+}
+
 /**
  * UI 平台适配接口。
  *
@@ -15,7 +28,7 @@ export interface INode {
  */
 export interface IUiDrive {
     /** 创建并显示 UI，同时将 `comp` 绑定到对应 View。 */
-    openUIAsyncByDrive: (uiid: string, comp: BaseModelComp) => Promise<boolean>
+    openUIAsyncByDrive: (uiid: string, comp: BaseModelComp, options?: IUiOpenOptions) => Promise<boolean>
     /** 从场景树中移除并释放指定 UI。 */
     removeUI: (uiid: string) => void
     /** 返回普通界面层根节点。 */

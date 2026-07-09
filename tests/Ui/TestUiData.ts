@@ -1,7 +1,7 @@
 import { BaseModelComp } from "../../src/EC/BaseModelComp"
 import { ISystemStatic, System } from "../../src/EC/System"
 import { SimpleBaseView } from "../../src/Ui/View"
-import { INode, IUiDrive } from "../../src/Ui/UiDrive"
+import { INode, IUiDrive, IUiOpenOptions } from "../../src/Ui/UiDrive"
 import { autoBindForDI, DI } from "../../src/DI/DI";
 
 @autoBindForDI('TestView')
@@ -91,12 +91,14 @@ export class TestNode implements INode {
 
 export class TestUiDrive implements IUiDrive {
     compName: string = 'TestUiDrive'
+    lastOpenOptions?: IUiOpenOptions
     getFirstUIView() {
         return new TestView()
     }
     mock_gui_root: INode = new TestNode('gui_root')
     mock_world_root: INode = new TestNode('world_root')
-    openUIAsyncByDrive(uiid: string, comp: BaseModelComp) {
+    openUIAsyncByDrive(uiid: string, comp: BaseModelComp, options?: IUiOpenOptions) {
+        this.lastOpenOptions = options
         return new Promise<boolean>((resolve, reject) => {
             setTimeout(() => {
                 // console.log('0.1秒后模拟打开，uiid=' + uiid)

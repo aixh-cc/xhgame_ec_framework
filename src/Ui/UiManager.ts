@@ -1,5 +1,5 @@
 import { BaseModelComp } from "../EC/BaseModelComp"
-import { INode, IUiDrive } from "./UiDrive"
+import { INode, IUiDrive, IUiOpenOptions } from "./UiDrive"
 import { IView } from "./View"
 
 /**
@@ -86,16 +86,17 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
      * 同一个 `uiid` 正在打开时直接返回 `false`。驱动抛错时会清理 opening 状态。
      * @param uiid 业务定义的 UI 唯一标识
      * @param comp 与 View 绑定的模型组件
+     * @param options UI 打开行为配置，由具体驱动解释
      * @returns 驱动调用未抛错时为 `true`，否则为 `false`
      */
-    async openUIAsync(uiid: string, comp: BaseModelComp): Promise<boolean> {
+    async openUIAsync(uiid: string, comp: BaseModelComp, options?: IUiOpenOptions): Promise<boolean> {
         if (this.checkOpening(uiid)) {
             console.error('已经在打开中,uiid=' + uiid)
             return false;
         }
         this._openingUiids.push(uiid)
         try {
-            await this._uiDrive.openUIAsyncByDrive(uiid, comp);
+            await this._uiDrive.openUIAsyncByDrive(uiid, comp, options);
             let _index = this._openingUiids.indexOf(uiid);
             if (_index > -1) {
                 this._openingUiids.splice(_index, 1);
