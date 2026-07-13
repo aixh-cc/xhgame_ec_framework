@@ -28,16 +28,16 @@ export class StorageManager {
             console.error("存储的key不能为空");
             return;
         }
-        if (this._crypto) {
-            key = this._crypto.md5(key);
-        }
-        key = `${this.prefix}_${key}`;
-
         if (null == value) {
             console.warn("存储的值为空，则直接移除该存储");
             this.remove(key);
             return;
         }
+        if (this._crypto) {
+            key = this._crypto.md5(key);
+        }
+        key = `${this.prefix}_${key}`;
+
         if (typeof value === 'function') {
             console.error("储存的值不能为方法");
             return;
@@ -155,5 +155,15 @@ export class StorageManager {
     /** 清空所有键 */
     clear() {
         this._localStorage.clear();
+    }
+    /** 仅清理当前 prefix 的数据，不影响同一 localStorage 中的其他模块。 */
+    clearNamespace() {
+        const prefix = `${this.prefix}_`;
+        const keys: string[] = [];
+        for (let i = 0; i < this._localStorage.length; i++) {
+            const key = this._localStorage.key(i);
+            if (typeof key === 'string' && key.startsWith(prefix)) keys.push(key);
+        }
+        for (const key of keys) this._localStorage.removeItem(key);
     }
 }

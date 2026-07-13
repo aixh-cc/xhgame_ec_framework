@@ -61,10 +61,19 @@ export class TimeSystem {
         this._pass_time = 0
         this._time_need_update = false
     }
+    /** 完整重置，适用于退出游戏、测试隔离和场景重建。 */
+    resetAll() {
+        this.timeReset()
+        this.unscheduleAll()
+        this._needTimeUpdateSystems = []
+        this._scheduleCount = 1
+    }
 
     /** 注册参与时间更新的系统 */
     addSystemToTimeUpdate(system: IUpdate) {
-        this._needTimeUpdateSystems.push(system)
+        if (!this._needTimeUpdateSystems.includes(system)) {
+            this._needTimeUpdateSystems.push(system)
+        }
         return this
     }
 
@@ -89,6 +98,9 @@ export class TimeSystem {
     }
     /** 循环调度(毫秒) */
     schedule(callback: Function, interval: number) {
+        if (!Number.isFinite(interval) || interval <= 0) {
+            throw new Error('schedule interval 必须大于 0')
+        }
         let uuid = `schedule_${this._scheduleCount++}`
         let lastTime = this._pass_time + interval
         let timer: ITimer = { uuid: uuid, callback: callback, lastTime: lastTime, duration: interval, isLoop: true }
@@ -97,6 +109,9 @@ export class TimeSystem {
     }
     /** 一次性调度(毫秒) */
     scheduleOnce(callback: Function, delay: number = 0) {
+        if (!Number.isFinite(delay) || delay < 0) {
+            throw new Error('scheduleOnce delay 不能小于 0')
+        }
         let uuid = `scheduleOnce_${this._scheduleCount++}`;
         let lastTime = this._pass_time + delay
         let timer: ITimer = { uuid: uuid, callback: callback, lastTime: lastTime, duration: delay, isLoop: false }
@@ -125,8 +140,9 @@ export class TimeSystem {
     }
 
     private _updateSystem(dt: number) {
-        for (let i = 0; i < this._needTimeUpdateSystems.length; i++) {
-            this._needTimeUpdateSystems[i].update(dt)
+        const snapshot = [...this._needTimeUpdateSystems]
+        for (const system of snapshot) {
+            if (this._needTimeUpdateSystems.includes(system)) system.update(dt)
         }
     }
     //

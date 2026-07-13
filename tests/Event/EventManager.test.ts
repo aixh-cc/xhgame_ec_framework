@@ -238,4 +238,27 @@ describe("Event功能", () => {
         expect(obj2_on_arr).toEqual(effective_emit_arr)
         expect(obj3_on_arr).toEqual(effective_emit_arr)
     });
+
+    test("派发期间移除监听不会触发错位回调", () => {
+        const calls: string[] = []
+        const first = () => {
+            calls.push('first')
+            eventManager.off('safe_emit', second)
+        }
+        const second = () => calls.push('second')
+        eventManager.on('safe_emit', first)
+        eventManager.on('safe_emit', second)
+        eventManager.emit('safe_emit')
+        expect(calls).toEqual(['first'])
+    });
+
+    test("全量清理同时清除 tag 状态", () => {
+        let calls = 0
+        eventManager.setTag('old').on('old_event', () => calls++)
+        eventManager.clearByTag()
+        eventManager.on('new_event', () => calls++)
+        eventManager.clearByTag('old')
+        eventManager.emit('new_event')
+        expect(calls).toBe(1)
+    });
 });

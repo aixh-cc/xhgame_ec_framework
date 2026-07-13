@@ -1,227 +1,123 @@
-
 export interface IEventItem {
-    id: number
-    name: string
-    event: Function
-    context: unknown
+    id: number;
+    name: string;
+    event: Function;
+    context: unknown;
+    tag: string;
 }
 
-// 获取 满足value的所有indexs的数组
-function getAllIndices(arr: any[], value: any): any[] {
-    return arr.reduce((indices, element, index) => {
-        if (element === value) {
-            indices.push(index);
-        }
-        return indices;
-    }, []);
-}
-// 发布订阅模式
-// 事件管理者
-/**
- * 事件管理器（发布-订阅）
- * - 支持按 `name` 绑定/解除，支持按 `tag` 批量清理
- * - 内部采用并行数组索引结构以提升查找效率
- * - 支持泛型事件映射，提供类型安全的 on/off/emit
- * 使用示例：`tests/core/Event/EventManager.test.ts`
- * 
- * @example
- * ```ts
- * interface MyEventMap {
- *     'game_start': { level: number }
- *     'game_over': { score: number, win: boolean }
- * }
- * const eventMgr = new EventManager<MyEventMap>()
- * eventMgr.on('game_start', (e, data) => { data.level }) // ✅ 自动推导
- * eventMgr.emit('game_over', { score: 100, win: true })  // ✅ 类型检查
- * ```
- */
+/** 类型化、可在派发期间安全增删监听器的事件管理器。 */
 export class EventManager<T extends Record<string, any> = Record<string, any>> {
+    private _is_debug = false;
+    private _tag = '';
+    private _nextEventItemId = 0;
+    private _listeners = new Map<string, IEventItem[]>();
 
-    /** _debug模式下可以看到更多的打印数据 */
-    private _is_debug: boolean = false
+    setDebug(val: boolean): void { this._is_debug = val; }
 
-    /** 设置_debug */
-    setDebug(val: boolean) {
-        this._is_debug = val
-    }
-    /** @deprecated 请使用 on(name, event, context, tag) 的 tag 参数替代 */
-    private _tag: string = ''
-    private _nextEventItemId: number = 0
-    // 索引到一维
-    private _eventIndex_EventItemArray: IEventItem[] = []
-    private _eventIndex_EventIdArray: number[] = []
-    private _eventIndex_NameArray: string[] = []
-    private _eventIndex_TagArray: string[] = []
-
-    /** 需在on之前使用 */
-    /** 设置 tag（仅对后续 `on` 生效） */
-    setTag(tag: string) {
-        this._tag = tag
-        return this
+    /** @deprecated 请直接向 on/onSingle 的第四个参数传 tag。 */
+    setTag(tag: string): this {
+        this._tag = tag;
+        return this;
     }
 
-    createEventItem(name: string, event: (event: IEventItem, obj: any) => void, context: any, tag: string = '') {
-        let eventItemId = ++this._nextEventItemId
-        let eventIndex = this._eventIndex_EventIdArray.length; // 当前可用的长度
-        let eventItem = { name, event, context, id: eventItemId }
-        this._eventIndex_EventIdArray[eventIndex] = eventItemId
-        this._eventIndex_EventItemArray[eventIndex] = eventItem
-        this._eventIndex_NameArray[eventIndex] = name
-        this._eventIndex_TagArray[eventIndex] = tag
-        return eventItemId
+    private consumeTag(explicitTag?: string): string {
+        const tag = explicitTag ?? this._tag;
+        this._tag = '';
+        return tag;
     }
 
-    removeEventItem(eventItemId: number) {
-        let eventItemIndex = this._eventIndex_EventIdArray.indexOf(eventItemId);
-        if (eventItemIndex === -1) {
-            // 可能已被移除，安全跳过
+    createEventItem(name: string, event: Function, context: unknown, tag = ''): number {
+        const item: IEventItem = {
+            id: ++this._nextEventItemId,
+            name,
+            event,
+            context,
+            tag
+        };
+        const listeners = this._listeners.get(name) ?? [];
+        listeners.push(item);
+        this._listeners.set(name, listeners);
+        return item.id;
+    }
+
+    removeEventItem(eventItemId: number): void {
+        for (const [name, listeners] of this._listeners) {
+            const index = listeners.findIndex(item => item.id === eventItemId);
+            if (index < 0) continue;
+            listeners.splice(index, 1);
+            if (listeners.length === 0) this._listeners.delete(name);
             return;
         }
-        let lastEventItemIndex = this._eventIndex_EventItemArray.length - 1 // 最后一个index
-        let tmp_EventItem = this._eventIndex_EventItemArray[eventItemIndex]
-        let tmp_EventId = this._eventIndex_EventIdArray[eventItemIndex]
-        let tmp_Name = this._eventIndex_NameArray[eventItemIndex]
-        let tmp_Tag = this._eventIndex_TagArray[eventItemIndex]
-        //  置换1
-        this._eventIndex_EventItemArray[eventItemIndex] = this._eventIndex_EventItemArray[lastEventItemIndex]
-        this._eventIndex_EventItemArray[lastEventItemIndex] = tmp_EventItem
-        //  置换2
-        this._eventIndex_EventIdArray[eventItemIndex] = this._eventIndex_EventIdArray[lastEventItemIndex]
-        this._eventIndex_EventIdArray[lastEventItemIndex] = tmp_EventId
-        //  置换3
-        this._eventIndex_NameArray[eventItemIndex] = this._eventIndex_NameArray[lastEventItemIndex]
-        this._eventIndex_NameArray[lastEventItemIndex] = tmp_Name
-        //  置换4
-        this._eventIndex_TagArray[eventItemIndex] = this._eventIndex_TagArray[lastEventItemIndex]
-        this._eventIndex_TagArray[lastEventItemIndex] = tmp_Tag
-        // 删除
-        this._eventIndex_EventItemArray.length = this._eventIndex_EventItemArray.length - 1
-        this._eventIndex_EventIdArray.length = this._eventIndex_EventIdArray.length - 1
-        this._eventIndex_NameArray.length = this._eventIndex_NameArray.length - 1
-        this._eventIndex_TagArray.length = this._eventIndex_TagArray.length - 1
     }
 
-    /** 监听事件（允许同一 `name+context` 绑定多个回调） */
-    on<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
-    on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
-    on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
-        const tag = this._tag
-        this._tag = ''
-        this.createEventItem(name, event, context, tag)
-        this._debug('添加新的监听器 name=' + name)
+    on<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown, tag?: string): void;
+    on(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown, tag?: string): void;
+    on(name: string, event: Function, context?: unknown, tag?: string): void {
+        this.createEventItem(name, event, context, this.consumeTag(tag));
+        this.debug(`添加监听器 name=${name}`);
     }
 
-    /** 去重监听：相同 name+context 只保留最新的回调 */
-    onSingle<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
-    onSingle(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
-    onSingle(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
-        const tag = this._tag
-        this._tag = ''
-        if (this._eventIndex_NameArray.indexOf(name) > -1) {
-            let indexs = getAllIndices(this._eventIndex_NameArray, name)
-            let existingEventItemId: number | null = null
-            for (let i = 0; i < indexs.length; i++) {
-                let eventItem = this._eventIndex_EventItemArray[indexs[i]]
-                if (eventItem && eventItem.context === context) {
-                    existingEventItemId = eventItem.id
-                    break
-                }
-            }
-            if (existingEventItemId !== null) {
-                this.removeEventItem(existingEventItemId)
-            }
+    onSingle<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown, tag?: string): void;
+    onSingle(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown, tag?: string): void;
+    onSingle(name: string, event: Function, context?: unknown, tag?: string): void {
+        const listeners = this._listeners.get(name) ?? [];
+        for (const item of [...listeners]) {
+            if (item.context === context) this.removeEventItem(item.id);
         }
-        this.createEventItem(name, event, context, tag)
-        this._debug('onSingle 添加监听器 name=' + name)
+        this.createEventItem(name, event, context, this.consumeTag(tag));
     }
 
-    /** 监听一次，触发后自动移除 */
-    once<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
-    once(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown): void
-    once(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown) {
-        const wrapper = (evt: IEventItem, obj: any) => {
-            this.off(name, wrapper, context)
-            event.call(context, evt, obj)
-        }
-        this.on(name, wrapper, context)
+    once<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown, tag?: string): void;
+    once(name: string, event: (event: IEventItem, obj: any) => void, context?: unknown, tag?: string): void;
+    once(name: string, event: Function, context?: unknown, tag?: string): void {
+        const wrapper = (item: IEventItem, obj: any) => {
+            this.removeEventItem(item.id);
+            event.call(context, item, obj);
+        };
+        this.on(name, wrapper, context, tag);
     }
 
-    /** 取消监听（精确匹配 `name+event+context`） */
-    off<K extends keyof T & string>(name: K, event: (event: IEventItem, obj: T[K]) => void, context?: unknown): void
-    off(name: string, event: Function, context?: unknown): void
-    off(name: string, event: Function, context?: unknown) {
-        if (this._eventIndex_NameArray.indexOf(name) > -1) {
-            let indexs = getAllIndices(this._eventIndex_NameArray, name)
-            let eventItemIds: number[] = []
-            for (let i = 0; i < indexs.length; i++) {
-                let eventItem = this._eventIndex_EventItemArray[indexs[i]] // 注意在循环删除时_eventIndex_EventItemArray已被改变
-                if (eventItem && eventItem.context === context && eventItem.event == event) {
-                    eventItemIds.push(eventItem.id) // 所以只能先通过eventItemIds先获取ids
-                }
-            }
-            for (let i = 0; i < eventItemIds.length; i++) {
-                this.removeEventItem(eventItemIds[i])
+    off<K extends keyof T & string>(name: K, event: ((event: IEventItem, obj: T[K]) => void) | null, context?: unknown): void;
+    off(name: string, event: Function | null, context?: unknown): void;
+    off(name: string, event: Function | null, context?: unknown): void {
+        const listeners = this._listeners.get(name) ?? [];
+        for (const item of [...listeners]) {
+            if (item.context === context && (event === null || item.event === event)) {
+                this.removeEventItem(item.id);
             }
         }
     }
 
-    /** 发送事件（仅投递到同 `context` 的监听） */
-    emit<K extends keyof T & string>(name: K, obj?: T[K], context?: unknown): void
-    emit(name: string, obj?: any, context?: unknown): void
-    emit(name: string, obj: any = null, context?: unknown) {
-        if (this._eventIndex_NameArray.indexOf(name) > -1) {
-            let indexs = getAllIndices(this._eventIndex_NameArray, name)
-            for (let i = 0; i < indexs.length; i++) {
-                let _index = indexs[i]
-                let eventItem = this._eventIndex_EventItemArray[_index]
-                if (eventItem && eventItem.context === context) {
-                    try {
-                        eventItem.event.apply(context, [eventItem, obj])
-                    } catch (e) {
-                        console.error(`[EventManager] emit "${name}" 处理器异常:`, e)
-                    }
-                }
+    emit<K extends keyof T & string>(name: K, obj?: T[K], context?: unknown): void;
+    emit(name: string, obj?: any, context?: unknown): void;
+    emit(name: string, obj: any = null, context?: unknown): void {
+        const snapshot = [...(this._listeners.get(name) ?? [])];
+        for (const item of snapshot) {
+            const stillRegistered = this._listeners.get(name)?.some(current => current.id === item.id);
+            if (!stillRegistered || item.context !== context) continue;
+            try {
+                item.event.call(context, item, obj);
+            } catch (e) {
+                console.error(`[EventManager] emit "${name}" 处理器异常:`, e);
             }
         }
     }
 
-    /**
-     * 清理监听
-     * - `tag=null` 清理全部
-     * - 指定 `tag` 仅清理该标签
-     */
-    clearByTag(tag: string | null = null) {
-        if (tag == null) {
-            this._eventIndex_EventIdArray = []
-            this._eventIndex_EventItemArray = []
-            this._eventIndex_NameArray = []
-            this._debug('全部清空')
-        } else {
-            if (this._eventIndex_TagArray.indexOf(tag) > -1) {
-                let remove_indexs = getAllIndices(this._eventIndex_TagArray, tag)
-                let eventItemIds: number[] = []
-                for (let i = 0; i < remove_indexs.length; i++) {
-                    let eventItem = this._eventIndex_EventItemArray[remove_indexs[i]]
-                    eventItemIds.push(eventItem.id)
-                }
-                for (let i = 0; i < eventItemIds.length; i++) {
-                    this.removeEventItem(eventItemIds[i])
-                }
-                this._debug('清空tag=' + tag)
-            } else {
-                this._debug('未找到tag=' + tag)
+    clearByTag(tag: string | null = null): void {
+        if (tag === null) {
+            this._listeners.clear();
+            this._tag = '';
+            return;
+        }
+        for (const listeners of [...this._listeners.values()]) {
+            for (const item of [...listeners]) {
+                if (item.tag === tag) this.removeEventItem(item.id);
             }
         }
     }
 
-    private _debug(str = '') {
-        if (!this._is_debug) {
-            return
-        }
-        console.log('======' + str + '======')
-        console.log('_eventIndex_EventIdArray', this._eventIndex_EventIdArray)
-        console.log('_eventIndex_EventItemArray', this._eventIndex_EventItemArray)
-        console.log('_eventIndex_NameArray', this._eventIndex_NameArray)
-        console.log('_eventIndex_TagArray', this._eventIndex_TagArray)
+    private debug(message: string): void {
+        if (this._is_debug) console.log(`[EventManager] ${message}`, this._listeners);
     }
 }

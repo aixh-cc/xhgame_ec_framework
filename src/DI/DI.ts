@@ -29,7 +29,7 @@ class DI {
     }
     static get lazyInject() {
         if (!this.decorators) {
-            this.decorators = getDecorators(this.container);
+            this.decorators = getDecorators(this.getContainer());
         }
         return this.decorators.lazyInject;
     }
@@ -105,6 +105,14 @@ class DI {
         } catch {
             return null;
         }
+    }
+    static tryMake<T>(identifier: string | symbol | NewableFunction): T | null {
+        return this.safeMake<T>(identifier);
+    }
+    static requireMake<T>(identifier: string | symbol | NewableFunction): T {
+        const container = this.getContainer();
+        if (!container.isBound(identifier)) throw new Error(`DI 标识符未绑定: ${String(identifier)}`);
+        return container.get<T>(identifier);
     }
     /**
      * 检查服务是否已绑定

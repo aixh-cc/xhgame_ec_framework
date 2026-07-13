@@ -65,7 +65,7 @@ describe("Entity功能", () => {
         expect(byClass!.compName).toBe('TestSenceComp')
 
         // 按名称查找
-        let byName = entity.getComponentByName('TestSenceComp')
+        let byName = entity.getComponentByName<TestSenceComp>('TestSenceComp')
         expect(byName).toBeDefined()
         expect(byName!.compName).toBe('TestSenceComp')
 
@@ -96,6 +96,44 @@ describe("Entity功能", () => {
         expect(entity.components.length).toBe(1)
         expect(entity.getComponentByName('TestViewComp')).toBeUndefined()
 
+        Entity.removeEntity(entity)
+    });
+
+    test("done 可在初始化完成后重复等待", async () => {
+        const entity = Entity.createEntity<GameEntity>(GameEntity)
+        const comp = entity.attachComponent(TestSenceComp)
+        await comp.done()
+        await comp.done()
+        expect(comp.lifecycleState).toBe('attached')
+        Entity.removeEntity(entity)
+    });
+
+    test("挂载期间卸载不会在后台重新注册", async () => {
+        const entity = Entity.createEntity<GameEntity>(GameEntity)
+        const comp = entity.attachComponent(TestSenceComp)
+        entity.detachComponent(TestSenceComp)
+        await expect(comp.done()).rejects.toThrow()
+        await new Promise(resolve => queueMicrotask(resolve))
+        expect(entity.getComponent(TestSenceComp)).toBeUndefined()
+        expect(comp.lifecycleState).toBe('pooled')
+        Entity.removeEntity(entity)
+    });
+
+    test("初始化失败会回滚 Entity 索引", async () => {
+        class FailSystem {
+            static async initComp() { throw new Error('init failed') }
+        }
+        class FailComp extends BaseModelComp {
+            compName = 'FailComp'
+            initBySystems: ISystemStatic[] = [FailSystem]
+            reset() { }
+            onDetach() { }
+        }
+        const entity = Entity.createEntity<GameEntity>(GameEntity)
+        const comp = entity.attachComponent(FailComp)
+        await expect(comp.done()).rejects.toThrow('init failed')
+        expect(entity.getComponent(FailComp)).toBeUndefined()
+        expect(entity.getComponentByName('FailComp')).toBeUndefined()
         Entity.removeEntity(entity)
     });
 

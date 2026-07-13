@@ -20,6 +20,9 @@ export abstract class BaseModelComp extends Comp implements ISubject {
     protected onRemoveCleanup(): void {
         DI.unbind(this.compName);
     }
+    protected onPoolCleanup(): void {
+        this._viewObservers = [];
+    }
     abstract onDetach(): void
     /**
      * 被观察着的视图列表

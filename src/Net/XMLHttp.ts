@@ -1,8 +1,8 @@
-import { IHttp } from "./Http";
+import { HttpHeaders, IHttp } from "./Http";
 
 export class XMLHttp implements IHttp {
-    public get(url: string, reqData: any, headers: string[][] = [['Content-Type', 'application/x-www-form-urlencoded']]) {
-        return new Promise((resolve, reject) => {
+    public get<TResponse = any, TRequest = any>(url: string, reqData?: TRequest, headers: HttpHeaders = [['Content-Type', 'application/x-www-form-urlencoded']]): Promise<TResponse> {
+        return new Promise<TResponse>((resolve, reject) => {
             url += "?";
             for (var item in reqData) {
                 url += item + "=" + reqData[item] + "&";
@@ -14,7 +14,7 @@ export class XMLHttp implements IHttp {
                         var response = xhr.responseText;
                         if (response) {
                             var responseJson = JSON.parse(response);
-                            resolve(responseJson);
+                            resolve(responseJson as TResponse);
                         } else {
                             reject('返回数据不存在');
                         }
@@ -39,8 +39,8 @@ export class XMLHttp implements IHttp {
     }
 
 
-    public post(url: string, reqData: any, headers: string[][] = [['Content-Type', 'application/x-www-form-urlencoded']]) {
-        return new Promise((resolve, reject) => {
+    public post<TResponse = any, TRequest = any>(url: string, reqData?: TRequest, headers: HttpHeaders = [['Content-Type', 'application/x-www-form-urlencoded']]): Promise<TResponse> {
+        return new Promise<TResponse>((resolve, reject) => {
             //1.拼接请求参数
             var param = "";
             for (var item in reqData) {
@@ -54,7 +54,7 @@ export class XMLHttp implements IHttp {
                         var response = xhr.responseText;
                         if (response) {
                             var responseJson = JSON.parse(response);
-                            resolve(responseJson);
+                            resolve(responseJson as TResponse);
                         } else {
                             reject('返回数据不存在');
                         }

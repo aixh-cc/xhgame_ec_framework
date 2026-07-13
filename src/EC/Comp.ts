@@ -1,171 +1,212 @@
 import { Entity } from "./Entity";
 import { ISystemStatic } from "./System";
 import { TimeSystem } from "../Time/TimeSystem";
-/**
- * 组件
- */
+
+export type CompLifecycleState = 'pooled' | 'created' | 'attaching' | 'attached' | 'detaching';
+
+type ReadyWaiter = {
+    resolve: (comp: Comp) => void;
+    reject: (error: Error) => void;
+};
+
+/** Entity 上可复用的业务组件。 */
 export abstract class Comp {
-    abstract compName: string
-    /**
-     * 组件池（每类组件最大缓存数量）
-     */
+    abstract compName: string;
+
     private static compsPool: Map<new () => any, Comp[]> = new Map();
     private static readonly MAX_POOL_SIZE = 64;
-    /**
-     * 清理组件池（用于测试隔离）
-     */
+
     public static clearPool(): void {
         this.compsPool.clear();
         this._dirty_comps = [];
         this._dirty_comps_set.clear();
     }
-    /**
-     * 创建组件
-     * @param compClass
-     * @returns
-     */
+
     public static createComp<T extends Comp>(compClass: new () => T): T {
-        // 获取对应组件类的池子
         let pool = this.compsPool.get(compClass);
-        // 如果池子不存在，为组件类创建一个新的空池子
         if (!pool) {
             pool = [];
             this.compsPool.set(compClass, pool);
         }
-        // 如果池子中有实例，则取出并返回；否则创建一个新实例并返回
-        let comp = pool.length > 0 ? pool.pop() as T : new compClass();
-        return comp
+        const comp = pool.length > 0 ? pool.pop() as T : new compClass();
+        comp._prepareLifecycle();
+        return comp;
     }
 
-    static removeComp(comp: Comp) {
-        // 如果有 onUpdate，先从 TimeSystem 移除
-        if (comp._updateBridge) {
-            TimeSystem.getInstance().removeSystemFromTimeUpdate(comp._updateBridge)
-            comp._updateBridge = null
-        }
-        comp.onRemoveCleanup();
-        comp.onDetach();
-        comp.entity = null
+    static removeComp(comp: Comp): void {
+        if (comp.lifecycleState === 'pooled') return;
 
-        // 特殊处理：如果是 BaseModelComp，清理所有 observers
-        // 防止组件回收到池子时保留旧的 observer 引用
-        if ('_viewObservers' in comp && Array.isArray((comp as any)._viewObservers)) {
-            (comp as any)._viewObservers = [];
-        }
-
-        comp.reset();
-        // 获取组件实例的构造函数
-        const compClass = comp.constructor as new () => Comp;
-        // 从组件池中找到对应的构造函数对应的池子
-        const pool = this.compsPool.get(compClass);
-        // 如果池子存在且未满，将组件实例放回池子中
-        if (pool) {
-            if (pool.length < Comp.MAX_POOL_SIZE) {
-                pool.push(comp);
+        comp.lifecycleState = 'detaching';
+        comp._rejectReady(new Error(`组件 ${comp.compName} 在初始化完成前已卸载`));
+        const errors: Error[] = [];
+        const safely = (cleanup: () => void) => {
+            try { cleanup(); } catch (error) {
+                errors.push(error instanceof Error ? error : new Error(String(error)));
             }
-            // 超过上限则丢弃，让 GC 回收
-        } else {
-            // 如果池子不存在，创建一个新的池子并将组件实例放入
-            this.compsPool.set(compClass, [comp]);
+        };
+
+        try {
+            if (comp._updateBridge) {
+                TimeSystem.getInstance().removeSystemFromTimeUpdate(comp._updateBridge);
+                comp._updateBridge = null;
+            }
+            if (comp._didAttach) {
+                safely(() => comp.onRemoveCleanup());
+                safely(() => comp.onDetach());
+            }
+            safely(() => comp.onPoolCleanup());
+            safely(() => comp.reset());
+        } finally {
+            comp._didAttach = false;
+            comp.entity = null;
+            Comp._dirty_comps_set.delete(comp);
+            comp.lifecycleState = 'pooled';
+
+            const compClass = comp.constructor as new () => Comp;
+            const pool = this.compsPool.get(compClass) ?? [];
+            if (!this.compsPool.has(compClass)) this.compsPool.set(compClass, pool);
+            if (pool.length < Comp.MAX_POOL_SIZE && !pool.includes(comp)) pool.push(comp);
+        }
+
+        if (errors.length > 0) {
+            const error = new Error(`组件 ${comp.compName} 清理时发生 ${errors.length} 个错误`);
+            (error as any).causes = errors;
+            throw error;
         }
     }
 
     private static _dirty_comps: Comp[] = [];
     private static _dirty_comps_set: Set<Comp> = new Set();
-    static pushDirtyComp(comp: Comp) {
-        if (!Comp._dirty_comps_set.has(comp)) {
-            Comp._dirty_comps_set.add(comp);
-            Comp._dirty_comps.push(comp)
-        }
+
+    static pushDirtyComp(comp: Comp): void {
+        if (comp.lifecycleState === 'pooled' || comp.lifecycleState === 'detaching' || Comp._dirty_comps_set.has(comp)) return;
+        Comp._dirty_comps_set.add(comp);
+        Comp._dirty_comps.push(comp);
     }
+
     static isDirtyComp(comp: Comp): boolean {
-        return Comp._dirty_comps_set.has(comp)
+        return Comp._dirty_comps_set.has(comp);
     }
-    static notifyAllDirtyComps() {
-        // 先取快照再清空，避免通知过程中新增的脏组件被丢弃
+
+    static notifyAllDirtyComps(): void {
         const snapshot = Comp._dirty_comps;
         Comp._dirty_comps = [];
         Comp._dirty_comps_set.clear();
-        for (let i = 0; i < snapshot.length; i++) {
+        for (const comp of snapshot) {
+            if (comp.lifecycleState === 'pooled' || comp.lifecycleState === 'detaching') continue;
             try {
-                snapshot[i].notify(true);
+                comp.notify(true);
             } catch (e) {
                 console.error('[Comp] notifyAllDirtyComps 回调异常:', e);
             }
         }
     }
-    abstract notify(is_update_now: boolean): void
-    /**
-     * 设置脏标记
-     */
-    setDirtyMark() {
-        Comp.pushDirtyComp(this)
+
+    abstract notify(is_update_now: boolean): void;
+
+    setDirtyMark(): void {
+        Comp.pushDirtyComp(this);
     }
-    /**
-     * 组件的实体
-     */
+
     public entity: Entity | null = null;
-    /** 
-     * 监听挂载到实体
-     */
-    abstract onAttach(): void
+    public lifecycleState: CompLifecycleState = 'created';
+    private _didAttach = false;
+    private _readyStatus: 'pending' | 'fulfilled' | 'rejected' = 'pending';
+    private _readyError: Error | null = null;
+    private _readyWaiters: ReadyWaiter[] = [];
+
+    abstract onAttach(): void;
     protected bindToDI(): void { }
-    /** TimeSystem 更新桥接对象，用于自动注册/移除 */
-    _updateBridge: { update: (dt: number) => void } | null = null
-    attach(entity: Entity): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-            this.entity = entity
-            setTimeout(() => {
-                this.bindToDI && this.bindToDI()
-                this.onAttach && this.onAttach()
-                // 如果子类覆盖了 onUpdate，自动注册到 TimeSystem
-                if (this.onUpdate !== Comp.prototype.onUpdate) {
-                    this._updateBridge = { update: (dt: number) => this.onUpdate(dt) }
-                    TimeSystem.getInstance().addSystemToTimeUpdate(this._updateBridge)
-                }
-                resolve(true)
-            }, 0)
-        })
-    }
-    /** 组件移除时的额外清理钩子（子类可覆盖，如清理 DI 绑定） */
     protected onRemoveCleanup(): void { }
-    /** 监听从实体卸载 */
-    abstract onDetach(): void
-    /** 重置 */
-    abstract reset(): void
-    /** 准备 */
-    setup(...obj: any): this {
-        return this
+    /** 子类可在这里清理池化前的框架级引用。 */
+    protected onPoolCleanup(): void { }
+    abstract onDetach(): void;
+    abstract reset(): void;
+
+    _updateBridge: { update: (dt: number) => void } | null = null;
+
+    private _prepareLifecycle(): void {
+        this.entity = null;
+        this.lifecycleState = 'created';
+        this._didAttach = false;
+        this._readyStatus = 'pending';
+        this._readyError = null;
+        this._readyWaiters = [];
     }
-    /** 组件自己卸载自己 */
-    detach() {
-        this.entity!.detachComponentByName(this.compName)
+
+    /**
+     * 延迟到 microtask 执行，使旧有的 attachComponent(...).setup(...) 链式调用仍能先完成 setup。
+     */
+    attach(entity: Entity): Promise<void> {
+        if (this.lifecycleState !== 'created') {
+            return Promise.reject(new Error(`组件 ${this.compName} 当前状态 ${this.lifecycleState}，不能挂载`));
+        }
+        this.entity = entity;
+        this.lifecycleState = 'attaching';
+        return new Promise<void>((resolve, reject) => {
+            queueMicrotask(() => {
+                if (this.lifecycleState !== 'attaching' || this.entity !== entity) {
+                    reject(new Error(`组件 ${this.compName} 的挂载已取消`));
+                    return;
+                }
+                try {
+                    this.bindToDI();
+                    this.onAttach();
+                    this._didAttach = true;
+                    if (this.onUpdate !== Comp.prototype.onUpdate) {
+                        this._updateBridge = { update: (dt: number) => this.onUpdate(dt) };
+                        TimeSystem.getInstance().addSystemToTimeUpdate(this._updateBridge);
+                    }
+                    this.lifecycleState = 'attached';
+                    resolve();
+                } catch (error) {
+                    reject(error instanceof Error ? error : new Error(String(error)));
+                }
+            });
+        });
     }
-    /** 依赖的组件名列表（可选），attach 时自动检查 */
-    get requires(): string[] { return [] }
-    /**
-     * 每帧更新钩子（可选），子类覆盖后自动注册到 TimeSystem
-     * @param dt 帧间隔时间（毫秒）
-     */
-    onUpdate(dt: number): void { }
-    /**
-     * 挂载时被以下系统初始化
-     */
-    abstract initBySystems: ISystemStatic[]
-    /**
-     * 初始化完成后的回调通知（包含 resolve 和 reject）
-     */
-    _initedCallbacks: { resolve: (comp: Comp) => void, reject: (err: Error) => void } | null = null
-    /**
-     * 初始化等待异步操作完成指令函数
-     * @returns
-     */
-    async done(): Promise<this> {
-        return new Promise((resolve, reject) => {
-            this._initedCallbacks = {
+
+    _resolveReady(): void {
+        if (this._readyStatus !== 'pending') return;
+        this._readyStatus = 'fulfilled';
+        const waiters = this._readyWaiters.splice(0);
+        for (const waiter of waiters) waiter.resolve(this);
+    }
+
+    _rejectReady(error: Error): void {
+        if (this._readyStatus !== 'pending') return;
+        this._readyStatus = 'rejected';
+        this._readyError = error;
+        const waiters = this._readyWaiters.splice(0);
+        for (const waiter of waiters) waiter.reject(error);
+    }
+
+    setup(..._obj: any[]): this {
+        return this;
+    }
+
+    detach(): void {
+        this.entity?.detachComponentByName(this.compName);
+    }
+
+    get requires(): string[] { return []; }
+    onUpdate(_dt: number): void { }
+    abstract initBySystems: ISystemStatic[];
+
+    /** 等待当前挂载周期完成；可重复调用，也可在初始化完成后调用。 */
+    done(): Promise<this> {
+        if (this._readyStatus === 'fulfilled') return Promise.resolve(this);
+        if (this._readyStatus === 'rejected') return Promise.reject(this._readyError!);
+        return new Promise<this>((resolve, reject) => {
+            this._readyWaiters.push({
                 resolve: resolve as (comp: Comp) => void,
                 reject
-            };
+            });
         });
+    }
+
+    /** done() 的语义化别名。 */
+    ready(): Promise<this> {
+        return this.done();
     }
 }

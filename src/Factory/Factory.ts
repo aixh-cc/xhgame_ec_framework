@@ -64,6 +64,10 @@ export abstract class BaseFactory<T extends IItemProduceDrive, TT extends IItem>
         return item
     }
     recycleItem(item: IItem) {
+        if (!item.alive) {
+            console.warn(`[Factory:${this.name}] 忽略重复回收 modelNo=${item.modelNo}`)
+            return
+        }
         this._itemProduceDrive.removeItem(item) // 销毁肉身
         let itemsPool = this._itemPoolsMap.get(item.modelNo)
         if (itemsPool) {

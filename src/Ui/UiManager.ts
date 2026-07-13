@@ -59,25 +59,17 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
         this._uiDrive.loaded()
     }
 
-    private _openingUiids: string[] = []
-    private _openedUiids: string[] = []
+    private _openingUiids = new Set<string>()
+    private _openedUiids = new Set<string>()
 
     /** 查询 UI 是否已经打开。 */
     checkOpened(uiid: string) {
-        let index = this._openedUiids.indexOf(uiid)
-        if (index > -1) {
-            return true
-        }
-        return false
+        return this._openedUiids.has(uiid)
     }
 
     /** 查询 UI 是否正在异步打开。 */
     checkOpening(uiid: string) {
-        let index = this._openingUiids.indexOf(uiid)
-        if (index > -1) {
-            return true
-        }
-        return false
+        return this._openingUiids.has(uiid)
     }
 
     /**
@@ -94,31 +86,39 @@ export class UiManager<T extends IUiDrive, NT extends INode> {
             console.error('已经在打开中,uiid=' + uiid)
             return false;
         }
-        this._openingUiids.push(uiid)
+        this._openingUiids.add(uiid)
         try {
-            await this._uiDrive.openUIAsyncByDrive(uiid, comp, options);
-            let _index = this._openingUiids.indexOf(uiid);
-            if (_index > -1) {
-                this._openingUiids.splice(_index, 1);
-            }
-            this._openedUiids.push(uiid);
+            const opened = await this._uiDrive.openUIAsyncByDrive(uiid, comp, options);
+            if (!opened) return false;
+            if (!this._openingUiids.has(uiid)) return false;
+            this._openedUiids.add(uiid);
             return true;
         } catch (err) {
-            let _index = this._openingUiids.indexOf(uiid);
-            if (_index > -1) {
-                this._openingUiids.splice(_index, 1);
-            }
             console.error(`[UiManager] 打开 UI "${uiid}" 失败:`, err);
             return false;
+        } finally {
+            this._openingUiids.delete(uiid);
+        }
+    }
+
+    /** 与 openUIAsync 相同，但保留驱动异常供上层统一处理。 */
+    async openUIOrThrow(uiid: string, comp: BaseModelComp, options?: IUiOpenOptions): Promise<void> {
+        if (this.checkOpening(uiid)) throw new Error(`UI ${uiid} 已在打开中`);
+        this._openingUiids.add(uiid);
+        try {
+            const opened = await this._uiDrive.openUIAsyncByDrive(uiid, comp, options);
+            if (!opened) throw new Error(`UI ${uiid} 驱动返回打开失败`);
+            if (!this._openingUiids.has(uiid)) throw new Error(`UI ${uiid} 打开期间已被取消`);
+            this._openedUiids.add(uiid);
+        } finally {
+            this._openingUiids.delete(uiid);
         }
     }
 
     /** 移除已打开的 UI，并同步更新管理器中的 opened 状态。 */
     removeUI(uiid: string) {
+        this._openingUiids.delete(uiid)
         this._uiDrive.removeUI(uiid)
-        let _index = this._openedUiids.indexOf(uiid)
-        if (_index > -1) {
-            this._openedUiids.splice(_index, 1);
-        }
+        this._openedUiids.delete(uiid)
     }
 }

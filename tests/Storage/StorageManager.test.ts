@@ -5,9 +5,15 @@ import { CryptoAES } from "../../src/Crypto/Crypto";
 import CryptoJS from "crypto-js";
 
 const getLocalStorage = () => {
-    const LocalStorage = require('node-localstorage').LocalStorage;
-    let localStorage = new LocalStorage('./scratch', { quota: 10 * 1024 * 1024 }); // 设置为 10MB
-    return localStorage
+    const values = new Map<string, string>()
+    return {
+        get length() { return values.size },
+        key(index: number) { return [...values.keys()][index] ?? null },
+        getItem(key: string) { return values.get(key) ?? null },
+        setItem(key: string, value: string) { values.set(key, String(value)) },
+        removeItem(key: string) { values.delete(key) },
+        clear() { values.clear() }
+    }
 }
 
 describe("StorageManager功能", () => {
@@ -52,5 +58,23 @@ describe("StorageManager功能", () => {
         storageManager.clear()
         expect(storageManager.get('test_boolen')).toBe(null as any)
         expect(storageManager.get('tt')).toBe(null as any)
+    });
+
+    test("空值删除不会重复添加 prefix", () => {
+        const localStorage = getLocalStorage()
+        const storageManager = new StorageManager('xh', localStorage)
+        storageManager.set('key', 'value')
+        storageManager.set('key', null)
+        expect(storageManager.get('key')).toBeNull()
+    });
+
+    test("clearNamespace 不清理其他模块数据", () => {
+        const localStorage = getLocalStorage()
+        const storageManager = new StorageManager('xh', localStorage)
+        storageManager.set('mine', '1')
+        localStorage.setItem('other_key', '2')
+        storageManager.clearNamespace()
+        expect(storageManager.get('mine')).toBeNull()
+        expect(localStorage.getItem('other_key')).toBe('2')
     });
 });
