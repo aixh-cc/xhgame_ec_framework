@@ -3,7 +3,7 @@ import { BaseModelComp, IObserver } from "../EC/BaseModelComp";
 import { IView } from "./View";
 
 export class ViewUtil {
-    static bindAttr(observer: IObserver, bindAttrMap: Record<string, string>): BaseModelComp[] {
+    static bindAttr(observer: IObserver, bindAttrMap: Record<string, string>, preferredModelComp?: BaseModelComp): BaseModelComp[] {
         let keys = Object.keys(bindAttrMap);
         let allBaseModelComps: BaseModelComp[] = []
         for (let key of keys) {
@@ -12,7 +12,9 @@ export class ViewUtil {
                 continue;
             } else {
                 let compName = _bindAttrLink.split('::')[0]
-                let modelComp = DI.safeMake(compName) as BaseModelComp
+                let modelComp = preferredModelComp?.compName === compName
+                    ? preferredModelComp
+                    : DI.safeMake(compName) as BaseModelComp
                 if (!modelComp) {
                     continue;
                 }
