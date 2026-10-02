@@ -15,7 +15,6 @@ export class EventManager<T extends Record<string, any> = Record<string, any>> {
 
     setDebug(val: boolean): void { this._is_debug = val; }
 
-    /** @deprecated 请直接向 on/onSingle 的第四个参数传 tag。 */
     setTag(tag: string): this {
         this._tag = tag;
         return this;
