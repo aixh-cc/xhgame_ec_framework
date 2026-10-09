@@ -15,7 +15,7 @@ export interface IItem {
     /** 克隆(自行) */
     clone(): any
     /** 上场 */
-    toScene(): void
+    toScene(path?: string): void
     /** 回对象池 */
     toPool(): void
     /** 基类中的基础属性重置 */
