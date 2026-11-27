@@ -10,11 +10,20 @@ describe("UiManager功能", () => {
         expect(uiManager.getWorldRoot().name).toBe('world_root')
         expect(uiManager.checkOpening('test_view')).toBe(false)
 
-        await uiManager.openUIAsync('test_view', new TestViewComp(), { uiType: 'dialog', closeOnMaskClick: true })
+        const parentNode = new TestNode('content_host')
+        await uiManager.openUIAsync('test_view', new TestViewComp(), {
+            uiType: 'dialog',
+            parentNode,
+            closeOnMaskClick: true,
+        })
 
         expect(uiManager.checkOpening('test_view')).toBe(false)
         expect(uiManager.checkOpened('test_view')).toBe(true)
-        expect(uiDrive.lastOpenOptions).toEqual({ uiType: 'dialog', closeOnMaskClick: true })
+        expect(uiDrive.lastOpenOptions).toEqual({
+            uiType: 'dialog',
+            parentNode,
+            closeOnMaskClick: true,
+        })
 
         uiManager.removeUI('test_view')
         expect(uiManager.checkOpened('test_view')).toBe(false)

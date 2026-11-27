@@ -13,6 +13,12 @@ export type UiType = 'panel' | 'dialog' | 'top'
 export interface IUiOpenOptions {
     /** UI 类型，未传时保持驱动默认行为。 */
     uiType?: UiType
+    /**
+     * 指定 UI 的挂载父节点；未传时由平台驱动选择默认层级。
+     *
+     * 节点只暴露跨平台最小接口，具体驱动负责校验节点类型与有效性。
+     */
+    parentNode?: INode
     /** dialog 遮罩点击是否关闭，dialog 默认 true。 */
     closeOnMaskClick?: boolean
     /** dialog 遮罩透明度，0-255，dialog 默认由驱动决定。 */
